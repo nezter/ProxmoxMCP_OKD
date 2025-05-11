@@ -2,6 +2,18 @@
 
 ![ProxmoxMCP](https://github.com/user-attachments/assets/e32ab79f-be8a-420c-ab2d-475612150534)
 
+> **Note**: This is a maintained fork of the original [canvrno/ProxmoxMCP](https://github.com/canvrno/ProxmoxMCP) repository, adding Docker support and ongoing maintenance. The original repository appears to be inactive since February 2025.
+
+### What's Different in this Fork?
+
+- ✨ **Full Docker Support**: Added complete Docker and Docker Compose configurations
+- 🔒 **Security Focused**: Containerized with security best practices
+- 📦 **Easy Deployment**: Simple `docker compose up` deployment
+- 🛠️ **Maintained**: Active maintenance and updates
+- 💡 **Community Driven**: Open to contributions and improvements
+
+The main addition is comprehensive Docker support, making it easy to deploy and run the Proxmox MCP server in a containerized environment. See the [Docker section](#🐳-running-with-docker) for details.
+
 A Python-based Model Context Protocol (MCP) server for interacting with Proxmox hypervisors, providing a clean interface for managing nodes, VMs, and containers.
 
 ## 🏗️ Built With
@@ -50,7 +62,7 @@ Before starting, ensure you have:
    # OR
    cd your/preferred/directory  # For manual installation
    
-   git clone https://github.com/canvrno/ProxmoxMCP.git
+   git clone https://github.com/basher83/ProxmoxMCP.git
    cd ProxmoxMCP
 
    # Create and activate virtual environment
@@ -153,7 +165,7 @@ For Cline users, add this configuration to your MCP settings file (typically at 
 ```json
 {
     "mcpServers": {
-        "github.com/canvrno/ProxmoxMCP": {
+        "github.com/basher83/ProxmoxMCP": {
             "command": "/absolute/path/to/ProxmoxMCP/.venv/bin/python",
             "args": ["-m", "proxmox_mcp.server"],
             "cwd": "/absolute/path/to/ProxmoxMCP",
@@ -181,7 +193,7 @@ To help generate the correct paths, you can use this command:
 # This will print the MCP settings with your absolute paths filled in
 python -c "import os; print(f'''{{
     \"mcpServers\": {{
-        \"github.com/canvrno/ProxmoxMCP\": {{
+        \"github.com/basher83/ProxmoxMCP\": {{
             \"command\": \"{os.path.abspath('.venv/bin/python')}\",
             \"args\": [\"-m\", \"proxmox_mcp.server\"],
             \"cwd\": \"{os.getcwd()}\",
