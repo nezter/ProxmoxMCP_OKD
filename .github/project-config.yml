@@ -1,0 +1,59 @@
+# GitHub Project Board Configuration
+
+# Project board name
+name: ProxmoxMCP Development Roadmap
+
+# Project description
+description: Tracking development progress for ProxmoxMCP based on the repository review
+
+# Project columns
+columns:
+  - name: To Do
+    description: Tasks that are planned but not yet started
+    
+  - name: In Progress
+    description: Tasks that are currently being worked on
+    
+  - name: Review
+    description: Tasks that are completed and awaiting review
+    
+  - name: Done
+    description: Tasks that are completed and approved
+
+# Automation rules
+automation:
+  # When issues are opened, add them to the To Do column
+  - event: issues.opened
+    action: add_to_column
+    column: To Do
+    
+  # When pull requests are opened, add them to the Review column
+  - event: pull_request.opened
+    action: add_to_column
+    column: Review
+    
+  # When pull requests are merged, move associated issues to Done
+  - event: pull_request.merged
+    action: move_to_column
+    column: Done
+    
+  # When issues are closed, move them to Done
+  - event: issues.closed
+    action: move_to_column
+    column: Done
+
+# Labels to automatically add to the project
+labels:
+  - bug
+  - enhancement
+  - documentation
+  - security
+
+# Instructions for setting up this project board:
+# 1. Go to the repository on GitHub
+# 2. Navigate to the "Projects" tab
+# 3. Click "New project"
+# 4. Select "Project board" template
+# 5. Name the project "ProxmoxMCP Development Roadmap"
+# 6. Add the columns defined above
+# 7. Configure automation rules in project settings

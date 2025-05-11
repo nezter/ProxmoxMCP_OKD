@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: ProxmoxMCP Discussions
+    url: https://github.com/yourusername/ProxmoxMCP/discussions
+    about: Please ask and answer questions here.
+  - name: ProxmoxMCP Documentation
+    url: https://github.com/yourusername/ProxmoxMCP/blob/main/README.md
+    about: Check the documentation before opening an issue.

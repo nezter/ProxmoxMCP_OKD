@@ -1,0 +1,27 @@
+{
+    "mcpServers": {
+        "proxmox-mcp": {
+            "command": "docker",
+            "args": [
+                "run",
+                "-i",
+                "--rm",
+                "-e",
+                "PVE_HOST",
+                "-e",
+                "PVE_USER",
+                "-e",
+                "PVE_TOKEN_NAME",
+                "-e",
+                "PVE_TOKEN",
+                "basher83/proxmox-mcp"
+            ],
+            "env": {
+                "PVE_HOST": "192.168.1.100",
+                "PVE_USER": "YOUR_LONG_LIVED_TOKEN",
+                "PVE_TOKEN_NAME": "Your token name",
+                "PVE_TOKEN": "YOUR_LONG_LIVED_TOKEN"
+            }
+        }
+    }
+}
