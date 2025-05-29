@@ -6,14 +6,6 @@
         "-y",
         "@upstash/context7-mcp"
       ]
-    },
-    "mem0": {
-      "command": "/workspaces/mem0-mcp/.venv/bin/python",
-      "args": ["/workspaces/mem0-mcp/main.py"],
-      "cwd": "/workspaces/mem0-mcp",
-      "env": {
-        "MEM0_API_KEY": "your_actual_api_key_here"
-      }
     }
   }
 }
