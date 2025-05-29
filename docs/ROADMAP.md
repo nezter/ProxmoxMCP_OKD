@@ -1,100 +1,234 @@
 # ProxmoxMCP Project Roadmap
 
-This roadmap outlines the planned development and improvement efforts for the ProxmoxMCP project, based on the comprehensive repository review. The roadmap is organized by priority to help guide development efforts and community contributions.
+This roadmap outlines the planned development and improvement efforts for the ProxmoxMCP project, prioritized for production readiness. The phases are organized by urgency with specific implementation guidance and timelines.
 
-## Critical Priorities (Immediate Focus)
+## Phase 1: Critical Security Fixes (Immediate - 1-2 days)
 
-These items address critical security vulnerabilities and error handling issues that should be addressed as soon as possible:
+These items address critical security vulnerabilities and must be implemented immediately:
 
-### Security Improvements
-
+### Secure Token Storage
 - [ ] **Token Encryption**: Implement token encryption at rest in `src/proxmox_mcp/config/loader.py`
-- [ ] **SSL Verification**: Enable SSL verification by default in configuration examples
-- [ ] **Input Validation**: Add input validation for VM commands in `src/proxmox_mcp/tools/vm.py`
-- [ ] **Docker Secrets**: Implement Docker secrets for sensitive credentials in `compose.yaml`
+  ```python
+  # Add cryptography.fernet for token encryption
+  import os
+  from cryptography.fernet import Fernet
+  
+  def encrypt_token(token: str, key: bytes) -> str:
+      """Encrypt sensitive tokens"""
+      f = Fernet(key)
+      return f.encrypt(token.encode()).decode()
+  ```
 
-### Error Handling Enhancements
+### SSL Security
+- [ ] **Enable SSL Verification**: Change default from `"verify_ssl": false` to `"verify_ssl": true` in `proxmox-config/config.example.json`
 
-- [ ] **Standardize Error Handling**: Create consistent error handling patterns across the codebase
-- [ ] **Specific Exceptions**: Replace generic exception catching with specific exception types
-- [ ] **Configuration Error Handling**: Add comprehensive error handling for configuration loading
-- [ ] **Error Propagation**: Implement proper error propagation to clients
+### Input Validation
+- [ ] **VM Command Validation**: Add input validation and sanitization in `src/proxmox_mcp/tools/vm.py`
+  ```python
+  import shlex
+  def validate_command(command: str) -> str:
+      """Validate and sanitize shell commands"""
+      # Implement whitelist of allowed commands
+      # Escape special characters
+      return shlex.quote(command)
+  ```
 
-## High Priority (Next Development Cycle)
+### Configuration Security
+- [ ] **Environment Variable Tokens**: Update config to use environment variables for sensitive data
+  ```json
+  {
+      "auth": {
+          "user": "mcp@pve",
+          "token_name": "mcp-token", 
+          "token_value": "${PROXMOX_TOKEN}"
+      }
+  }
+  ```
 
-These items should be addressed in the next development cycle after critical issues are resolved:
+## Phase 2: Docker Improvements (1 day)
 
-### Docker Configuration Improvements
+Enhance Docker security and deployment:
 
-- [ ] **Resource Limits**: Add resource limits in `compose.yaml`
-- [ ] **Read-Only Filesystem**: Implement read-only filesystem where possible
-- [ ] **Base Image Versioning**: Use specific version tags for base images in `Dockerfile`
-- [ ] **Health Checks**: Add health checks for container monitoring
+### Docker Security
+- [ ] **Non-Root User**: Run container as non-root user from start
+  ```dockerfile
+  # Enhanced Dockerfile with security best practices
+  FROM python:3.10-slim AS base
+  
+  # Security: Run as non-root from the start
+  RUN groupadd -r mcp && useradd -r -g mcp mcp
+  ```
 
-### Scalability Enhancements
+### Docker Secrets
+- [ ] **Implement Docker Secrets**: Use Docker secrets for sensitive credentials
+  ```yaml
+  services:
+    proxmox-mcp:
+      secrets:
+        - proxmox_token
+      environment:
+        PROXMOX_TOKEN_FILE: /run/secrets/proxmox_token
+  
+  secrets:
+    proxmox_token:
+      external: true
+  ```
 
+### Resource Management
+- [ ] **Resource Limits**: Add resource limits and health checks
+  ```yaml
+  deploy:
+    resources:
+      limits:
+        cpus: '1'
+        memory: 512M
+  restart: unless-stopped
+  healthcheck:
+    test: ["CMD", "python", "-m", "proxmox_mcp.health"]
+    interval: 30s
+    timeout: 10s
+    retries: 3
+  ```
+
+## Phase 3: Enhanced Error Handling (2-3 days)
+
+Standardize error handling across the codebase:
+
+### Exception Hierarchy
+- [ ] **Specific Exception Classes**: Create ProxmoxMCP-specific exceptions in `src/proxmox_mcp/tools/base.py`
+  ```python
+  class ProxmoxError(Exception):
+      """Base exception for Proxmox operations"""
+      pass
+  
+  class ProxmoxAuthError(ProxmoxError):
+      """Authentication-related errors"""
+      pass
+  
+  class ProxmoxResourceNotFoundError(ProxmoxError):
+      """Resource not found errors"""
+      pass
+  ```
+
+### Error Handling Implementation
+- [ ] **Standardized Error Handling**: Implement consistent error handling patterns
+  ```python
+  def _handle_error(self, operation: str, error: Exception) -> None:
+      if isinstance(error, proxmoxer.AuthenticationError):
+          raise ProxmoxAuthError(f"Authentication failed: {error}")
+      # ... more specific error handling
+  ```
+
+### Health Check Endpoint
+- [ ] **Health Check Tool**: Add health check endpoint for monitoring
+  ```python
+  @self.mcp.tool(description="Check MCP server and Proxmox connection health")
+  def health_check():
+      try:
+          version = self.proxmox.version.get()
+          return {"status": "healthy", "proxmox_version": version}
+      except Exception as e:
+          return {"status": "unhealthy", "error": str(e)}
+  ```
+
+## Phase 4: Performance Improvements
+
+Optimize performance for production workloads:
+
+### Connection Management
 - [ ] **Connection Pooling**: Implement connection pooling in `src/proxmox_mcp/core/proxmox.py`
-- [ ] **Data Caching**: Add caching for frequently accessed data
-- [ ] **Async Operations**: Convert more operations to async, particularly in `src/proxmox_mcp/tools/`
+  ```python
+  from functools import lru_cache
+  import asyncio
+  
+  class ProxmoxManager:
+      def __init__(self, ...):
+          self._connection_pool = {}
+          self._cache = {}
+          
+      @lru_cache(maxsize=100)
+      def get_cached_node_status(self, node: str):
+          """Cache frequently accessed data"""
+          return self.api.nodes(node).status.get()
+  ```
+
+### Async Operations
+- [ ] **Enhanced Async Support**: Convert more operations to async
 - [ ] **Request Throttling**: Implement request throttling to prevent API rate limiting
 
-### Documentation Improvements
+## Phase 5: Feature Additions
 
-- [ ] **Quick Start Guide**: Add a comprehensive quick start guide
-- [ ] **Troubleshooting FAQ**: Create a troubleshooting FAQ
-- [ ] **Environment Variables**: Standardize environment variable names and document them
-- [ ] **Docker Deployment**: Improve Docker deployment documentation
-- [ ] **Security Best Practices**: Add security best practices section
+Add new functionality after core improvements:
 
-## Medium Priority (Future Development)
+### LXC Support
+- [ ] **Container Tools**: Add LXC container support
+  ```python
+  # In src/proxmox_mcp/tools/container.py
+  class ContainerTools(ProxmoxTool):
+      def get_containers(self) -> List[Content]:
+          """List LXC containers"""
+          # Implementation similar to VM tools
+  ```
 
-These items should be addressed after high-priority items are completed:
+### Batch Operations
+- [ ] **Concurrent Operations**: Implement batch command execution
+  ```python
+  async def batch_execute_commands(self, commands: List[VMCommand]):
+      """Execute multiple commands concurrently"""
+      tasks = [self.execute_command(cmd) for cmd in commands]
+      return await asyncio.gather(*tasks)
+  ```
 
-### Extensibility Improvements
-
-- [ ] **Plugin System**: Implement a formal plugin system
-- [ ] **Dynamic Tool Discovery**: Add dynamic tool discovery
-- [ ] **Extension Documentation**: Create better documentation for extending the tool set
-- [ ] **Configuration Validation**: Implement configuration schema validation
-
-### Code Quality Enhancements
-
-- [ ] **Logging Consistency**: Make logging practices consistent across the codebase
-- [ ] **Type Annotations**: Add comprehensive type annotations
-- [ ] **Resource Cleanup**: Implement proper resource cleanup in all tools
-- [ ] **Code Refactoring**: Refactor complex modules for better maintainability
-
-### Testing Improvements
-
-- [ ] **Test Coverage**: Expand test coverage beyond the current limited tests
-- [ ] **Security Testing**: Add security-focused tests
-- [ ] **Container Testing**: Implement container testing
-- [ ] **Integration Testing**: Add integration tests with a mock Proxmox API
-
-## Future Enhancements (Long-term Vision)
-
-These items represent the long-term vision for the project:
-
-### Feature Additions
-
-- [ ] **LXC Container Support**: Add support for LXC containers
-- [ ] **Batch Operations**: Implement batch operations for better performance
+### Extended Functionality
 - [ ] **Proxmox Backup Server**: Add support for Proxmox Backup Server
 - [ ] **Monitoring and Alerting**: Implement resource monitoring and alerting
-
-### Integration Improvements
-
-- [ ] **Cline Integration**: Enhance Cline integration examples
-- [ ] **MCP Client Support**: Add support for other MCP clients
-- [ ] **API Versioning**: Implement API versioning
-- [ ] **Monitoring Integration**: Add integration with monitoring systems
 - [ ] **Webhook Support**: Implement webhook support for events
+
+## Quick Wins for Immediate Impact
+
+These can be implemented alongside the phases:
+
+- [ ] **Secure Config Defaults**: Update `proxmox-config/config.example.json` with secure defaults
+  ```json
+  {
+      "proxmox": {
+          "host": "your-proxmox-host",
+          "port": 8006,
+          "verify_ssl": true,  // Changed from false
+          "service": "PVE"
+      },
+      "auth": {
+          "user": "mcp@pve",  // Use dedicated user
+          "token_name": "mcp-token",
+          "token_value": "${PROXMOX_TOKEN}"  // Environment variable
+      }
+  }
+  ```
+- [ ] **Dedicated User**: Use dedicated MCP user instead of root/admin
+- [ ] **Docker Base Image**: Use specific version tags for base images
+- [ ] **Environment Variables**: Standardize environment variable names
+
+## Testing & Quality Assurance
+
+Throughout all phases:
+
+- [ ] **Expand Test Coverage**: Add comprehensive tests for new functionality
+- [ ] **Security Testing**: Add security-focused tests
+- [ ] **Integration Testing**: Add integration tests with mock Proxmox API
+- [ ] **Container Testing**: Implement container testing
 
 ## Timeline
 
-- **Q2 2025**: Address all Critical priority items
-- **Q3 2025**: Complete High priority items
-- **Q4 2025**: Address Medium priority items
-- **2026**: Begin work on Future enhancements
+- **Phase 1**: 1-2 days (Critical security fixes)
+- **Phase 2**: 1 day (Docker improvements)  
+- **Phase 3**: 2-3 days (Error handling)
+- **Phase 4**: 1-2 weeks (Performance improvements)
+- **Phase 5**: 2-4 weeks (Feature additions)
 
-This roadmap is a living document and will be updated as the project evolves and new priorities emerge.
+## Focus Areas
+
+**Immediate Priority**: Security fixes first, then Docker improvements and error handling
+**Next Priority**: Performance optimizations and comprehensive testing
+**Future Priority**: New features and extended functionality
+
+This roadmap is a living document and will be updated as development progresses and new priorities emerge.
