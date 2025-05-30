@@ -1,0 +1,94 @@
+labels: ["discussion", "show-and-tell", "community"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        🎉 **Show and Tell** - Share your ProxmoxMCP projects and implementations!
+        
+        This is the perfect place to:
+        - Show off your ProxmoxMCP setup
+        - Share creative use cases
+        - Demonstrate integrations
+        - Display monitoring dashboards
+        - Share automation workflows
+        
+  - type: input
+    attributes:
+      label: "Project Title"
+      description: "What did you build/implement?"
+      placeholder: "e.g., Automated VM Deployment Pipeline with ProxmoxMCP"
+    validations:
+      required: true
+      
+  - type: textarea
+    attributes:
+      label: "Project Description"
+      description: "Tell us about your project and how you used ProxmoxMCP"
+      placeholder: "Describe what you built, what problem it solves, and how ProxmoxMCP fits in..."
+    validations:
+      required: true
+      
+  - type: dropdown
+    attributes:
+      label: "Project Type"
+      description: "What type of project is this?"
+      options:
+        - Home Lab Setup
+        - Production Deployment
+        - Development/Testing Environment
+        - Automation Workflow
+        - Monitoring Solution
+        - Integration Project
+        - Educational/Learning
+        - Proof of Concept
+        - Other
+    validations:
+      required: true
+      
+  - type: textarea
+    attributes:
+      label: "Technical Details"
+      description: "Share technical implementation details"
+      placeholder: |
+        - ProxmoxMCP version:
+        - Proxmox setup:
+        - Integration tools:
+        - Architecture overview:
+        - Key challenges solved:
+      
+  - type: textarea
+    attributes:
+      label: "Code/Configuration Snippets"
+      description: "Share relevant code or configuration (remember to redact sensitive information)"
+      render: markdown
+      placeholder: |
+        ```python
+        # Your code here
+        ```
+        
+        ```json
+        {
+          "your": "config here"
+        }
+        ```
+        
+  - type: textarea
+    attributes:
+      label: "Screenshots/Demos"
+      description: "Share screenshots, videos, or demo links"
+      placeholder: |
+        - Screenshots: (drag and drop images here)
+        - Demo video: 
+        - Live demo:
+        
+  - type: textarea
+    attributes:
+      label: "Lessons Learned"
+      description: "What did you learn? Any tips for others?"
+      placeholder: "Share insights, gotchas, best practices, or advice for others doing similar projects..."
+      
+  - type: textarea
+    attributes:
+      label: "Future Plans"
+      description: "What's next for this project? (optional)"
+      placeholder: "Planned improvements, next features, scaling plans..."

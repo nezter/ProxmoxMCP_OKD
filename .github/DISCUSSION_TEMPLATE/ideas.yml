@@ -1,0 +1,95 @@
+labels: ["discussion", "ideas", "enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        💡 **Ideas and Brainstorming** - Share your ideas for ProxmoxMCP improvements!
+        
+        This is the place for:
+        - Feature brainstorming
+        - Architecture discussions
+        - Integration ideas
+        - Performance improvements
+        - New tool concepts
+        
+        **Note**: For concrete feature requests, please use the [Feature Request issue template](https://github.com/basher83/ProxmoxMCP/issues/new?template=feature_request.md).
+        
+  - type: input
+    attributes:
+      label: "Idea Title"
+      description: "What's your idea?"
+      placeholder: "e.g., Container management tools for LXC"
+    validations:
+      required: true
+      
+  - type: textarea
+    attributes:
+      label: "Idea Description"
+      description: "Describe your idea in detail"
+      placeholder: "What would this look like? How would it work? What problem does it solve?"
+    validations:
+      required: true
+      
+  - type: dropdown
+    attributes:
+      label: "Idea Category"
+      description: "What area does this idea relate to?"
+      options:
+        - New Tools/Features
+        - Performance Improvements
+        - Security Enhancements
+        - User Experience
+        - Integration/Compatibility
+        - Documentation
+        - Testing/Quality
+        - Deployment/DevOps
+        - Architecture/Design
+        - Other
+    validations:
+      required: true
+      
+  - type: textarea
+    attributes:
+      label: "Problem/Need"
+      description: "What problem would this solve or what need would it address?"
+      placeholder: "Current limitations, pain points, or missing functionality..."
+      
+  - type: textarea
+    attributes:
+      label: "Potential Implementation"
+      description: "Any thoughts on how this could be implemented? (optional)"
+      placeholder: "Technical approach, API changes, new dependencies, etc..."
+      
+  - type: dropdown
+    attributes:
+      label: "Complexity Estimate"
+      description: "How complex do you think this would be to implement?"
+      options:
+        - Simple (few hours/days)
+        - Moderate (weeks)
+        - Complex (months)
+        - Major undertaking (major version)
+        - Not sure
+        
+  - type: dropdown
+    attributes:
+      label: "Priority/Impact"
+      description: "How important do you think this is?"
+      options:
+        - High Impact - Many users would benefit
+        - Medium Impact - Some users would benefit
+        - Low Impact - Nice to have
+        - Niche - Specific use cases
+        - Not sure
+        
+  - type: textarea
+    attributes:
+      label: "Alternative Solutions"
+      description: "Are there existing workarounds or alternative approaches?"
+      placeholder: "Current workarounds, other tools that do this, etc..."
+      
+  - type: textarea
+    attributes:
+      label: "Additional Thoughts"
+      description: "Any other thoughts, concerns, or considerations?"
+      placeholder: "Edge cases, compatibility concerns, related ideas..."

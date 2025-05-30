@@ -1,0 +1,97 @@
+labels: ["discussion", "help", "community-support"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        🤝 **Community Help** - Get help from the community!
+        
+        This is for:
+        - General usage questions
+        - Best practice discussions
+        - Architecture advice
+        - Integration guidance
+        - Troubleshooting assistance
+        
+        **Before posting:**
+        - [ ] Check the [README](https://github.com/basher83/ProxmoxMCP#readme)
+        - [ ] Search [existing discussions](https://github.com/basher83/ProxmoxMCP/discussions)
+        - [ ] Consider if this should be an [issue](https://github.com/basher83/ProxmoxMCP/issues/new/choose) instead
+        
+  - type: input
+    attributes:
+      label: "What do you need help with?"
+      description: "Brief summary of what you're trying to accomplish"
+      placeholder: "e.g., Setting up ProxmoxMCP in a Docker Swarm environment"
+    validations:
+      required: true
+      
+  - type: textarea
+    attributes:
+      label: "Detailed Description"
+      description: "Provide more details about your situation and what you need help with"
+      placeholder: "What are you trying to achieve? What challenges are you facing?"
+    validations:
+      required: true
+      
+  - type: dropdown
+    attributes:
+      label: "Help Category"
+      description: "What type of help do you need?"
+      options:
+        - Installation/Setup
+        - Configuration
+        - Usage/How-to
+        - Best Practices
+        - Architecture Design
+        - Integration
+        - Performance
+        - Troubleshooting
+        - Security
+        - Other
+    validations:
+      required: true
+      
+  - type: textarea
+    attributes:
+      label: "Your Environment"
+      description: "Tell us about your environment (if relevant)"
+      placeholder: |
+        - ProxmoxMCP version:
+        - Proxmox version:
+        - Deployment method:
+        - Operating system:
+        - Special requirements:
+        
+  - type: textarea
+    attributes:
+      label: "What You've Tried"
+      description: "What have you already attempted?"
+      placeholder: "Steps taken, documentation read, solutions tried..."
+      
+  - type: textarea
+    attributes:
+      label: "Current Configuration"
+      description: "Share relevant configuration (redact sensitive information)"
+      render: markdown
+      placeholder: |
+        ```json
+        {
+          "your": "config here"
+        }
+        ```
+        
+  - type: dropdown
+    attributes:
+      label: "Urgency"
+      description: "How urgent is this for you?"
+      options:
+        - High - Blocking critical work
+        - Medium - Important for project
+        - Low - Nice to resolve
+        - Learning - No rush
+        
+  - type: textarea
+    attributes:
+      label: "Additional Context"
+      description: "Any other information that might be helpful"
+      placeholder: "Error messages, logs, specific constraints, goals..."

@@ -1,0 +1,35 @@
+# These are supported funding model platforms
+
+# GitHub Sponsors (username)
+github: # [basher83]
+
+# Open Collective (project name)
+# open_collective: proxmoxmcp
+
+# Ko-fi (username)
+# ko_fi: basher83
+
+# Tidelift (package-manager/package-name)
+# tidelift: pypi/proxmox-mcp
+
+# Community Bridge (project name)
+# community_bridge: proxmoxmcp
+
+# Liberapay (username)
+# liberapay: basher83
+
+# IssueHunt (username)
+# issuehunt: basher83
+
+# Otechie (username)
+# otechie: basher83
+
+# LFX Crowdfunding (project name)
+# lfx_crowdfunding: proxmoxmcp
+
+# Custom funding URLs (up to 4)
+custom:
+  - "https://www.buymeacoffee.com/basher83"
+  # - "https://example.com/sponsor"
+  # - "https://example.com/donate"
+  # - "https://example.com/support"

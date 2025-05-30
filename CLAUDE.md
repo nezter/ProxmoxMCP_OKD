@@ -6,6 +6,12 @@ hidden: true
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+See @README for project overview and @docs/ROADMAP for guidance and direction on this project.
+
+# Additional Instructions
+- memory workflow @docs/memory-instructions.md
+
+
 ## Development Commands
 
 ### Environment Setup

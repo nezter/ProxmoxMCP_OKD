@@ -1,0 +1,219 @@
+# GitHub Labels Configuration for ProxmoxMCP
+# This file documents the standardized labels used in this repository
+# To apply these labels, use GitHub CLI: gh label create/edit commands
+
+# Issue Type Labels
+- name: "bug"
+  color: "d73a4a"
+  description: "Something isn't working correctly"
+
+- name: "enhancement"
+  color: "a2eeef" 
+  description: "New feature or request"
+
+- name: "documentation"
+  color: "0075ca"
+  description: "Improvements or additions to documentation"
+
+- name: "security"
+  color: "b60205"
+  description: "Security-related issues or improvements"
+
+- name: "performance"
+  color: "fbca04"
+  description: "Performance-related issues or improvements"
+
+- name: "question"
+  color: "d876e3"
+  description: "Further information is requested"
+
+# Priority Labels
+- name: "priority:critical"
+  color: "b60205"
+  description: "Critical priority - immediate attention required"
+
+- name: "priority:high"
+  color: "d93f0b"
+  description: "High priority - should be addressed soon"
+
+- name: "priority:medium"
+  color: "fbca04"
+  description: "Medium priority - normal timeline"
+
+- name: "priority:low"
+  color: "0e8a16"
+  description: "Low priority - can be addressed later"
+
+# Status Labels
+- name: "status:needs-investigation"
+  color: "f9d0c4"
+  description: "Requires investigation to understand the issue"
+
+- name: "status:confirmed"
+  color: "0e8a16"
+  description: "Issue has been confirmed and reproduced"
+
+- name: "status:in-progress"
+  color: "fbca04"
+  description: "Work is currently in progress"
+
+- name: "status:blocked"
+  color: "d73a4a"
+  description: "Cannot proceed due to external dependencies"
+
+- name: "status:ready-for-review"
+  color: "0075ca"
+  description: "Ready for code review"
+
+- name: "status:waiting-for-feedback"
+  color: "f9d0c4"
+  description: "Waiting for feedback from reporter or community"
+
+# Component Labels
+- name: "component:server"
+  color: "1d76db"
+  description: "Core MCP server implementation"
+
+- name: "component:config"
+  color: "1d76db"
+  description: "Configuration system and loading"
+
+- name: "component:tools"
+  color: "1d76db"
+  description: "MCP tool implementations"
+
+- name: "component:formatting"
+  color: "1d76db"
+  description: "Output formatting and theming"
+
+- name: "component:docker"
+  color: "0052cc"
+  description: "Docker and containerization"
+
+- name: "component:authentication"
+  color: "b60205"
+  description: "Authentication and security"
+
+- name: "component:api"
+  color: "1d76db"
+  description: "Proxmox API integration"
+
+- name: "component:testing"
+  color: "0e8a16"
+  description: "Test suite and testing infrastructure"
+
+# Platform/Environment Labels
+- name: "platform:linux"
+  color: "5319e7"
+  description: "Linux-specific issues"
+
+- name: "platform:windows"
+  color: "5319e7"
+  description: "Windows-specific issues"
+
+- name: "platform:macos"
+  color: "5319e7"
+  description: "macOS-specific issues"
+
+- name: "platform:docker"
+  color: "0052cc"
+  description: "Docker-specific issues"
+
+# Proxmox Version Labels
+- name: "proxmox:7.x"
+  color: "ff6b35"
+  description: "Proxmox VE 7.x versions"
+
+- name: "proxmox:8.x"
+  color: "ff6b35"
+  description: "Proxmox VE 8.x versions"
+
+# Effort Labels
+- name: "effort:small"
+  color: "c2e0c6"
+  description: "Small effort - hours to days"
+
+- name: "effort:medium"
+  color: "ffeaa7"
+  description: "Medium effort - days to weeks"
+
+- name: "effort:large"
+  color: "fdcb6e"
+  description: "Large effort - weeks to months"
+
+# Community Labels
+- name: "help-wanted"
+  color: "008672"
+  description: "Extra attention is needed - community help welcome"
+
+- name: "good-first-issue"
+  color: "7057ff"
+  description: "Good for newcomers"
+
+- name: "hacktoberfest"
+  color: "ff6b35"
+  description: "Suitable for Hacktoberfest contributions"
+
+# Special Labels
+- name: "duplicate"
+  color: "cfd3d7"
+  description: "This issue or pull request already exists"
+
+- name: "invalid"
+  color: "e4e669"
+  description: "This doesn't seem right"
+
+- name: "wontfix"
+  color: "ffffff"
+  description: "This will not be worked on"
+
+- name: "dependencies"
+  color: "0366d6"
+  description: "Pull requests that update a dependency file"
+
+- name: "python"
+  color: "306998"
+  description: "Python-related changes"
+
+- name: "github-actions"
+  color: "000000"
+  description: "GitHub Actions and CI/CD related"
+
+# Discussion Labels
+- name: "discussion"
+  color: "d876e3"
+  description: "Discussion topic"
+
+- name: "show-and-tell"
+  color: "0e8a16"
+  description: "Community showcase"
+
+- name: "ideas"
+  color: "a2eeef"
+  description: "Ideas and brainstorming"
+
+- name: "community-support"
+  color: "008672"
+  description: "Community help and support"
+
+# Installation Labels
+- name: "installation"
+  color: "f9d0c4"
+  description: "Installation and setup related"
+
+- name: "configuration"
+  color: "f9d0c4"
+  description: "Configuration-related issues"
+
+# Integration Labels
+- name: "integration:cline"
+  color: "bfd4f2"
+  description: "Cline integration specific"
+
+- name: "integration:mcp"
+  color: "bfd4f2"
+  description: "MCP protocol specific"
+
+- name: "integration:proxmox"
+  color: "ff6b35"
+  description: "Proxmox integration specific"

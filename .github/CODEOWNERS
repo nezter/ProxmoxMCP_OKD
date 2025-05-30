@@ -1,0 +1,45 @@
+# This file defines code ownership for automated review assignments
+# More info: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+
+# Global ownership - all files default to these reviewers
+* @basher83
+
+# Core server and API components
+/src/proxmox_mcp/server.py @basher83
+/src/proxmox_mcp/core/ @basher83
+
+# Configuration and security-related files
+/src/proxmox_mcp/config/ @basher83
+/.github/SECURITY.md @basher83
+/proxmox-config/ @basher83
+
+# Tool implementations
+/src/proxmox_mcp/tools/ @basher83
+
+# Formatting and presentation
+/src/proxmox_mcp/formatting/ @basher83
+
+# Testing infrastructure
+/tests/ @basher83
+/pyproject.toml @basher83
+/requirements*.in @basher83
+
+# Docker and deployment
+/Dockerfile @basher83
+/compose.yaml @basher83
+/.dockerignore @basher83
+
+# Documentation
+/README.md @basher83
+/docs/ @basher83
+/CONTRIBUTING.md @basher83
+
+# GitHub configuration
+/.github/ @basher83
+
+# Build and CI/CD
+/.github/workflows/ @basher83
+
+# Security-sensitive files require additional review
+/.github/SECURITY.md @basher83
+/src/proxmox_mcp/utils/auth.py @basher83
