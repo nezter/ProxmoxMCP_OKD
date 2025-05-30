@@ -51,14 +51,14 @@ Implement token encryption for sensitive data in configuration files to enhance 
 
 ## Implementation Tasks
 - [ ] Add cryptography.fernet dependency to requirements
-- [ ] Update \`src/proxmox_mcp/config/loader.py\` with encryption functions
+- [ ] Update src/proxmox_mcp/config/loader.py with encryption functions
 - [ ] Implement key management system
 - [ ] Add token encryption/decryption methods
 - [ ] Update configuration loading to handle encrypted tokens
 
 ## Code Implementation
-\`\`\`python
-# Add to src/proxmox_mcp/config/loader.py
+Add to src/proxmox_mcp/config/loader.py:
+```python
 import os
 from cryptography.fernet import Fernet
 
@@ -71,7 +71,7 @@ def decrypt_token(encrypted_token: str, key: bytes) -> str:
     \"\"\"Decrypt sensitive tokens\"\"\"
     f = Fernet(key)
     return f.decrypt(encrypted_token.encode()).decode()
-\`\`\`
+```
 
 ## Acceptance Criteria
 - [ ] Tokens are encrypted at rest
@@ -84,9 +84,9 @@ def decrypt_token(encrypted_token: str, key: bytes) -> str:
 1-2 days
 
 ## Related Files
-- \`src/proxmox_mcp/config/loader.py\`
-- \`src/proxmox_mcp/config/models.py\`
-- \`requirements.in\`"
+- src/proxmox_mcp/config/loader.py
+- src/proxmox_mcp/config/models.py
+- requirements.in"
 
 create_issue \
     "[SECURITY] Change default SSL verification to true" \
@@ -95,25 +95,26 @@ create_issue \
 Change default SSL verification from false to true for enhanced security by default.
 
 ## Implementation Tasks
-- [ ] Update \`proxmox-config/config.example.json\` default value
+- [ ] Update proxmox-config/config.example.json default value
 - [ ] Update documentation to reflect secure defaults
 - [ ] Add migration guide for existing users
 - [ ] Update README installation instructions
 
 ## Changes Required
-\`\`\`json
+Update proxmox-config/config.example.json:
+```json
 {
     \"proxmox\": {
         \"host\": \"your-proxmox-host\",
         \"port\": 8006,
-        \"verify_ssl\": true,  // Changed from false
+        \"verify_ssl\": true,
         \"service\": \"PVE\"
     }
 }
-\`\`\`
+```
 
 ## Acceptance Criteria
-- [ ] Default \`verify_ssl\` changed to \`true\`
+- [ ] Default verify_ssl changed to true
 - [ ] Documentation updated with secure defaults
 - [ ] Migration guide created for existing users
 - [ ] Breaking change properly documented
@@ -122,9 +123,9 @@ Change default SSL verification from false to true for enhanced security by defa
 Few hours
 
 ## Files to Update
-- \`proxmox-config/config.example.json\`
-- \`README.md\`
-- \`docs/\` (migration guide)"
+- proxmox-config/config.example.json
+- README.md
+- docs/ (migration guide)"
 
 create_issue \
     "[SECURITY] Implement VM command validation and sanitization" \
@@ -133,7 +134,7 @@ create_issue \
 Add input validation and sanitization for VM commands to prevent injection attacks and enhance security.
 
 ## Implementation Tasks
-- [ ] Add command validation in \`src/proxmox_mcp/tools/vm.py\`
+- [ ] Add command validation in src/proxmox_mcp/tools/vm.py
 - [ ] Implement command sanitization with shlex
 - [ ] Create command whitelist/allowlist system
 - [ ] Add command execution limits and timeouts
@@ -141,7 +142,7 @@ Add input validation and sanitization for VM commands to prevent injection attac
 - [ ] Add security tests for edge cases
 
 ## Code Implementation
-\`\`\`python
+```python
 import shlex
 import re
 from typing import List, Set
@@ -152,8 +153,7 @@ class CommandValidator:
     }
     
     def validate_command(self, command: str) -> str:
-        \"\"\"Validate and sanitize shell commands\"\"\"
-        # Basic validation
+        # Validate and sanitize shell commands
         if not command or len(command) > 1000:
             raise ValueError(\"Invalid command length\")
         
@@ -163,7 +163,7 @@ class CommandValidator:
         
         # Sanitize command
         return shlex.quote(command)
-\`\`\`
+```
 
 ## Security Considerations
 - Prevent command injection attacks
@@ -182,8 +182,8 @@ class CommandValidator:
 1-2 days
 
 ## Related Files
-- \`src/proxmox_mcp/tools/vm.py\`
-- \`tests/test_vm_security.py\` (new)
+- src/proxmox_mcp/tools/vm.py
+- tests/test_vm_security.py (new)
 - Security documentation"
 
 # Phase 2: Docker Improvements
@@ -204,7 +204,7 @@ Enhance Docker container security with non-root user execution, secrets manageme
 - [ ] Add container security documentation
 
 ## Dockerfile Improvements
-\`\`\`dockerfile
+```dockerfile
 # Security: Run as non-root from the start
 RUN groupadd -r mcp && useradd -r -g mcp mcp
 USER mcp
@@ -212,10 +212,10 @@ USER mcp
 # Add health check
 HEALTHCHECK --interval=30s --timeout=10s --retries=3 \\
   CMD python -m proxmox_mcp.health || exit 1
-\`\`\`
+```
 
 ## Docker Compose Enhancements
-\`\`\`yaml
+```yaml
 services:
   proxmox-mcp:
     secrets:
@@ -232,7 +232,7 @@ services:
 secrets:
   proxmox_token:
     external: true
-\`\`\`
+```
 
 ## Acceptance Criteria
 - [ ] Container runs as non-root user
@@ -245,9 +245,9 @@ secrets:
 1 day
 
 ## Files to Update
-- \`Dockerfile\`
-- \`compose.yaml\`
-- \`README.md\` (Docker section)
+- Dockerfile
+- compose.yaml
+- README.md (Docker section)
 - Security documentation"
 
 # Phase 3: Error Handling
@@ -260,14 +260,14 @@ create_issue \
 Create specific exception classes for better error handling, debugging, and user experience.
 
 ## Implementation Tasks
-- [ ] Create exception hierarchy in \`src/proxmox_mcp/tools/base.py\`
+- [ ] Create exception hierarchy in src/proxmox_mcp/tools/base.py
 - [ ] Implement specific exception classes for different error types
 - [ ] Update existing code to use new exceptions
 - [ ] Add error handling documentation
 - [ ] Add tests for exception handling
 
 ## Exception Classes to Implement
-\`\`\`python
+```python
 class ProxmoxError(Exception):
     \"\"\"Base exception for Proxmox operations\"\"\"
     pass
@@ -287,7 +287,7 @@ class ProxmoxConnectionError(ProxmoxError):
 class ProxmoxConfigError(ProxmoxError):
     \"\"\"Configuration-related errors\"\"\"
     pass
-\`\`\`
+```
 
 ## Acceptance Criteria
 - [ ] Exception hierarchy created
@@ -300,7 +300,7 @@ class ProxmoxConfigError(ProxmoxError):
 1 day
 
 ## Files to Update
-- \`src/proxmox_mcp/tools/base.py\`
+- src/proxmox_mcp/tools/base.py
 - All tool files to use new exceptions
 - Test files for exception coverage"
 
@@ -318,7 +318,7 @@ Add health check tool for monitoring server and Proxmox connection status.
 - [ ] Integrate with Docker health checks
 
 ## Health Check Implementation
-\`\`\`python
+```python
 @self.mcp.tool(description=\"Check MCP server and Proxmox connection health\")
 def health_check():
     try:
@@ -334,7 +334,7 @@ def health_check():
             \"error\": str(e),
             \"timestamp\": datetime.utcnow().isoformat()
         }
-\`\`\`
+```
 
 ## Acceptance Criteria
 - [ ] Health check tool implemented
@@ -347,7 +347,7 @@ def health_check():
 1 day
 
 ## Files to Update
-- \`src/proxmox_mcp/server.py\`
+- src/proxmox_mcp/server.py
 - Health check documentation
 - Docker health check integration"
 
