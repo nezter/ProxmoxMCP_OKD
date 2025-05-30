@@ -1,10 +1,10 @@
 # GitHub Project Board Configuration
 
 # Project board name
-name: ProxmoxMCP Development Roadmap
+name: Proxmox MCP Development Roadmap
 
 # Project description
-description: Tracking development progress for ProxmoxMCP based on the repository review
+description: Tracking development progress for Proxmox MCP based on the repository review
 
 # Project columns
 columns:
