@@ -91,7 +91,7 @@ Before starting, ensure you have:
         "proxmox": {
             "host": "PROXMOX_HOST",        # Required: Your Proxmox server address
             "port": 8006,                  # Optional: Default is 8006
-            "verify_ssl": false,           # Optional: Set false for self-signed certs
+            "verify_ssl": true,            # Optional: Set false only for self-signed certs
             "service": "PVE"               # Optional: Default is PVE
         },
         "auth": {
@@ -145,6 +145,16 @@ Before starting, ensure you have:
    * Enter a token ID (e.g., "mcp-token")
    * Uncheck "Privilege Separation" if you want full access
    * Save and copy both the token ID and secret
+
+#### Migration Notice for Existing Users
+
+**Breaking Change**: Starting with this version, SSL verification is enabled by default (`"verify_ssl": true`).
+
+If you're using self-signed certificates and encounter SSL errors:
+1. Update your existing `config.json` to explicitly set `"verify_ssl": false`
+2. Or preferably, set up proper SSL certificates for your Proxmox server
+
+This change improves security by default while maintaining flexibility for self-signed certificate environments.
 
 ### 🚀 Running the Server
 

@@ -20,7 +20,7 @@ These items address critical security vulnerabilities and must be implemented im
   ```
 
 ### SSL Security
-- [ ] **Enable SSL Verification**: Change default from `"verify_ssl": false` to `"verify_ssl": true` in `proxmox-config/config.example.json`
+- [x] **Enable SSL Verification**: Change default from `"verify_ssl": false` to `"verify_ssl": true` in `proxmox-config/config.example.json`
 
 ### Input Validation
 - [ ] **VM Command Validation**: Add input validation and sanitization in `src/proxmox_mcp/tools/vm.py`
