@@ -10,10 +10,12 @@ This module handles loading and validation of server configuration:
 The module ensures that all required configuration is present
 and valid before the server starts operation.
 """
+
 import json
 import os
 from typing import Optional
 from .models import Config
+
 
 def load_config(config_path: Optional[str] = None) -> Config:
     """Load and validate configuration from JSON file.
@@ -23,12 +25,12 @@ def load_config(config_path: Optional[str] = None) -> Config:
     2. Loads JSON configuration file
     3. Validates required fields are present
     4. Converts to typed Config object using Pydantic
-    
+
     Configuration must include:
     - Proxmox connection settings (host, port, etc.)
     - Authentication credentials (user, token)
     - Logging configuration
-    
+
     Args:
         config_path: Path to the JSON configuration file
                     If not provided, raises ValueError
@@ -65,7 +67,7 @@ def load_config(config_path: Optional[str] = None) -> Config:
     try:
         with open(config_path) as f:
             config_data = json.load(f)
-            if not config_data.get('proxmox', {}).get('host'):
+            if not config_data.get("proxmox", {}).get("host"):
                 raise ValueError("Proxmox host cannot be empty")
             return Config(**config_data)
     except json.JSONDecodeError as e:

@@ -10,21 +10,23 @@ This module provides the foundation for all Proxmox MCP tools, including:
 All tool implementations inherit from the ProxmoxTool base class to ensure
 consistent behavior and error handling across the MCP server.
 """
+
 import logging
 from typing import Any, Dict, List, Optional, Union
 from mcp.types import TextContent as Content
 from proxmoxer import ProxmoxAPI
 from ..formatting import ProxmoxTemplates
 
+
 class ProxmoxTool:
     """Base class for Proxmox MCP tools.
-    
+
     This class provides common functionality used by all Proxmox tool implementations:
     - Proxmox API access
     - Standardized logging
     - Response formatting
     - Error handling
-    
+
     All tool classes should inherit from this base class to ensure consistent
     behavior and error handling across the MCP server.
     """
@@ -36,9 +38,13 @@ class ProxmoxTool:
             proxmox_api: Initialized ProxmoxAPI instance
         """
         self.proxmox = proxmox_api
-        self.logger = logging.getLogger(f"proxmox-mcp.{self.__class__.__name__.lower()}")
+        self.logger = logging.getLogger(
+            f"proxmox-mcp.{self.__class__.__name__.lower()}"
+        )
 
-    def _format_response(self, data: Any, resource_type: Optional[str] = None) -> List[Content]:
+    def _format_response(
+        self, data: Any, resource_type: Optional[str] = None
+    ) -> List[Content]:
         """Format response data into MCP content using templates.
 
         This method handles formatting of various Proxmox resource types into
@@ -73,6 +79,7 @@ class ProxmoxTool:
         else:
             # Fallback to JSON formatting for unknown types
             import json
+
             formatted = json.dumps(data, indent=2)
 
         return [Content(type="text", text=formatted)]
@@ -102,5 +109,5 @@ class ProxmoxTool:
             raise ValueError(f"Permission denied: {error_msg}")
         if "invalid" in error_msg.lower():
             raise ValueError(f"Invalid input: {error_msg}")
-        
+
         raise RuntimeError(f"Failed to {operation}: {error_msg}")

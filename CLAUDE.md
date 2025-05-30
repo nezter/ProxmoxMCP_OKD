@@ -6,7 +6,7 @@ hidden: true
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-See @README for project overview and @docs/ROADMAP for guidance and direction on this project.
+See @README for project overview and @docs/ROADMAP for guidance and direction on this project. Referance @CLAUDE for specific instructions on how to interact with the codebase.
 
 # Additional Instructions
 - memory workflow @docs/memory-instructions.md
@@ -132,3 +132,7 @@ cp proxmox-config/config.example.json proxmox-config/config.json
 * Built on Model Context Protocol (MCP) SDK for tool interface
 * Uses `proxmoxer` library for Proxmox API communication
 * Requires Python 3.9+ with modern async/await support
+
+## Memories
+- "ruff isn't available in this environment"
+- "When tasked are completed you must commit changes to github"

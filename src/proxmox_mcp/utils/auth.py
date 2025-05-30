@@ -7,11 +7,14 @@ from typing import Dict, Optional, Tuple
 
 from pydantic import BaseModel
 
+
 class ProxmoxAuth(BaseModel):
     """Proxmox authentication configuration."""
+
     user: str
     token_name: str
     token_value: str
+
 
 def load_auth_from_env() -> ProxmoxAuth:
     """
@@ -40,13 +43,16 @@ def load_auth_from_env() -> ProxmoxAuth:
             missing.append("PROXMOX_TOKEN_NAME")
         if not token_value:
             missing.append("PROXMOX_TOKEN_VALUE")
-        raise ValueError(f"Missing required environment variables: {', '.join(missing)}")
+        raise ValueError(
+            f"Missing required environment variables: {', '.join(missing)}"
+        )
 
     return ProxmoxAuth(
         user=user,
         token_name=token_name,
         token_value=token_value,
     )
+
 
 def parse_user(user: str) -> Tuple[str, str]:
     """
@@ -68,6 +74,7 @@ def parse_user(user: str) -> Tuple[str, str]:
         raise ValueError(
             "Invalid user format. Expected 'username@realm' (e.g., 'root@pam' or 'user@pve')"
         )
+
 
 def get_auth_dict(auth: ProxmoxAuth) -> Dict[str, str]:
     """
