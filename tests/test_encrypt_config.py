@@ -30,77 +30,133 @@ from proxmox_mcp.utils.encryption import TokenEncryption
 class TestSecureKeyGeneration:
     """Test cases for secure master key generation."""
 
-    @patch("builtins.input")
+    @patch("pathlib.Path.write_text")
+    @patch("pathlib.Path.chmod")
+    @patch("pathlib.Path.home")
     @patch("builtins.print")
-    def test_generate_master_key_secure_workflow(self, mock_print: MagicMock, mock_input: MagicMock) -> None:
+    def test_generate_master_key_secure_workflow(
+        self,
+        mock_print: MagicMock,
+        mock_home: MagicMock,
+        mock_chmod: MagicMock,
+        mock_write_text: MagicMock,
+    ) -> None:
         """Test that master key generation follows secure workflow."""
-        # Mock user pressing Enter twice (to confirm and after storing)
-        mock_input.side_effect = ["", ""]
+        # Mock home directory
+        mock_home.return_value = Path("/home/test")
 
         # Call the function
         generate_master_key()
 
-        # Verify security warnings were displayed
+        # Verify key was written to secure file
+        mock_write_text.assert_called_once()
+        written_key = mock_write_text.call_args[0][0]
+        # Key should be base64 encoded string, not prefixed with PROXMOX_MCP_MASTER_KEY=
+        assert len(written_key) > 0, "Key should be written"
+        assert not written_key.startswith("PROXMOX_MCP_MASTER_KEY="), "Key should be stored without prefix"
+
+        # Verify file permissions were set to 600 (owner read/write only)
+        mock_chmod.assert_called_once_with(0o600)
+
+        # Verify secure workflow messages were displayed
         printed_calls = [str(call) for call in mock_print.call_args_list]
-        security_warnings = [
-            call for call in printed_calls if "SECURITY WARNING" in call
-        ]
-        assert len(security_warnings) > 0, "Security warning should be displayed"
+        all_output = " ".join(printed_calls)
 
-        # Verify key is displayed (may appear in export command too)
+        assert "Master key generated securely" in all_output
+        assert "Key saved to:" in all_output
+        assert "export PROXMOX_MCP_MASTER_KEY=$(cat ~/.proxmox_mcp_key)" in all_output
+
+        # Verify NO raw key is displayed in output
         key_displays = [
-            call for call in printed_calls if "PROXMOX_MCP_MASTER_KEY=" in call
+            call
+            for call in printed_calls
+            if "PROXMOX_MCP_MASTER_KEY=" in call and "$(cat" not in call
         ]
-        assert len(key_displays) >= 1, "Key should be displayed at least once"
-
-        # Verify history clearing instructions are provided
-        history_instructions = [call for call in printed_calls if "history -c" in call]
         assert (
-            len(history_instructions) > 0
-        ), "History clearing instructions should be provided"
+            len(key_displays) == 0
+        ), "Raw key should NOT be displayed in console output"
 
-    @patch("builtins.input")
+    @patch("pathlib.Path.write_text")
+    @patch("pathlib.Path.chmod")
+    @patch("pathlib.Path.home")
     @patch("builtins.print")
-    def test_generate_master_key_cancellation(self, mock_print: MagicMock, mock_input: MagicMock) -> None:
-        """Test that key generation can be cancelled."""
-        # Mock user pressing Ctrl+C
-        mock_input.side_effect = KeyboardInterrupt()
+    def test_generate_master_key_file_error_handling(
+        self,
+        mock_print: MagicMock,
+        mock_home: MagicMock,
+        mock_chmod: MagicMock,
+        mock_write_text: MagicMock,
+    ) -> None:
+        """Test error handling when key file cannot be written."""
+        # Mock home directory
+        mock_home.return_value = Path("/home/test")
 
-        # Should exit gracefully
+        # Mock file write error
+        mock_write_text.side_effect = OSError("Permission denied")
+
+        # Should exit with error
         with pytest.raises(SystemExit) as exc_info:
             generate_master_key()
 
-        assert exc_info.value.code == 0  # Clean exit
+        assert exc_info.value.code == 1
 
-        # Verify cancellation message was displayed
+        # Verify error message was displayed
         printed_calls = [str(call) for call in mock_print.call_args_list]
-        cancellation_messages = [call for call in printed_calls if "cancelled" in call]
-        assert len(cancellation_messages) > 0
+        error_messages = [
+            call for call in printed_calls if "Error saving key file" in call
+        ]
+        assert len(error_messages) > 0
 
-    @patch("builtins.input")
+    @patch("pathlib.Path.write_text")
+    @patch("pathlib.Path.chmod")
+    @patch("pathlib.Path.home")
     @patch("builtins.print")
-    def test_generate_master_key_prompts_for_confirmation(self, mock_print: MagicMock, mock_input: MagicMock) -> None:
-        """Test that key generation requires user confirmation."""
-        mock_input.side_effect = ["", ""]  # Two confirmations needed
+    def test_no_key_exposure_in_output(
+        self,
+        mock_print: MagicMock,
+        mock_home: MagicMock,
+        mock_chmod: MagicMock,
+        mock_write_text: MagicMock,
+    ) -> None:
+        """Test that master key is never exposed in console output."""
+        # Mock home directory
+        mock_home.return_value = Path("/home/test")
 
+        # Call the function
         generate_master_key()
 
-        # Should be called twice: once before showing key, once after
-        assert mock_input.call_count == 2
+        # Get all printed output
+        printed_calls = [str(call) for call in mock_print.call_args_list]
+        all_output = " ".join(printed_calls)
 
-        # First call should be for display confirmation
-        first_call = mock_input.call_args_list[0]
-        assert "Press ENTER to display" in first_call[0][0]
+        # Verify that no actual key value appears in the output
+        # The key should only be written to file, not displayed
+        assert (
+            "PROXMOX_MCP_MASTER_KEY=AAAA" not in all_output
+        ), "Actual key values should not appear in output"
 
-        # Second call should be for storage confirmation
-        second_call = mock_input.call_args_list[1]
-        assert "after you have safely stored" in second_call[0][0]
+        # The only reference should be in the export command template
+        export_commands = [
+            call
+            for call in printed_calls
+            if "export PROXMOX_MCP_MASTER_KEY=$(cat" in call
+        ]
+        assert len(export_commands) == 1, "Should show export command template"
 
-    @patch("builtins.input")
+    @patch("pathlib.Path.write_text")
+    @patch("pathlib.Path.chmod")
+    @patch("pathlib.Path.home")
     @patch("builtins.print")
-    def test_security_reminders_displayed(self, mock_print: MagicMock, mock_input: MagicMock) -> None:
+    def test_security_reminders_displayed(
+        self,
+        mock_print: MagicMock,
+        mock_home: MagicMock,
+        mock_chmod: MagicMock,
+        mock_write_text: MagicMock,
+    ) -> None:
         """Test that appropriate security reminders are displayed."""
-        mock_input.side_effect = ["", ""]
+        # Mock home directory
+        mock_home.return_value = Path("/home/test")
 
         generate_master_key()
 
@@ -108,10 +164,8 @@ class TestSecureKeyGeneration:
         all_output = " ".join(printed_calls)
 
         # Check for key security reminders
-        assert "Copy it immediately" in all_output
-        assert "store it securely" in all_output
-        assert "Anyone with this key can decrypt" in all_output
-        assert "clearing your terminal history" in all_output
+        assert "Store this file securely" in all_output
+        assert "Key file permissions set to 600" in all_output
         assert "Losing this key means losing access" in all_output
 
 
@@ -120,25 +174,25 @@ class TestKeyRotation:
 
     def test_create_backup(self) -> None:
         """Test that backup creation works correctly."""
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as f:
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
             test_config = {"test": "data"}
             json.dump(test_config, f)
             f.flush()
-            
+
             try:
                 backup_path = create_backup(f.name)
-                
+
                 # Verify backup exists
                 assert os.path.exists(backup_path)
-                
+
                 # Verify backup contains same data
                 with open(backup_path) as backup_f:
                     backup_data = json.load(backup_f)
                 assert backup_data == test_config
-                
+
                 # Verify backup path format
                 assert backup_path.startswith(f.name + ".backup.")
-                
+
                 # Clean up
                 os.unlink(backup_path)
             finally:
@@ -150,21 +204,17 @@ class TestKeyRotation:
         master_key = TokenEncryption.generate_master_key()
         encryptor = TokenEncryption(master_key=master_key)
         encrypted_token = encryptor.encrypt_token("test-token")
-        
-        test_config = {
-            "auth": {
-                "token_value": encrypted_token
-            }
-        }
-        
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as f:
+
+        test_config = {"auth": {"token_value": encrypted_token}}
+
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
             json.dump(test_config, f)
             f.flush()
-            
+
             try:
                 # Should verify successfully with correct key
                 assert verify_config_decryption(f.name, master_key) == True
-                
+
                 # Should fail with wrong key
                 wrong_key = TokenEncryption.generate_master_key()
                 assert verify_config_decryption(f.name, wrong_key) == False
@@ -173,16 +223,12 @@ class TestKeyRotation:
 
     def test_verify_config_decryption_with_plain_token(self) -> None:
         """Test config decryption verification with plain text token."""
-        test_config = {
-            "auth": {
-                "token_value": "plain-text-token"
-            }
-        }
-        
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as f:
+        test_config = {"auth": {"token_value": "plain-text-token"}}
+
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
             json.dump(test_config, f)
             f.flush()
-            
+
             try:
                 # Should pass verification even with random key since token is plain text
                 random_key = TokenEncryption.generate_master_key()
@@ -193,11 +239,11 @@ class TestKeyRotation:
     def test_verify_config_decryption_no_token(self) -> None:
         """Test config decryption verification with no token."""
         test_config = {"other": "data"}
-        
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as f:
+
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
             json.dump(test_config, f)
             f.flush()
-            
+
             try:
                 # Should pass verification when no encrypted tokens exist
                 random_key = TokenEncryption.generate_master_key()
@@ -209,11 +255,11 @@ class TestKeyRotation:
     def test_rotate_master_key_no_env_key(self) -> None:
         """Test key rotation fails when no environment key is set."""
         test_config = {"auth": {"token_value": "enc:test"}}
-        
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as f:
+
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
             json.dump(test_config, f)
             f.flush()
-            
+
             try:
                 with pytest.raises(SystemExit):
                     rotate_master_key(f.name)
@@ -227,17 +273,13 @@ class TestKeyRotation:
         actual_key = TokenEncryption.generate_master_key()
         encryptor = TokenEncryption(master_key=actual_key)
         encrypted_token = encryptor.encrypt_token("test-token")
-        
-        test_config = {
-            "auth": {
-                "token_value": encrypted_token
-            }
-        }
-        
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as f:
+
+        test_config = {"auth": {"token_value": encrypted_token}}
+
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
             json.dump(test_config, f)
             f.flush()
-            
+
             try:
                 with pytest.raises(SystemExit):
                     rotate_master_key(f.name)
@@ -250,53 +292,51 @@ class TestKeyRotation:
         old_key = TokenEncryption.generate_master_key()
         old_encryptor = TokenEncryption(master_key=old_key)
         encrypted_token = old_encryptor.encrypt_token("test-token-value")
-        
-        test_config = {
-            "auth": {
-                "token_value": encrypted_token
-            },
-            "other": "data"
-        }
-        
-        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as f:
+
+        test_config = {"auth": {"token_value": encrypted_token}, "other": "data"}
+
+        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".json") as f:
             json.dump(test_config, f)
             f.flush()
-            
+
             try:
                 # Set old key in environment
                 with patch.dict(os.environ, {"PROXMOX_MCP_MASTER_KEY": old_key}):
                     # Generate new key for rotation
                     new_key = TokenEncryption.generate_master_key()
-                    
+
                     # Perform rotation
                     rotate_master_key(f.name, new_key)
-                    
+
                     # Verify config was updated
                     with open(f.name) as config_f:
                         rotated_config = json.load(config_f)
-                    
+
                     # Should have different encrypted token
                     new_encrypted_token = rotated_config["auth"]["token_value"]
                     assert new_encrypted_token != encrypted_token
                     assert new_encrypted_token.startswith("enc:")
-                    
+
                     # Should decrypt to same value with new key
                     new_encryptor = TokenEncryption(master_key=new_key)
                     decrypted_token = new_encryptor.decrypt_token(new_encrypted_token)
                     assert decrypted_token == "test-token-value"
-                    
+
                     # Other data should be unchanged
                     assert rotated_config["other"] == "data"
-                    
+
                     # Backup should exist
-                    backup_files = [file for file in os.listdir(os.path.dirname(f.name)) 
-                                  if file.startswith(os.path.basename(f.name) + ".backup.")]
+                    backup_files = [
+                        file
+                        for file in os.listdir(os.path.dirname(f.name))
+                        if file.startswith(os.path.basename(f.name) + ".backup.")
+                    ]
                     assert len(backup_files) == 1
-                    
+
                     # Clean up backup
                     backup_path = os.path.join(os.path.dirname(f.name), backup_files[0])
                     os.unlink(backup_path)
-                    
+
             finally:
                 os.unlink(f.name)
 
@@ -306,69 +346,72 @@ class TestKeyRotation:
             # Create test keys
             old_key = TokenEncryption.generate_master_key()
             old_encryptor = TokenEncryption(master_key=old_key)
-            
+
             # Create multiple config files
             config1_path = os.path.join(temp_dir, "config1.json")
             config2_path = os.path.join(temp_dir, "config2.json")
             config3_path = os.path.join(temp_dir, "config_plain.json")
-            
+
             # Config 1: encrypted token
             config1 = {
                 "auth": {"token_value": old_encryptor.encrypt_token("token1")},
-                "name": "config1"
+                "name": "config1",
             }
-            
+
             # Config 2: encrypted token
             config2 = {
                 "auth": {"token_value": old_encryptor.encrypt_token("token2")},
-                "name": "config2"
+                "name": "config2",
             }
-            
+
             # Config 3: plain token (should be skipped)
-            config3 = {
-                "auth": {"token_value": "plain-token"},
-                "name": "config3"
-            }
-            
+            config3 = {"auth": {"token_value": "plain-token"}, "name": "config3"}
+
             # Write configs
-            with open(config1_path, 'w') as f:
+            with open(config1_path, "w") as f:
                 json.dump(config1, f)
-            with open(config2_path, 'w') as f:
+            with open(config2_path, "w") as f:
                 json.dump(config2, f)
-            with open(config3_path, 'w') as f:
+            with open(config3_path, "w") as f:
                 json.dump(config3, f)
-            
+
             # Set old key in environment and perform bulk rotation
             with patch.dict(os.environ, {"PROXMOX_MCP_MASTER_KEY": old_key}):
                 new_key = TokenEncryption.generate_master_key()
                 rotate_master_key_all(temp_dir, new_key)
-                
+
                 # Verify encrypted configs were rotated
                 new_encryptor = TokenEncryption(master_key=new_key)
-                
+
                 # Check config1
                 with open(config1_path) as f:
                     rotated_config1 = json.load(f)
-                decrypted_token1 = new_encryptor.decrypt_token(rotated_config1["auth"]["token_value"])
+                decrypted_token1 = new_encryptor.decrypt_token(
+                    rotated_config1["auth"]["token_value"]
+                )
                 assert decrypted_token1 == "token1"
                 assert rotated_config1["name"] == "config1"
-                
+
                 # Check config2
                 with open(config2_path) as f:
                     rotated_config2 = json.load(f)
-                decrypted_token2 = new_encryptor.decrypt_token(rotated_config2["auth"]["token_value"])
+                decrypted_token2 = new_encryptor.decrypt_token(
+                    rotated_config2["auth"]["token_value"]
+                )
                 assert decrypted_token2 == "token2"
                 assert rotated_config2["name"] == "config2"
-                
+
                 # Check config3 (should be unchanged)
                 with open(config3_path) as f:
                     unchanged_config3 = json.load(f)
                 assert unchanged_config3["auth"]["token_value"] == "plain-token"
                 assert unchanged_config3["name"] == "config3"
-                
+
                 # Verify backups were created for rotated configs
                 backup_files = [f for f in os.listdir(temp_dir) if ".backup." in f]
-                assert len(backup_files) == 2  # Only encrypted configs should have backups
+                assert (
+                    len(backup_files) == 2
+                )  # Only encrypted configs should have backups
 
     def test_rotate_master_key_all_no_configs(self) -> None:
         """Test bulk rotation with no configuration files."""
