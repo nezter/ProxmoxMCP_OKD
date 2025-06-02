@@ -20,32 +20,13 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create branch for issue
-        run: |
-          # Create branch name from issue number and title
-          ISSUE_NUMBER="${{ github.event.issue.number }}"
-          ISSUE_TITLE="${{ github.event.issue.title }}"
-          # Clean title for branch name (remove special chars, lowercase, replace spaces with hyphens)
-          CLEAN_TITLE=$(echo "$ISSUE_TITLE" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9 ]//g' | sed 's/ /-/g' | cut -c1-50)
-          BRANCH_NAME="claude/issue-${ISSUE_NUMBER}-${CLEAN_TITLE}"
-          
-          # Create and switch to new branch
-          git config user.name "claude-code-bot"
-          git config user.email "claude-code-bot@users.noreply.github.com"
-          git checkout -b "$BRANCH_NAME"
-          git push origin "$BRANCH_NAME"
-          
-          # Store branch name for next step
-          echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+      # Claude Code will create its own branch, so we don't need to create one manually
 
       - name: Add comment to issue
         uses: actions/github-script@v7
         with:
           script: |
-            const branchName = process.env.BRANCH_NAME;
             const comment = `🤖 **Claude Code has been assigned to this issue!**
-            
-            I've created a new branch: \`${branchName}\`
             
             I'll start working on this issue and create a pull request when ready.
             
@@ -55,7 +36,7 @@ jobs:
             3. Run tests and quality checks
             4. Create a pull request for review
             
-            You can track my progress by watching for commits on the branch.`;
+            You can track my progress by watching for commits on the new branch that will be created.`;
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
@@ -100,7 +81,7 @@ jobs:
             6. Commit changes with clear, descriptive commit messages
             7. When implementation is complete, create a pull request
             
-            **Branch:** I'm working on branch `${{ env.BRANCH_NAME }}`
+            **Branch:** I'll create a new branch for this work
             
             Please implement the solution for this issue following the project's guidelines in CLAUDE.md and the development workflow.
             
@@ -118,17 +99,41 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const branchName = process.env.BRANCH_NAME;
+            // Claude Code creates its own branch, we need to find it
+            // Look for branches that start with claude/issue-{number}
+            const issueNumber = ${{ github.event.issue.number }};
+            const branchPrefix = `claude/issue-${issueNumber}`;
             
-            // Check if there are any commits on the branch
-            const commits = await github.rest.repos.listCommits({
+            // Get all branches and find the one Claude created
+            const branches = await github.rest.repos.listBranches({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              sha: branchName
+              per_page: 100
             });
             
-            // Only create PR if there are commits beyond the base
-            if (commits.data.length > 0) {
+            const claudeBranch = branches.data.find(branch => 
+              branch.name.startsWith(branchPrefix) && 
+              branch.name !== `${branchPrefix}-security-replace-static-salt-with-unique-salt-per-`
+            );
+            
+            if (!claudeBranch) {
+              console.log('No Claude branch found for this issue');
+              return;
+            }
+            
+            const branchName = claudeBranch.name;
+            console.log(`Found Claude branch: ${branchName}`);
+            
+            // Check if there are any commits on the branch different from main
+            const comparison = await github.rest.repos.compareCommits({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              base: 'main',
+              head: branchName
+            });
+            
+            // Only create PR if there are commits ahead of main
+            if (comparison.data.ahead_by > 0) {
               const pr = await github.rest.pulls.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
