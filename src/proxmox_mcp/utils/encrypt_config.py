@@ -59,48 +59,35 @@ def clear_terminal_if_requested() -> None:
 
 
 def generate_master_key() -> None:
-    """Generate and display a new master key securely."""
+    """Generate and save a new master key securely."""
     key = TokenEncryption.generate_master_key()
-    print("🔑 Generated new master key.")
-    print()
-    print("⚠️  SECURITY WARNING:")
-    print("   - This key will be displayed ONCE below")
-    print("   - Copy it immediately and store it securely")
-    print("   - Anyone with this key can decrypt your tokens")
-    print("   - Consider clearing your terminal history after copying")
-    print()
 
-    # Prompt for confirmation before displaying the key
+    # Save to secure file instead of displaying
+    key_file = Path.home() / ".proxmox_mcp_key"
     try:
-        response = input("Press ENTER to display the key, or Ctrl+C to cancel: ")
-        print()
-        print("🔑 Master Key (copy this now):")
-        print(f"   PROXMOX_MCP_MASTER_KEY={key}")
-        print()
-        print("📋 To use this key:")
-        print("   1. Set the environment variable in your shell:")
-        print(f"      export PROXMOX_MCP_MASTER_KEY={key}")
-        print("   2. Or add it to your .env file")
-        print("   3. Store this key securely - you'll need it to decrypt your config!")
-        print()
-        print("🧹 Security reminder:")
-        print("   - Clear your terminal history to remove the key:")
-        print("     history -c && history -w")
-        print("   - Or close this terminal session")
-        print()
-        print("⚠️  WARNING: Losing this key means losing access to encrypted tokens!")
+        key_file.write_text(key)
+        key_file.chmod(0o600)  # Owner read/write only
+    except Exception as e:
+        print(f"❌ Error saving key file: {e}")
+        sys.exit(1)
 
-        # Final confirmation
-        input("Press ENTER after you have safely stored the key...")
-        print("✅ Key generation complete.")
-        print()
+    print("🔐 Master key generated securely!")
+    print(f"📁 Key saved to: {key_file}")
+    print()
+    print("📋 Set environment variable:")
+    print("   export PROXMOX_MCP_MASTER_KEY=$(cat ~/.proxmox_mcp_key)")
+    print()
+    print("🔒 Security notes:")
+    print("   - Key file permissions set to 600 (owner read/write only)")
+    print("   - Store this file securely - you'll need it to decrypt your config!")
+    print("   - Consider backing up the key file to a secure location")
+    print()
+    print("⚠️  WARNING: Losing this key means losing access to encrypted tokens!")
+    print("✅ Key generation complete.")
+    print()
 
-        # Offer to clear terminal for security
-        clear_terminal_if_requested()
-
-    except KeyboardInterrupt:
-        print("\n❌ Key generation cancelled.")
-        sys.exit(0)
+    # Offer to clear terminal for security
+    clear_terminal_if_requested()
 
 
 def encrypt_config(config_path: str, output_path: Optional[str] = None) -> None:
@@ -271,6 +258,16 @@ def rotate_master_key(config_path: str, new_key: Optional[str] = None) -> None:
             print("🔑 Generating new master key...")
             new_key = TokenEncryption.generate_master_key()
             print("✅ New master key generated")
+
+            # Save new key to secure file
+            key_file = Path.home() / ".proxmox_mcp_key"
+            try:
+                key_file.write_text(new_key)
+                key_file.chmod(0o600)  # Owner read/write only
+                print(f"🔐 New key saved securely to: {key_file}")
+            except Exception as e:
+                print(f"⚠️  Warning: Could not save key file: {e}")
+                print("   Please save the key manually after rotation")
         else:
             print("🔑 Using provided new master key...")
 
@@ -311,7 +308,7 @@ def rotate_master_key(config_path: str, new_key: Optional[str] = None) -> None:
         print()
         print("📋 Next steps:")
         print("   1. Update your environment with the new master key:")
-        print(f"      export PROXMOX_MCP_MASTER_KEY={new_key}")
+        print("      export PROXMOX_MCP_MASTER_KEY=$(cat ~/.proxmox_mcp_key)")
         print("   2. Test the configuration:")
         print(
             f"      PROXMOX_MCP_CONFIG={config_path} python -m proxmox_mcp.server --test"
@@ -360,6 +357,15 @@ def rotate_master_key_all(directory: str, new_key: Optional[str] = None) -> None
             new_key = TokenEncryption.generate_master_key()
             print("✅ New master key generated")
 
+            # Save new key to secure file
+            key_file = Path.home() / ".proxmox_mcp_key"
+            try:
+                key_file.write_text(new_key)
+                key_file.chmod(0o600)  # Owner read/write only
+                print(f"🔐 New key saved securely to: {key_file}")
+            except Exception as e:
+                print(f"⚠️  Warning: Could not save key file: {e}")
+                print("   Please save the key manually after rotation")
         print(f"🔄 Starting bulk key rotation in: {directory}")
         print(f"   Found {len(config_files)} configuration files")
         print()
@@ -416,7 +422,7 @@ def rotate_master_key_all(directory: str, new_key: Optional[str] = None) -> None
             print()
             print("📋 Next steps:")
             print("   1. Update your environment with the new master key:")
-            print(f"      export PROXMOX_MCP_MASTER_KEY={new_key}")
+            print("      export PROXMOX_MCP_MASTER_KEY=$(cat ~/.proxmox_mcp_key)")
             print("   2. Test each rotated configuration")
             print("   3. If successful, delete backup files")
             print("   4. Update any other systems using the old key")

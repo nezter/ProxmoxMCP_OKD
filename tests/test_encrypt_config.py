@@ -31,86 +31,133 @@ from proxmox_mcp.utils.encryption import TokenEncryption
 class TestSecureKeyGeneration:
     """Test cases for secure master key generation."""
 
-    @patch("builtins.input")
+    @patch("pathlib.Path.write_text")
+    @patch("pathlib.Path.chmod")
+    @patch("pathlib.Path.home")
     @patch("builtins.print")
     def test_generate_master_key_secure_workflow(
-        self, mock_print: MagicMock, mock_input: MagicMock
+        self,
+        mock_print: MagicMock,
+        mock_home: MagicMock,
+        mock_chmod: MagicMock,
+        mock_write_text: MagicMock,
     ) -> None:
         """Test that master key generation follows secure workflow."""
-        # Mock user pressing Enter twice (to confirm and after storing)
-        mock_input.side_effect = ["", ""]
+        # Mock home directory
+        mock_home.return_value = Path("/home/test")
 
         # Call the function
         generate_master_key()
 
-        # Verify security warnings were displayed
+        # Verify key was written to secure file
+        mock_write_text.assert_called_once()
+        written_key = mock_write_text.call_args[0][0]
+        # Key should be base64 encoded string, not prefixed with PROXMOX_MCP_MASTER_KEY=
+        assert len(written_key) > 0, "Key should be written"
+        assert not written_key.startswith("PROXMOX_MCP_MASTER_KEY="), "Key should be stored without prefix"
+
+        # Verify file permissions were set to 600 (owner read/write only)
+        mock_chmod.assert_called_once_with(0o600)
+
+        # Verify secure workflow messages were displayed
         printed_calls = [str(call) for call in mock_print.call_args_list]
-        security_warnings = [
-            call for call in printed_calls if "SECURITY WARNING" in call
-        ]
-        assert len(security_warnings) > 0, "Security warning should be displayed"
+        all_output = " ".join(printed_calls)
 
-        # Verify key is displayed (may appear in export command too)
+        assert "Master key generated securely" in all_output
+        assert "Key saved to:" in all_output
+        assert "export PROXMOX_MCP_MASTER_KEY=$(cat ~/.proxmox_mcp_key)" in all_output
+
+        # Verify NO raw key is displayed in output
         key_displays = [
-            call for call in printed_calls if "PROXMOX_MCP_MASTER_KEY=" in call
+            call
+            for call in printed_calls
+            if "PROXMOX_MCP_MASTER_KEY=" in call and "$(cat" not in call
         ]
-        assert len(key_displays) >= 1, "Key should be displayed at least once"
-
-        # Verify history clearing instructions are provided
-        history_instructions = [call for call in printed_calls if "history -c" in call]
         assert (
-            len(history_instructions) > 0
-        ), "History clearing instructions should be provided"
+            len(key_displays) == 0
+        ), "Raw key should NOT be displayed in console output"
 
-    @patch("builtins.input")
+    @patch("pathlib.Path.write_text")
+    @patch("pathlib.Path.chmod")
+    @patch("pathlib.Path.home")
     @patch("builtins.print")
-    def test_generate_master_key_cancellation(
-        self, mock_print: MagicMock, mock_input: MagicMock
+    def test_generate_master_key_file_error_handling(
+        self,
+        mock_print: MagicMock,
+        mock_home: MagicMock,
+        mock_chmod: MagicMock,
+        mock_write_text: MagicMock,
     ) -> None:
-        """Test that key generation can be cancelled."""
-        # Mock user pressing Ctrl+C
-        mock_input.side_effect = KeyboardInterrupt()
+        """Test error handling when key file cannot be written."""
+        # Mock home directory
+        mock_home.return_value = Path("/home/test")
 
-        # Should exit gracefully
+        # Mock file write error
+        mock_write_text.side_effect = OSError("Permission denied")
+
+        # Should exit with error
         with pytest.raises(SystemExit) as exc_info:
             generate_master_key()
 
-        assert exc_info.value.code == 0  # Clean exit
+        assert exc_info.value.code == 1
 
-        # Verify cancellation message was displayed
+        # Verify error message was displayed
         printed_calls = [str(call) for call in mock_print.call_args_list]
-        cancellation_messages = [call for call in printed_calls if "cancelled" in call]
-        assert len(cancellation_messages) > 0
+        error_messages = [
+            call for call in printed_calls if "Error saving key file" in call
+        ]
+        assert len(error_messages) > 0
 
-    @patch("builtins.input")
+    @patch("pathlib.Path.write_text")
+    @patch("pathlib.Path.chmod")
+    @patch("pathlib.Path.home")
     @patch("builtins.print")
-    def test_generate_master_key_prompts_for_confirmation(
-        self, mock_print: MagicMock, mock_input: MagicMock
+    def test_no_key_exposure_in_output(
+        self,
+        mock_print: MagicMock,
+        mock_home: MagicMock,
+        mock_chmod: MagicMock,
+        mock_write_text: MagicMock,
     ) -> None:
-        """Test that key generation requires user confirmation."""
-        # Three confirmations needed: display, storage, terminal clearing
-        mock_input.side_effect = ["", "", "n"]
+        """Test that master key is never exposed in console output."""
+        # Mock home directory
+        mock_home.return_value = Path("/home/test")
 
+        # Call the function
         generate_master_key()
 
-        # Should be called three times: once before showing key, once after, once for terminal clearing
-        assert mock_input.call_count == 3
+        # Get all printed output
+        printed_calls = [str(call) for call in mock_print.call_args_list]
+        all_output = " ".join(printed_calls)
 
-        # First call should be for display confirmation
-        first_call = mock_input.call_args_list[0]
-        assert "Press ENTER to display" in first_call[0][0]
+        # Verify that no actual key value appears in the output
+        # The key should only be written to file, not displayed
+        assert (
+            "PROXMOX_MCP_MASTER_KEY=AAAA" not in all_output
+        ), "Actual key values should not appear in output"
 
-        # Second call should be for storage confirmation
-        second_call = mock_input.call_args_list[1]
-        assert "after you have safely stored" in second_call[0][0]
+        # The only reference should be in the export command template
+        export_commands = [
+            call
+            for call in printed_calls
+            if "export PROXMOX_MCP_MASTER_KEY=$(cat" in call
+        ]
+        assert len(export_commands) == 1, "Should show export command template"
 
-    @patch("builtins.input")
+    @patch("pathlib.Path.write_text")
+    @patch("pathlib.Path.chmod")
+    @patch("pathlib.Path.home")
     @patch("builtins.print")
     def test_security_reminders_displayed(
-        self, mock_print: MagicMock, mock_input: MagicMock
+        self,
+        mock_print: MagicMock,
+        mock_home: MagicMock,
+        mock_chmod: MagicMock,
+        mock_write_text: MagicMock,
     ) -> None:
         """Test that appropriate security reminders are displayed."""
-        mock_input.side_effect = ["", ""]
+        # Mock home directory
+        mock_home.return_value = Path("/home/test")
 
         generate_master_key()
 
@@ -118,10 +165,8 @@ class TestSecureKeyGeneration:
         all_output = " ".join(printed_calls)
 
         # Check for key security reminders
-        assert "Copy it immediately" in all_output
-        assert "store it securely" in all_output
-        assert "Anyone with this key can decrypt" in all_output
-        assert "clearing your terminal history" in all_output
+        assert "Store this file securely" in all_output
+        assert "Key file permissions set to 600" in all_output
         assert "Losing this key means losing access" in all_output
 
 

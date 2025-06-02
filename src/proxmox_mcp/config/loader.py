@@ -16,8 +16,9 @@ like API tokens can be stored encrypted in the configuration file.
 import json
 import os
 from typing import Optional
-from .models import Config
+
 from ..utils.encryption import TokenEncryption
+from .models import Config
 
 
 def load_config(config_path: Optional[str] = None) -> Config:
@@ -107,28 +108,83 @@ def _decrypt_config_tokens(config_data: dict) -> dict:
         Configuration dictionary with decrypted tokens
 
     Raises:
-        ValueError: If token decryption fails
+        ValueError: If token decryption fails with detailed context
     """
-    try:
-        # Only initialize encryption if we find encrypted values
-        encryptor = None
+    # Only initialize encryption if we find encrypted values
+    encryptor = None
 
-        # Check and decrypt auth.token_value if encrypted
-        if "auth" in config_data and "token_value" in config_data["auth"]:
-            token_value = config_data["auth"]["token_value"]
-            if isinstance(token_value, str) and token_value.startswith("enc:"):
+    # Check and decrypt auth.token_value if encrypted
+    if "auth" in config_data and "token_value" in config_data["auth"]:
+        token_value = config_data["auth"]["token_value"]
+        if isinstance(token_value, str) and token_value.startswith("enc:"):
+            try:
                 if encryptor is None:
                     encryptor = TokenEncryption()
                 config_data["auth"]["token_value"] = encryptor.decrypt_token(
                     token_value
                 )
+            except Exception as e:
+                _handle_decryption_error("auth.token_value", token_value, e)
 
-        # Future: Add support for other encrypted fields here
-        # e.g., database passwords, API keys, etc.
+    # Future: Add support for other encrypted fields here
+    # e.g., database passwords, API keys, etc.
 
-        return config_data
-    except Exception as e:
-        raise ValueError(f"Failed to decrypt configuration tokens: {e}")
+    return config_data
+
+
+def _handle_decryption_error(
+    field_name: str, encrypted_value: str, original_error: Exception
+) -> None:
+    """Handle decryption errors with enhanced context and actionable messages.
+
+    Args:
+        field_name: The configuration field that failed to decrypt
+        encrypted_value: The encrypted value that failed (for format validation)
+        original_error: The original exception that occurred
+
+    Raises:
+        ValueError: With enhanced error message containing field context and suggestions
+    """
+    # Analyze the type of error and provide specific guidance
+    error_msg = str(original_error).lower()
+
+    # Check for format errors
+    if not encrypted_value.startswith("enc:"):
+        raise ValueError(
+            f"Configuration field '{field_name}' contains invalid encrypted token format. "
+            f"Encrypted tokens must start with 'enc:' prefix. "
+            f"Use the encrypt_config utility to properly encrypt tokens."
+        )
+
+    # Check for invalid encryption format
+    if "invalid encrypted token format" in error_msg:
+        raise ValueError(
+            f"Failed to decrypt token for field '{field_name}': Invalid encryption format. "
+            f"The token may be corrupted or use an unsupported format. "
+            f"Re-encrypt the token using: python -m proxmox_mcp.utils.encrypt_config"
+        )
+
+    # Check for decryption key issues
+    if "invalid master key" in error_msg or "decrypt" in error_msg:
+        raise ValueError(
+            f"Failed to decrypt token for field '{field_name}': Decryption key mismatch. "
+            f"Ensure PROXMOX_MCP_MASTER_KEY environment variable is set correctly. "
+            f"If the master key was changed, tokens must be re-encrypted."
+        )
+
+    # Check for base64 decoding errors
+    if "base64" in error_msg or "invalid" in error_msg:
+        raise ValueError(
+            f"Failed to decrypt token for field '{field_name}': Token data is corrupted. "
+            f"The encrypted token contains invalid characters. "
+            f"Please re-encrypt the original token value."
+        )
+
+    # Generic decryption failure with context
+    raise ValueError(
+        f"Failed to decrypt token for field '{field_name}': {original_error}. "
+        f"Verify the token format and master key are correct."
+    )
 
 
 def encrypt_config_file(config_path: str, output_path: Optional[str] = None) -> str:
@@ -174,7 +230,7 @@ def encrypt_config_file(config_path: str, output_path: Optional[str] = None) -> 
             json.dump(config_data, f, indent=4)
 
         print(f"✅ Encrypted configuration saved to: {output_path}")
-        print(f"🔑 Make sure to set PROXMOX_MCP_MASTER_KEY environment variable")
+        print("🔑 Make sure to set PROXMOX_MCP_MASTER_KEY environment variable")
 
         return output_path
     except Exception as e:
