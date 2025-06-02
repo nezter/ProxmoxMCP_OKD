@@ -255,7 +255,7 @@ def rotate_master_key(config_path: str, new_key: Optional[str] = None) -> None:
             config_data = json.load(f)
         
         # Track what was rotated
-        rotated_fields = []
+        rotated_fields: List[str] = []
         
         # Rotate token_value if encrypted
         if "auth" in config_data and "token_value" in config_data["auth"]:
@@ -309,7 +309,7 @@ def rotate_master_key_all(directory: str, new_key: Optional[str] = None) -> None
             sys.exit(1)
         
         # Find all JSON files in directory
-        config_files = []
+        config_files: List[str] = []
         for file_path in Path(directory).rglob("*.json"):
             if not file_path.name.startswith("config.example"):  # Skip example files
                 config_files.append(str(file_path))
@@ -328,8 +328,8 @@ def rotate_master_key_all(directory: str, new_key: Optional[str] = None) -> None
         print(f"   Found {len(config_files)} configuration files")
         print()
         
-        successful_rotations = []
-        failed_rotations = []
+        successful_rotations: List[str] = []
+        failed_rotations: List[tuple[str, str]] = []
         
         # Rotate each file
         for config_file in config_files:
@@ -368,13 +368,13 @@ def rotate_master_key_all(directory: str, new_key: Optional[str] = None) -> None
         
         if successful_rotations:
             print("   Rotated files:")
-            for file_path in successful_rotations:
-                print(f"     • {file_path}")
+            for rotated_file in successful_rotations:
+                print(f"     • {rotated_file}")
         
         if failed_rotations:
             print("   Failed files:")
-            for file_path, error in failed_rotations:
-                print(f"     • {file_path}: {error}")
+            for failed_file, error in failed_rotations:
+                print(f"     • {failed_file}: {error}")
         
         if successful_rotations:
             print()
@@ -390,7 +390,7 @@ def rotate_master_key_all(directory: str, new_key: Optional[str] = None) -> None
         sys.exit(1)
 
 
-def main():
+def main() -> None:
     """Main command-line interface."""
     parser = argparse.ArgumentParser(
         description="Encrypt sensitive values in Proxmox MCP configuration files",

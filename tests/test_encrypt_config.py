@@ -32,7 +32,7 @@ class TestSecureKeyGeneration:
 
     @patch("builtins.input")
     @patch("builtins.print")
-    def test_generate_master_key_secure_workflow(self, mock_print, mock_input):
+    def test_generate_master_key_secure_workflow(self, mock_print: MagicMock, mock_input: MagicMock) -> None:
         """Test that master key generation follows secure workflow."""
         # Mock user pressing Enter twice (to confirm and after storing)
         mock_input.side_effect = ["", ""]
@@ -61,7 +61,7 @@ class TestSecureKeyGeneration:
 
     @patch("builtins.input")
     @patch("builtins.print")
-    def test_generate_master_key_cancellation(self, mock_print, mock_input):
+    def test_generate_master_key_cancellation(self, mock_print: MagicMock, mock_input: MagicMock) -> None:
         """Test that key generation can be cancelled."""
         # Mock user pressing Ctrl+C
         mock_input.side_effect = KeyboardInterrupt()
@@ -79,7 +79,7 @@ class TestSecureKeyGeneration:
 
     @patch("builtins.input")
     @patch("builtins.print")
-    def test_generate_master_key_prompts_for_confirmation(self, mock_print, mock_input):
+    def test_generate_master_key_prompts_for_confirmation(self, mock_print: MagicMock, mock_input: MagicMock) -> None:
         """Test that key generation requires user confirmation."""
         mock_input.side_effect = ["", ""]  # Two confirmations needed
 
@@ -98,7 +98,7 @@ class TestSecureKeyGeneration:
 
     @patch("builtins.input")
     @patch("builtins.print")
-    def test_security_reminders_displayed(self, mock_print, mock_input):
+    def test_security_reminders_displayed(self, mock_print: MagicMock, mock_input: MagicMock) -> None:
         """Test that appropriate security reminders are displayed."""
         mock_input.side_effect = ["", ""]
 
@@ -118,7 +118,7 @@ class TestSecureKeyGeneration:
 class TestKeyRotation:
     """Test cases for master key rotation functionality."""
 
-    def test_create_backup(self):
+    def test_create_backup(self) -> None:
         """Test that backup creation works correctly."""
         with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as f:
             test_config = {"test": "data"}
@@ -144,7 +144,7 @@ class TestKeyRotation:
             finally:
                 os.unlink(f.name)
 
-    def test_verify_config_decryption_with_encrypted_token(self):
+    def test_verify_config_decryption_with_encrypted_token(self) -> None:
         """Test config decryption verification with encrypted token."""
         # Create test config with encrypted token
         master_key = TokenEncryption.generate_master_key()
@@ -171,7 +171,7 @@ class TestKeyRotation:
             finally:
                 os.unlink(f.name)
 
-    def test_verify_config_decryption_with_plain_token(self):
+    def test_verify_config_decryption_with_plain_token(self) -> None:
         """Test config decryption verification with plain text token."""
         test_config = {
             "auth": {
@@ -190,7 +190,7 @@ class TestKeyRotation:
             finally:
                 os.unlink(f.name)
 
-    def test_verify_config_decryption_no_token(self):
+    def test_verify_config_decryption_no_token(self) -> None:
         """Test config decryption verification with no token."""
         test_config = {"other": "data"}
         
@@ -206,7 +206,7 @@ class TestKeyRotation:
                 os.unlink(f.name)
 
     @patch.dict(os.environ, {}, clear=True)
-    def test_rotate_master_key_no_env_key(self):
+    def test_rotate_master_key_no_env_key(self) -> None:
         """Test key rotation fails when no environment key is set."""
         test_config = {"auth": {"token_value": "enc:test"}}
         
@@ -221,7 +221,7 @@ class TestKeyRotation:
                 os.unlink(f.name)
 
     @patch.dict(os.environ, {"PROXMOX_MCP_MASTER_KEY": "invalid_key"})
-    def test_rotate_master_key_invalid_env_key(self):
+    def test_rotate_master_key_invalid_env_key(self) -> None:
         """Test key rotation fails when environment key can't decrypt config."""
         # Create config with token encrypted with different key
         actual_key = TokenEncryption.generate_master_key()
@@ -244,7 +244,7 @@ class TestKeyRotation:
             finally:
                 os.unlink(f.name)
 
-    def test_rotate_master_key_successful(self):
+    def test_rotate_master_key_successful(self) -> None:
         """Test successful key rotation."""
         # Create original key and encrypted config
         old_key = TokenEncryption.generate_master_key()
@@ -300,7 +300,7 @@ class TestKeyRotation:
             finally:
                 os.unlink(f.name)
 
-    def test_rotate_master_key_all_successful(self):
+    def test_rotate_master_key_all_successful(self) -> None:
         """Test successful bulk key rotation."""
         with tempfile.TemporaryDirectory() as temp_dir:
             # Create test keys
@@ -370,13 +370,13 @@ class TestKeyRotation:
                 backup_files = [f for f in os.listdir(temp_dir) if ".backup." in f]
                 assert len(backup_files) == 2  # Only encrypted configs should have backups
 
-    def test_rotate_master_key_all_no_configs(self):
+    def test_rotate_master_key_all_no_configs(self) -> None:
         """Test bulk rotation with no configuration files."""
         with tempfile.TemporaryDirectory() as temp_dir:
             with pytest.raises(SystemExit):
                 rotate_master_key_all(temp_dir)
 
-    def test_rotate_master_key_all_invalid_directory(self):
+    def test_rotate_master_key_all_invalid_directory(self) -> None:
         """Test bulk rotation with invalid directory."""
         with pytest.raises(SystemExit):
             rotate_master_key_all("/nonexistent/directory")
