@@ -64,16 +64,26 @@ class TokenEncryption:
         if env_key:
             return env_key
 
-        # Generate a new key and warn the user
+        # Generate a new key securely without displaying it
         new_key = base64.urlsafe_b64encode(os.urandom(32)).decode()
 
-        print("⚠️  WARNING: Generated new encryption master key.")
-        print(f"   Please set environment variable: PROXMOX_MCP_MASTER_KEY={new_key}")
-        print("   This key is required to decrypt your configuration.")
-        print(
-            "   Store it securely - losing it means losing access to encrypted tokens!"
-        )
+        # Provide secure instructions without exposing the key
+        print("🔐 SECURITY: Generated new encryption master key.")
+        print("   ⚠️  IMPORTANT: The master key has been generated but NOT displayed for security.")
+        print("   📋 To set the environment variable manually:")
+        print("   ")
+        print("   1. Generate a key using the utility function:")
+        print("      python -c \"from proxmox_mcp.utils.encryption import TokenEncryption; print('PROXMOX_MCP_MASTER_KEY=' + TokenEncryption.generate_master_key())\"")
+        print("   ")
+        print("   2. Set the environment variable in your shell:")
+        print("      export PROXMOX_MCP_MASTER_KEY=<your_generated_key>")
+        print("   ")
+        print("   3. Or add it to your shell profile (~/.bashrc, ~/.zshrc, etc.)")
+        print("   ")
+        print("   🚨 WARNING: Store the key securely - losing it means losing access to encrypted tokens!")
+        print("   💡 Consider using a secure password manager or environment file.")
 
+        # Return the generated key for this session but don't expose it in logs
         return new_key
 
     def _create_cipher(self, salt: bytes = None) -> Fernet:

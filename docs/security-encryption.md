@@ -15,10 +15,15 @@ ProxmoxMCP now supports secure encryption of API tokens and other sensitive conf
 ### 1. Generate a Master Key
 
 ```bash
-# Generate and set master key
+# Generate a new master key securely
 python -m src.proxmox_mcp.utils.encrypt_config --generate-key
+
+# Follow the prompts to securely save the generated key
+# Then set it as an environment variable:
 export PROXMOX_MCP_MASTER_KEY="your-generated-key"
 ```
+
+> **Security Note**: The key generation process now includes enhanced security measures that prevent the key from being exposed in terminal history or log files during automatic generation.
 
 ### 2. Encrypt Your Configuration
 
@@ -61,7 +66,11 @@ python -m src.proxmox_mcp.utils.encrypt_config config.json --status
 ### Generate Master Key
 
 ```bash
+# Generate a new master key with security prompts
 python -m src.proxmox_mcp.utils.encrypt_config --generate-key
+
+# The tool will display the key once and prompt you to save it securely
+# No key exposure in logs or terminal history during automatic generation
 ```
 
 ## Configuration Format
@@ -102,6 +111,8 @@ python -m src.proxmox_mcp.utils.encrypt_config --generate-key
 3. **Rotate Keys Regularly**: Generate new master keys periodically and re-encrypt configurations
 4. **Secure Key Storage**: Use secure key management systems in production environments
 5. **Backup Safely**: Ensure encrypted backups include both data and key recovery procedures
+6. **Clear Terminal History**: After key generation, consider clearing terminal history to prevent exposure
+7. **Use CLI Tool**: Always use the provided CLI tool for key generation rather than manual methods
 
 ## Migration from Plain Text
 
