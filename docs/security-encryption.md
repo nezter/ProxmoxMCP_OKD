@@ -16,7 +16,7 @@ ProxmoxMCP now supports secure encryption of API tokens and other sensitive conf
 
 ```bash
 # Generate a new master key securely
-python -m src.proxmox_mcp.utils.encrypt_config --generate-key
+python -m proxmox_mcp.utils.encrypt_config --generate-key
 
 # Follow the prompts to securely save the generated key
 # Then set it as an environment variable:
@@ -29,7 +29,7 @@ export PROXMOX_MCP_MASTER_KEY="your-generated-key"
 
 ```bash
 # Encrypt existing config
-python -m src.proxmox_mcp.utils.encrypt_config proxmox-config/config.json
+python -m proxmox_mcp.utils.encrypt_config proxmox-config/config.json
 
 # This creates config.encrypted.json with encrypted token values
 ```
@@ -51,23 +51,23 @@ python -m proxmox_mcp.server
 
 ```bash
 # Basic encryption
-python -m src.proxmox_mcp.utils.encrypt_config config.json
+python -m proxmox_mcp.utils.encrypt_config config.json
 
 # Specify output file
-python -m src.proxmox_mcp.utils.encrypt_config config.json -o encrypted.json
+python -m proxmox_mcp.utils.encrypt_config config.json -o encrypted.json
 ```
 
 ### Check Encryption Status
 
 ```bash
-python -m src.proxmox_mcp.utils.encrypt_config config.json --status
+python -m proxmox_mcp.utils.encrypt_config config.json --status
 ```
 
 ### Generate Master Key
 
 ```bash
 # Generate a new master key with security prompts
-python -m src.proxmox_mcp.utils.encrypt_config --generate-key
+python -m proxmox_mcp.utils.encrypt_config --generate-key
 
 # The tool will display the key once and prompt you to save it securely
 # No key exposure in logs or terminal history during automatic generation
@@ -81,7 +81,7 @@ ProxmoxMCP supports secure master key rotation for enhanced security compliance 
 
 ```bash
 # Rotate master key for a specific configuration file
-python -m src.proxmox_mcp.utils.encrypt_config --rotate-key config.encrypted.json
+python -m proxmox_mcp.utils.encrypt_config --rotate-key config.encrypted.json
 
 # The tool will:
 # 1. Verify current master key can decrypt the configuration
@@ -95,7 +95,7 @@ python -m src.proxmox_mcp.utils.encrypt_config --rotate-key config.encrypted.jso
 
 ```bash
 # Rotate master key for all configuration files in a directory
-python -m src.proxmox_mcp.utils.encrypt_config --rotate-key-all proxmox-config/
+python -m proxmox_mcp.utils.encrypt_config --rotate-key-all proxmox-config/
 
 # Bulk rotation will:
 # - Process all *.json files in the directory (except examples)
@@ -238,7 +238,7 @@ cp proxmox-config/config.encrypted.json proxmox-config/config.encrypted.json.bac
 
 ```bash
 # Rotate key for one configuration file
-python -m src.proxmox_mcp.utils.encrypt_config --rotate-key proxmox-config/config.encrypted.json
+python -m proxmox_mcp.utils.encrypt_config --rotate-key proxmox-config/config.encrypted.json
 
 # The tool will:
 # - Verify current key can decrypt the file
@@ -252,7 +252,7 @@ python -m src.proxmox_mcp.utils.encrypt_config --rotate-key proxmox-config/confi
 
 ```bash
 # Rotate all configurations in a directory
-python -m src.proxmox_mcp.utils.encrypt_config --rotate-key-all proxmox-config/
+python -m proxmox_mcp.utils.encrypt_config --rotate-key-all proxmox-config/
 
 # This will:
 # - Process all .json files (excluding examples)
@@ -441,14 +441,14 @@ echo $PROXMOX_MCP_MASTER_KEY | wc -c  # Should be 45 characters
 
 # Test decryption manually
 python -c "
-from src.proxmox_mcp.utils.encryption import TokenEncryption
+from proxmox_mcp.utils.encryption import TokenEncryption
 import os
 enc = TokenEncryption(os.getenv('PROXMOX_MCP_MASTER_KEY'))
 print('Key works!' if enc else 'Key invalid')
 "
 
 # Check configuration file integrity
-python -m src.proxmox_mcp.utils.encrypt_config config.encrypted.json --status
+python -m proxmox_mcp.utils.encrypt_config config.encrypted.json --status
 ```
 
 #### "Failed to create backup"
@@ -505,7 +505,7 @@ Enable detailed logging during rotation:
 export PROXMOX_MCP_DEBUG=true
 
 # Run rotation with verbose output
-python -m src.proxmox_mcp.utils.encrypt_config --rotate-key config.encrypted.json
+python -m proxmox_mcp.utils.encrypt_config --rotate-key config.encrypted.json
 
 # Check detailed logs
 tail -f /var/log/proxmox-mcp/rotation.log
@@ -569,7 +569,7 @@ jobs:
         env:
           PROXMOX_MCP_MASTER_KEY: ${{ secrets.STAGING_MASTER_KEY }}
         run: |
-          python -m src.proxmox_mcp.utils.encrypt_config --rotate-key staging-config/config.encrypted.json
+          python -m proxmox_mcp.utils.encrypt_config --rotate-key staging-config/config.encrypted.json
           
       - name: Test rotated configuration
         env:
@@ -594,7 +594,7 @@ stages:
 rotate-keys:
   stage: rotate
   script:
-    - python -m src.proxmox_mcp.utils.encrypt_config --rotate-key-all config/
+    - python -m proxmox_mcp.utils.encrypt_config --rotate-key-all config/
     - echo "NEW_KEY=$NEW_MASTER_KEY" >> rotation.env
   artifacts:
     reports:
@@ -640,7 +640,7 @@ if [ -f "$KEY_FILE" ]; then
     if [ $DAYS_SINCE_ROTATION -gt $MAX_AGE_DAYS ]; then
         echo "Key rotation required: $DAYS_SINCE_ROTATION days since last rotation"
         # Trigger automated rotation
-        python -m src.proxmox_mcp.utils.encrypt_config --rotate-key-all /etc/proxmox-mcp/
+        python -m proxmox_mcp.utils.encrypt_config --rotate-key-all /etc/proxmox-mcp/
     fi
 fi
 EOF

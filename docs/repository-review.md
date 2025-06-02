@@ -7,10 +7,10 @@ This document contains the findings from a thorough review of the ProxmoxMCP rep
 ProxmoxMCP is a Model Context Protocol (MCP) server implementation that provides tools and resources for interacting with Proxmox Virtual Environment (PVE) clusters. The repository contains code for connecting to Proxmox instances, managing virtual machines, and exposing these capabilities through the MCP protocol.
 
 Key components of the repository include:
-- Core Proxmox API integration (`src/proxmox_mcp/core/proxmox.py`)
-- MCP server implementation (`src/proxmox_mcp/server.py`)
-- Configuration management (`src/proxmox_mcp/config/`)
-- Tool implementations for various Proxmox operations (`src/proxmox_mcp/tools/`)
+- Core Proxmox API integration (`proxmox_mcp/core/proxmox.py`)
+- MCP server implementation (`proxmox_mcp/server.py`)
+- Configuration management (`proxmox_mcp/config/`)
+- Tool implementations for various Proxmox operations (`proxmox_mcp/tools/`)
 - Docker deployment configuration (`Dockerfile`, `compose.yaml`)
 
 This review examines the codebase across multiple dimensions including code quality, Docker implementation, architecture, security, and documentation.
@@ -20,16 +20,16 @@ This review examines the codebase across multiple dimensions including code qual
 ### Security Vulnerabilities
 - **Token Handling**: API tokens are stored in plaintext in configuration files (`proxmox-config/config.json`), creating a potential security risk
 - **SSL Verification**: SSL verification is disabled by default in examples (`verify_ssl: false` in configuration examples), which could lead to man-in-the-middle attacks
-- **Input Validation**: Limited input validation for VM commands in `src/proxmox_mcp/tools/vm.py`, potentially allowing injection attacks
+- **Input Validation**: Limited input validation for VM commands in `proxmox_mcp/tools/vm.py`, potentially allowing injection attacks
 - **Exception Handling**: Overly broad exception catching in multiple files, which could mask security issues
 
 ### Error Handling
 - **Inconsistent Practices**: Error handling varies across the codebase, with some functions using specific exceptions and others using generic try/except blocks
 - **Missing Error Propagation**: Some errors are caught and logged but not properly propagated to the caller
-- **Configuration Errors**: Limited error handling for configuration loading in `src/proxmox_mcp/config/loader.py`
+- **Configuration Errors**: Limited error handling for configuration loading in `proxmox_mcp/config/loader.py`
 
 ### Potential Bugs
-- **Race Conditions**: Potential race conditions in command execution, particularly in the console manager (`src/proxmox_mcp/tools/console/manager.py`)
+- **Race Conditions**: Potential race conditions in command execution, particularly in the console manager (`proxmox_mcp/tools/console/manager.py`)
 - **Resource Leaks**: Some resources may not be properly closed in error cases
 - **Edge Cases**: Several edge cases not properly handled, such as network timeouts and API rate limiting
 
@@ -142,15 +142,15 @@ This review examines the codebase across multiple dimensions including code qual
 ### Critical (Address Immediately)
 
 1. **Fix Security Vulnerabilities**:
-   - Implement token encryption at rest in `src/proxmox_mcp/config/loader.py`
+   - Implement token encryption at rest in `proxmox_mcp/config/loader.py`
    - Enable SSL verification by default in configuration examples
-   - Add input validation for VM commands in `src/proxmox_mcp/tools/vm.py`
+   - Add input validation for VM commands in `proxmox_mcp/tools/vm.py`
    - Implement Docker secrets for sensitive credentials in `compose.yaml`
 
 2. **Improve Error Handling**:
    - Standardize error handling across the codebase
    - Catch specific exceptions instead of generic ones
-   - Add comprehensive error handling for configuration loading in `src/proxmox_mcp/config/loader.py`
+   - Add comprehensive error handling for configuration loading in `proxmox_mcp/config/loader.py`
    - Implement proper error propagation to clients
 
 ### High Priority
@@ -162,9 +162,9 @@ This review examines the codebase across multiple dimensions including code qual
    - Add health checks for container monitoring
 
 2. **Improve Scalability**:
-   - Implement connection pooling in `src/proxmox_mcp/core/proxmox.py`
+   - Implement connection pooling in `proxmox_mcp/core/proxmox.py`
    - Add caching for frequently accessed data
-   - Convert more operations to async, particularly in `src/proxmox_mcp/tools/`
+   - Convert more operations to async, particularly in `proxmox_mcp/tools/`
    - Implement request throttling to prevent API rate limiting
 
 3. **Strengthen Documentation**:
