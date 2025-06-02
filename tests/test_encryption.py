@@ -42,8 +42,19 @@ class TestTokenEncryption:
         encryptor = TokenEncryption()
         assert encryptor._master_key is not None
         assert len(encryptor._master_key) > 0
-        # Verify warning was printed
+        # Verify warning was printed but key was NOT exposed
         assert mock_print.called
+        
+        # Check that no call to print contains the actual master key
+        for call_args in mock_print.call_args_list:
+            printed_text = str(call_args[0][0]) if call_args[0] else ""
+            # The master key should not appear in any print statement
+            assert encryptor._master_key not in printed_text
+        
+        # Verify security messaging is included
+        printed_messages = [str(call[0][0]) for call in mock_print.call_args_list if call[0]]
+        security_message_found = any("SECURITY" in msg or "security" in msg for msg in printed_messages)
+        assert security_message_found, "Security warning should be displayed"
 
         # Verify that the key itself is NOT printed to console
         printed_calls = [str(call) for call in mock_print.call_args_list]

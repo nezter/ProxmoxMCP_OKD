@@ -35,7 +35,7 @@ from proxmox_mcp.config.loader import encrypt_config_file
 
 
 def generate_master_key() -> None:
-    """Generate and display a new master key."""
+    """Generate and display a new master key securely."""
     key = TokenEncryption.generate_master_key()
     print("🔑 Generated new master key.")
     print()

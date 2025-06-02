@@ -81,6 +81,7 @@ class TokenEncryption:
             "   ⚠️  WARNING: Terminal history may expose keys - use the utility for security!"
         )
 
+        # Return the generated key for this session but don't expose it in logs
         return new_key
 
     def _create_cipher(self, salt: Optional[bytes] = None) -> Fernet:
