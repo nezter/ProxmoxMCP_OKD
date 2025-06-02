@@ -4,7 +4,7 @@ Logging configuration for the Proxmox MCP server.
 
 import logging
 import sys
-from typing import Optional
+from typing import Optional, List
 
 
 def setup_logging(
@@ -28,7 +28,7 @@ def setup_logging(
     logger.setLevel(getattr(logging, level.upper()))
 
     # Create handlers
-    handlers = []
+    handlers: List[logging.Handler] = []
 
     # Console handler
     console_handler = logging.StreamHandler(sys.stderr)

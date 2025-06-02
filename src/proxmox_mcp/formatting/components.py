@@ -75,19 +75,20 @@ class ProxmoxComponents:
         # Add rows with multi-line cell support
         for row in rows:
             # Split each cell into lines
-            cell_lines = [str(cell).split("\n") for cell in row]
-            max_lines = max(len(lines) for lines in cell_lines)
+            row_cell_lines: List[List[str]] = [str(cell).split("\n") for cell in row]
+            max_lines = max(len(lines) for lines in row_cell_lines)
 
             # Pad cells with fewer lines
-            padded_cells = []
-            for lines in cell_lines:
-                if len(lines) < max_lines:
-                    lines.extend([""] * (max_lines - len(lines)))
-                padded_cells.append(lines)
+            padded_cells: List[List[str]] = []
+            for cell_line_list in row_cell_lines:
+                lines_copy = list(cell_line_list)  # Create a copy
+                if len(lines_copy) < max_lines:
+                    lines_copy.extend([""] * (max_lines - len(lines_copy)))
+                padded_cells.append(lines_copy)
 
             # Create row strings for each line
             for line_idx in range(max_lines):
-                line_parts = []
+                line_parts: List[str] = []
                 for col_idx, cell_lines in enumerate(padded_cells):
                     line = cell_lines[line_idx]
                     line_parts.append(f" {line:<{widths[col_idx]}} ")
@@ -140,7 +141,7 @@ class ProxmoxComponents:
         return (
             f"{emoji} {label}:\n"
             f"  {progress}\n"
-            f"  {ProxmoxFormatters.format_bytes(used)} / {ProxmoxFormatters.format_bytes(total)}"
+            f"  {ProxmoxFormatters.format_bytes(int(used))} / {ProxmoxFormatters.format_bytes(int(total))}"
         )
 
     @staticmethod

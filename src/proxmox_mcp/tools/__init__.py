@@ -2,4 +2,4 @@
 MCP tools for interacting with Proxmox hypervisors.
 """
 
-__all__ = []
+__all__: list[str] = []

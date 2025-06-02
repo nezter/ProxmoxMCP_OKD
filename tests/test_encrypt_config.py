@@ -495,7 +495,9 @@ class TestTerminalClearing:
         # Verify manual instruction was printed - look for the specific message from KeyboardInterrupt handler
         printed_calls = [str(call) for call in mock_print.call_args_list]
         interrupt_instructions = [
-            call for call in printed_calls if "Consider clearing terminal manually for security" in call
+            call
+            for call in printed_calls
+            if "Consider clearing terminal manually for security" in call
         ]
         assert len(interrupt_instructions) > 0
 
@@ -524,7 +526,9 @@ class TestTerminalClearing:
         # Verify manual instruction was printed - look for the specific message from EOFError handler
         printed_calls = [str(call) for call in mock_print.call_args_list]
         eof_instructions = [
-            call for call in printed_calls if "Consider clearing terminal manually for security" in call
+            call
+            for call in printed_calls
+            if "Consider clearing terminal manually for security" in call
         ]
         assert len(eof_instructions) > 0
 
