@@ -3,7 +3,7 @@ Configuration models for the Proxmox MCP server.
 
 This module defines Pydantic models for configuration validation:
 - Proxmox connection settings
-- Authentication credentials
+- Authentication credentials with encryption support
 - Logging configuration
 - Tool-specific parameter models
 
@@ -12,10 +12,11 @@ The models provide:
 - Default values
 - Field descriptions
 - Required vs optional field handling
+- Support for encrypted sensitive values
 """
 
 from typing import Optional, Annotated
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class NodeStatus(BaseModel):
@@ -70,11 +71,29 @@ class AuthConfig(BaseModel):
     Defines the required parameters for API authentication
     using token-based authentication. All fields are required
     to ensure secure API access.
+
+    Supports encrypted token values for enhanced security.
+    Encrypted tokens should be prefixed with 'enc:' and will
+    be automatically decrypted during configuration loading.
     """
 
     user: str  # Required: Username (e.g., 'root@pam')
     token_name: str  # Required: API token name
-    token_value: str  # Required: API token secret
+    token_value: str  # Required: API token secret (can be encrypted with 'enc:' prefix)
+
+    @field_validator("token_value")
+    @classmethod
+    def validate_token_value(cls, v):
+        """Validate that token_value is not empty after potential decryption."""
+        if not v or not v.strip():
+            raise ValueError("Token value cannot be empty")
+        # Note: At this point, encrypted tokens have already been decrypted
+        # by the config loader, so we're validating the plain text value
+        if v.startswith("enc:"):
+            raise ValueError(
+                "Token appears to be encrypted but was not decrypted properly"
+            )
+        return v.strip()
 
 
 class LoggingConfig(BaseModel):
@@ -89,9 +108,9 @@ class LoggingConfig(BaseModel):
     format: str = (
         "%(asctime)s - %(name)s - %(levelname)s - %(message)s"  # Optional: Log format
     )
-    file: Optional[str] = (
-        None  # Optional: Log file path (default: None for console logging)
-    )
+    file: Optional[
+        str
+    ] = None  # Optional: Log file path (default: None for console logging)
 
 
 class Config(BaseModel):
