@@ -29,7 +29,10 @@ class TestTokenEncryption:
         encryptor = TokenEncryption(master_key=master_key)
         assert encryptor._master_key == master_key
 
-    @patch.dict(os.environ, {"PROXMOX_MCP_MASTER_KEY": "dGVzdF9rZXlfZnJvbV9lbnYxMjM0NTY3ODkwMTIzNDU2"})
+    @patch.dict(
+        os.environ,
+        {"PROXMOX_MCP_MASTER_KEY": "dGVzdF9rZXlfZnJvbV9lbnYxMjM0NTY3ODkwMTIzNDU2"},
+    )
     def test_init_with_env_key(self):
         """Test initialization with key from environment variable."""
         encryptor = TokenEncryption()
@@ -44,16 +47,20 @@ class TestTokenEncryption:
         assert len(encryptor._master_key) > 0
         # Verify warning was printed but key was NOT exposed
         assert mock_print.called
-        
+
         # Check that no call to print contains the actual master key
         for call_args in mock_print.call_args_list:
             printed_text = str(call_args[0][0]) if call_args[0] else ""
             # The master key should not appear in any print statement
             assert encryptor._master_key not in printed_text
-        
+
         # Verify security messaging is included
-        printed_messages = [str(call[0][0]) for call in mock_print.call_args_list if call[0]]
-        security_message_found = any("SECURITY" in msg or "security" in msg for msg in printed_messages)
+        printed_messages = [
+            str(call[0][0]) for call in mock_print.call_args_list if call[0]
+        ]
+        security_message_found = any(
+            "SECURITY" in msg or "security" in msg for msg in printed_messages
+        )
         assert security_message_found, "Security warning should be displayed"
 
         # Verify that the key itself is NOT printed to console
@@ -226,7 +233,10 @@ class TestConvenienceFunctions:
         assert encrypted.startswith("enc:")
         assert encrypted.count(":") == 2  # New format
 
-    @patch.dict(os.environ, {"PROXMOX_MCP_MASTER_KEY": "dGVzdF9rZXlfZnJvbV9lbnYxMjM0NTY3ODkwMTIzNDU2"})
+    @patch.dict(
+        os.environ,
+        {"PROXMOX_MCP_MASTER_KEY": "dGVzdF9rZXlfZnJvbV9lbnYxMjM0NTY3ODkwMTIzNDU2"},
+    )
     def test_decrypt_sensitive_value(self):
         """Test decrypt_sensitive_value convenience function."""
         value = "sensitive-value"

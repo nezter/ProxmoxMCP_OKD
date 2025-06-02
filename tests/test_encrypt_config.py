@@ -2,7 +2,7 @@
 Tests for encrypt_config utility.
 
 This module tests the encrypt_config command-line utility including:
-- Secure master key generation 
+- Secure master key generation
 - Key display security
 - Interactive prompts and warnings
 - Configuration encryption workflows
