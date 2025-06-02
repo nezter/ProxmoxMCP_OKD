@@ -91,7 +91,7 @@ jobs:
             - Update documentation if needed
             - Ensure all quality checks pass
             - Create meaningful commit messages
-          allowed_tools: "bash,read,write,edit,glob,grep"
+          allowed_tools: "Bash,Read,Write,Edit,Glob,Grep"
           assignee_trigger: "basher83,claude-code-bot"
 
       - name: Create Pull Request
