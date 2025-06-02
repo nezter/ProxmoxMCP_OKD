@@ -13,7 +13,11 @@ import os
 import pytest
 import base64
 from unittest.mock import patch, mock_open
-from proxmox_mcp.utils.encryption import TokenEncryption, encrypt_sensitive_value, decrypt_sensitive_value
+from proxmox_mcp.utils.encryption import (
+    TokenEncryption,
+    encrypt_sensitive_value,
+    decrypt_sensitive_value,
+)
 
 
 class TestTokenEncryption:
@@ -25,11 +29,11 @@ class TestTokenEncryption:
         encryptor = TokenEncryption(master_key=master_key)
         assert encryptor._master_key == master_key
 
-    @patch.dict(os.environ, {"PROXMOX_MCP_MASTER_KEY": "test_key_from_env"})
+    @patch.dict(os.environ, {"PROXMOX_MCP_MASTER_KEY": "dGVzdF9rZXlfZnJvbV9lbnYxMjM0NTY3ODkwMTIzNDU2"})
     def test_init_with_env_key(self):
         """Test initialization with key from environment variable."""
         encryptor = TokenEncryption()
-        assert encryptor._master_key == "test_key_from_env"
+        assert encryptor._master_key == "dGVzdF9rZXlfZnJvbV9lbnYxMjM0NTY3ODkwMTIzNDU2"
 
     @patch.dict(os.environ, {}, clear=True)
     @patch("builtins.print")
@@ -41,15 +45,42 @@ class TestTokenEncryption:
         # Verify warning was printed
         assert mock_print.called
 
+        # Verify that the key itself is NOT printed to console
+        printed_calls = [str(call) for call in mock_print.call_args_list]
+        for call in printed_calls:
+            # Make sure the actual key value is not in any print statement
+            assert encryptor._master_key not in call
+
+    @patch.dict(os.environ, {}, clear=True)
+    @patch("builtins.print")
+    def test_key_not_exposed_in_auto_generation(self, mock_print):
+        """Test that auto-generated keys are not exposed in console output."""
+        encryptor = TokenEncryption()
+
+        # Get all the printed messages
+        printed_messages = []
+        for call_args in mock_print.call_args_list:
+            if call_args[0]:  # If there are positional arguments
+                printed_messages.append(call_args[0][0])  # First positional argument
+
+        # Join all messages and verify the key is not exposed
+        all_output = " ".join(printed_messages)
+        assert encryptor._master_key not in all_output
+
+        # Verify appropriate security warnings are shown
+        assert any("WARNING" in msg for msg in printed_messages)
+        assert any("temporary key" in msg for msg in printed_messages)
+        assert any("encrypt_config" in msg for msg in printed_messages)
+
     def test_encrypt_decrypt_roundtrip_new_format(self):
         """Test that encryption and decryption work correctly with new format."""
         master_key = TokenEncryption.generate_master_key()
         encryptor = TokenEncryption(master_key=master_key)
-        
+
         original_token = "test-api-token-12345"
         encrypted_token = encryptor.encrypt_token(original_token)
         decrypted_token = encryptor.decrypt_token(encrypted_token)
-        
+
         assert decrypted_token == original_token
         assert encrypted_token.startswith("enc:")
         # New format should have salt and encrypted data separated by colons
@@ -59,18 +90,18 @@ class TestTokenEncryption:
         """Test that encrypting the same token twice generates different salts."""
         master_key = TokenEncryption.generate_master_key()
         encryptor = TokenEncryption(master_key=master_key)
-        
+
         token = "test-token"
         encrypted1 = encryptor.encrypt_token(token)
         encrypted2 = encryptor.encrypt_token(token)
-        
+
         # Both should decrypt to the same value
         assert encryptor.decrypt_token(encrypted1) == token
         assert encryptor.decrypt_token(encrypted2) == token
-        
+
         # But should have different encrypted representations (due to unique salts)
         assert encrypted1 != encrypted2
-        
+
         # Extract salts and verify they're different
         salt1 = encrypted1.split(":")[1]
         salt2 = encrypted2.split(":")[1]
@@ -80,16 +111,16 @@ class TestTokenEncryption:
         """Test that old format tokens (without salt) can still be decrypted."""
         master_key = TokenEncryption.generate_master_key()
         encryptor = TokenEncryption(master_key=master_key)
-        
+
         # Simulate an old format encrypted token (using static salt)
         original_token = "legacy-token"
-        
+
         # Create cipher with static salt (old behavior)
         cipher = encryptor._create_cipher()  # No salt provided, uses static salt
         encrypted_bytes = cipher.encrypt(original_token.encode())
         encrypted_b64 = base64.urlsafe_b64encode(encrypted_bytes).decode()
         old_format_token = f"enc:{encrypted_b64}"
-        
+
         # Should be able to decrypt old format
         decrypted_token = encryptor.decrypt_token(old_format_token)
         assert decrypted_token == original_token
@@ -104,10 +135,10 @@ class TestTokenEncryption:
     def test_is_encrypted(self):
         """Test the is_encrypted method."""
         encryptor = TokenEncryption()
-        
+
         # Test plain text token
         assert not encryptor.is_encrypted("plain-token")
-        
+
         # Test encrypted token
         encrypted = encryptor.encrypt_token("test-token")
         assert encryptor.is_encrypted(encrypted)
@@ -115,17 +146,17 @@ class TestTokenEncryption:
     def test_migrate_plain_token(self):
         """Test migrating plain text token to encrypted format."""
         encryptor = TokenEncryption()
-        
+
         plain_token = "plain-token"
         migrated_token = encryptor.migrate_plain_token(plain_token)
-        
+
         # Should be encrypted
         assert migrated_token.startswith("enc:")
         assert encryptor.is_encrypted(migrated_token)
-        
+
         # Should decrypt to original value
         assert encryptor.decrypt_token(migrated_token) == plain_token
-        
+
         # Migrating already encrypted token should return it unchanged
         migrated_again = encryptor.migrate_plain_token(migrated_token)
         assert migrated_again == migrated_token
@@ -138,11 +169,11 @@ class TestTokenEncryption:
     def test_invalid_encrypted_token_format(self):
         """Test that invalid encrypted token formats raise appropriate errors."""
         encryptor = TokenEncryption()
-        
+
         # Invalid format (too many colons)
         with pytest.raises(ValueError, match="Failed to decrypt token"):
             encryptor.decrypt_token("enc:part1:part2:part3:extra")
-        
+
         # Invalid base64
         with pytest.raises(ValueError, match="Failed to decrypt token"):
             encryptor.decrypt_token("enc:invalid_base64:invalid_base64")
@@ -151,10 +182,10 @@ class TestTokenEncryption:
         """Test master key generation."""
         key1 = TokenEncryption.generate_master_key()
         key2 = TokenEncryption.generate_master_key()
-        
+
         # Keys should be different
         assert key1 != key2
-        
+
         # Keys should be valid base64
         assert base64.urlsafe_b64decode(key1.encode())
         assert base64.urlsafe_b64decode(key2.encode())
@@ -162,14 +193,14 @@ class TestTokenEncryption:
     def test_different_encryptors_same_master_key(self):
         """Test that different encryptor instances with same master key can decrypt each other's tokens."""
         master_key = TokenEncryption.generate_master_key()
-        
+
         encryptor1 = TokenEncryption(master_key=master_key)
         encryptor2 = TokenEncryption(master_key=master_key)
-        
+
         token = "shared-token"
         encrypted_by_1 = encryptor1.encrypt_token(token)
         decrypted_by_2 = encryptor2.decrypt_token(encrypted_by_1)
-        
+
         assert decrypted_by_2 == token
 
 
@@ -180,25 +211,26 @@ class TestConvenienceFunctions:
         """Test encrypt_sensitive_value convenience function."""
         value = "sensitive-value"
         encrypted = encrypt_sensitive_value(value)
-        
+
         assert encrypted.startswith("enc:")
         assert encrypted.count(":") == 2  # New format
 
+    @patch.dict(os.environ, {"PROXMOX_MCP_MASTER_KEY": "dGVzdF9rZXlfZnJvbV9lbnYxMjM0NTY3ODkwMTIzNDU2"})
     def test_decrypt_sensitive_value(self):
         """Test decrypt_sensitive_value convenience function."""
         value = "sensitive-value"
         encrypted = encrypt_sensitive_value(value)
         decrypted = decrypt_sensitive_value(encrypted)
-        
+
         assert decrypted == value
 
     def test_convenience_functions_with_custom_encryptor(self):
         """Test convenience functions with custom encryptor."""
         master_key = TokenEncryption.generate_master_key()
         encryptor = TokenEncryption(master_key=master_key)
-        
+
         value = "test-value"
         encrypted = encrypt_sensitive_value(value, encryptor)
         decrypted = decrypt_sensitive_value(encrypted, encryptor)
-        
+
         assert decrypted == value
