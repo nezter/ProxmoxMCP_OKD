@@ -37,39 +37,42 @@ from proxmox_mcp.config.loader import encrypt_config_file
 def generate_master_key() -> None:
     """Generate and display a new master key securely."""
     key = TokenEncryption.generate_master_key()
-    
-    print("🔐 Generating new encryption master key...")
-    print()
-    print("✅ Master key generated successfully!")
-    print()
-    print("🔑 Your encryption master key (save this securely):")
-    print(f"   PROXMOX_MCP_MASTER_KEY={key}")
-    print()
-    print("📋 To use this key:")
-    print("   1. Copy the key above and store it in a secure location")
-    print("   2. Set the environment variable in your shell:")
-    print("      export PROXMOX_MCP_MASTER_KEY=<the_key_above>")
-    print("   3. Or add it to your shell profile (~/.bashrc, ~/.zshrc, etc.)")
-    print("   4. Or add it to your .env file")
+    print("🔑 Generated new master key.")
     print()
     print("⚠️  SECURITY WARNING:")
-    print("   - Store this key securely - losing it means losing access to encrypted tokens!")
-    print("   - Consider using a secure password manager")
-    print("   - Clear your terminal history if needed")
-    print("   - This key will only be displayed once")
+    print("   - This key will be displayed ONCE below")
+    print("   - Copy it immediately and store it securely")
+    print("   - Anyone with this key can decrypt your tokens")
+    print("   - Consider clearing your terminal history after copying")
     print()
-    
-    # Prompt user to confirm they've saved it
+
+    # Prompt for confirmation before displaying the key
     try:
-        confirm = input("Have you securely saved the master key? (yes/no): ").strip().lower()
-        if confirm not in ['yes', 'y']:
-            print("❌ Please save the key before continuing.")
-            print("💡 TIP: You can regenerate a key anytime with --generate-key")
-            sys.exit(1)
-        print("✅ Key generation complete!")
+        response = input("Press ENTER to display the key, or Ctrl+C to cancel: ")
+        print()
+        print("🔑 Master Key (copy this now):")
+        print(f"   PROXMOX_MCP_MASTER_KEY={key}")
+        print()
+        print("📋 To use this key:")
+        print("   1. Set the environment variable in your shell:")
+        print(f"      export PROXMOX_MCP_MASTER_KEY={key}")
+        print("   2. Or add it to your .env file")
+        print("   3. Store this key securely - you'll need it to decrypt your config!")
+        print()
+        print("🧹 Security reminder:")
+        print("   - Clear your terminal history to remove the key:")
+        print("     history -c && history -w")
+        print("   - Or close this terminal session")
+        print()
+        print("⚠️  WARNING: Losing this key means losing access to encrypted tokens!")
+
+        # Final confirmation
+        input("Press ENTER after you have safely stored the key...")
+        print("✅ Key generation complete.")
+
     except KeyboardInterrupt:
         print("\n❌ Key generation cancelled.")
-        sys.exit(1)
+        sys.exit(0)
 
 
 def encrypt_config(config_path: str, output_path: Optional[str] = None) -> None:

@@ -64,29 +64,27 @@ class TokenEncryption:
         if env_key:
             return env_key
 
-        # Generate a new key securely without displaying it
+        # Generate a new key for the session but do not display it
         new_key = base64.urlsafe_b64encode(os.urandom(32)).decode()
 
-        # Provide secure instructions without exposing the key
-        print("🔐 SECURITY: Generated new encryption master key.")
-        print("   ⚠️  IMPORTANT: The master key has been generated but NOT displayed for security.")
-        print("   📋 To set the environment variable manually:")
-        print("   ")
-        print("   1. Generate a key using the utility function:")
-        print("      python -c \"from proxmox_mcp.utils.encryption import TokenEncryption; print('PROXMOX_MCP_MASTER_KEY=' + TokenEncryption.generate_master_key())\"")
-        print("   ")
-        print("   2. Set the environment variable in your shell:")
-        print("      export PROXMOX_MCP_MASTER_KEY=<your_generated_key>")
-        print("   ")
-        print("   3. Or add it to your shell profile (~/.bashrc, ~/.zshrc, etc.)")
-        print("   ")
-        print("   🚨 WARNING: Store the key securely - losing it means losing access to encrypted tokens!")
-        print("   💡 Consider using a secure password manager or environment file.")
+        print("⚠️  WARNING: No master key found in environment.")
+        print("   A temporary key has been generated for this session only.")
+        print("   To generate and set a permanent master key:")
+        print("   1. Run: python -m proxmox_mcp.utils.encrypt_config --generate-key")
+        print(
+            "   2. Copy the key to your environment: export PROXMOX_MCP_MASTER_KEY=<key>"
+        )
+        print(
+            "   3. Any tokens encrypted with the temporary key will need re-encryption."
+        )
+        print(
+            "   ⚠️  WARNING: Terminal history may expose keys - use the utility for security!"
+        )
 
         # Return the generated key for this session but don't expose it in logs
         return new_key
 
-    def _create_cipher(self, salt: bytes = None) -> Fernet:
+    def _create_cipher(self, salt: Optional[bytes] = None) -> Fernet:
         """Create Fernet cipher from master key with optional salt.
 
         Args:
@@ -135,17 +133,17 @@ class TokenEncryption:
         try:
             # Generate a unique salt for this encryption
             unique_salt = os.urandom(16)  # 16 bytes = 128 bits of salt
-            
+
             # Create cipher with unique salt
             cipher = self._create_cipher(unique_salt)
-            
+
             # Encrypt the token
             encrypted_bytes = cipher.encrypt(token.encode())
-            
+
             # Encode salt and encrypted data
             salt_b64 = base64.urlsafe_b64encode(unique_salt).decode()
             encrypted_b64 = base64.urlsafe_b64encode(encrypted_bytes).decode()
-            
+
             return f"enc:{salt_b64}:{encrypted_b64}"
         except Exception as e:
             raise ValueError(f"Failed to encrypt token: {e}")
@@ -174,34 +172,34 @@ class TokenEncryption:
 
             # Remove 'enc:' prefix
             token_parts = encrypted_token[4:].split(":")
-            
+
             if len(token_parts) == 2:
                 # New format: enc:{salt_b64}:{encrypted_data_b64}
                 salt_b64, encrypted_b64 = token_parts
-                
+
                 # Decode salt and encrypted data
                 salt = base64.urlsafe_b64decode(salt_b64.encode())
                 encrypted_bytes = base64.urlsafe_b64decode(encrypted_b64.encode())
-                
+
                 # Create cipher with the stored salt
                 cipher = self._create_cipher(salt)
-                
+
                 # Decrypt and return
                 decrypted_bytes = cipher.decrypt(encrypted_bytes)
                 return decrypted_bytes.decode()
-                
+
             elif len(token_parts) == 1:
                 # Old format: enc:{encrypted_data_b64} (backward compatibility)
                 encrypted_b64 = token_parts[0]
                 encrypted_bytes = base64.urlsafe_b64decode(encrypted_b64.encode())
-                
+
                 # Use default cipher with static salt for backward compatibility
                 decrypted_bytes = self._cipher.decrypt(encrypted_bytes)
                 return decrypted_bytes.decode()
-                
+
             else:
                 raise ValueError("Invalid encrypted token format")
-                
+
         except Exception as e:
             raise ValueError(f"Failed to decrypt token: {e}")
 
