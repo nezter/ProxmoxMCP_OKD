@@ -18,6 +18,10 @@ The main addition is comprehensive Docker support, making it easy to deploy and 
 
 A Python-based Model Context Protocol (MCP) server for interacting with Proxmox hypervisors, providing a clean interface for managing nodes, VMs, and containers.
 
+## 📚 Documentation
+
+📖 **[Complete Documentation](https://the-mothership.gitbook.io/proxmox-mcp/)** - Comprehensive guides, API reference, and tutorials on GitBook
+
 ### 🏗️ Built With
 
 * [Claude Code](https://docs.anthropic.com/en/docs/claude-code/overview) - An agentic coding tool made by Anthropic

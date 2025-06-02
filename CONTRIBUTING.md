@@ -2,6 +2,8 @@
 
 Thank you for your interest in contributing to ProxmoxMCP! This document provides guidelines and instructions for contributing to the project.
 
+📚 **[Complete Documentation](https://the-mothership.gitbook.io/proxmox-mcp/)** - For detailed guides and API reference
+
 ## Table of Contents
 
 * [Code of Conduct](CONTRIBUTING.md#code-of-conduct)

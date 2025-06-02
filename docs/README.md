@@ -41,10 +41,12 @@ This project includes Claude Code automation for issue resolution. When you assi
 
 ## 🔗 Links
 
+- **[📚 Live Documentation](https://the-mothership.gitbook.io/proxmox-mcp/)** - You're reading this live on GitBook!
 - **[Main Repository](../README.md)** - Project overview and setup
 - **[GitHub Issues](https://github.com/basher83/ProxmoxMCP/issues)** - Bug reports and feature requests
 - **[Pull Requests](https://github.com/basher83/ProxmoxMCP/pulls)** - Code contributions
 
 ---
 
-*This documentation is built with GitBook and automatically synced with the repository.*
+*This documentation is built with GitBook and automatically synced with the repository.*  
+**📖 Live URL:** [https://the-mothership.gitbook.io/proxmox-mcp/](https://the-mothership.gitbook.io/proxmox-mcp/)
