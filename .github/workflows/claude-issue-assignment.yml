@@ -111,6 +111,7 @@ jobs:
             - Ensure all quality checks pass
             - Create meaningful commit messages
           allowed_tools: "bash,read,write,edit,glob,grep"
+          assignee_trigger: "basher83,claude-code-bot"
 
       - name: Create Pull Request
         if: success()
