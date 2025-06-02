@@ -8,8 +8,6 @@
 ## Architecture & Development
 * [📋 Repository Review](repository-review.md)
 * [🤖 Claude Code Automation](claude-code-automation.md)
-* [🧠 Memory Instructions](memory-instructions.md)
-* [🧠 Mem0 MCP Integration](mem0mcp.md)
 
 ## Security
 * [🔒 Security & Encryption](security-encryption.md)

@@ -15,8 +15,6 @@ For installation and basic usage, see the [main README](../README.md).
 ### **Architecture & Development**
 - **[Repository Review](repository-review.md)** - Comprehensive code analysis and structure
 - **[Claude Code Automation](claude-code-automation.md)** - Automated development workflow setup
-- **[Memory Instructions](memory-instructions.md)** - AI assistant memory management
-- **[Mem0 MCP Integration](mem0mcp.md)** - Memory context protocol integration
 
 ### **Security**
 - **[Security & Encryption](security-encryption.md)** - Token encryption and security practices
