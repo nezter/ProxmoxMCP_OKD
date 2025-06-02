@@ -76,8 +76,12 @@ class TokenEncryption:
 
         return new_key
 
-    def _create_cipher(self) -> Fernet:
-        """Create Fernet cipher from master key.
+    def _create_cipher(self, salt: bytes = None) -> Fernet:
+        """Create Fernet cipher from master key with optional salt.
+
+        Args:
+            salt: Optional salt for key derivation. If not provided, uses static salt
+                  for backward compatibility.
 
         Returns:
             Fernet cipher instance
@@ -89,11 +93,15 @@ class TokenEncryption:
             # Decode the master key and create cipher
             key_bytes = base64.urlsafe_b64decode(self._master_key.encode())
 
+            # Use provided salt or fall back to static salt for backward compatibility
+            if salt is None:
+                salt = b"proxmox_mcp_salt"  # Static salt for backward compatibility
+
             # Use PBKDF2 to derive a proper Fernet key from the master key
             kdf = PBKDF2HMAC(
                 algorithm=hashes.SHA256(),
                 length=32,
-                salt=b"proxmox_mcp_salt",  # Static salt for consistency
+                salt=salt,
                 iterations=100000,
             )
             fernet_key = base64.urlsafe_b64encode(kdf.derive(key_bytes))
@@ -103,26 +111,41 @@ class TokenEncryption:
             raise ValueError(f"Invalid master key: {e}")
 
     def encrypt_token(self, token: str) -> str:
-        """Encrypt a token for secure storage.
+        """Encrypt a token for secure storage with unique salt.
 
         Args:
             token: Plain text token to encrypt
 
         Returns:
-            Base64-encoded encrypted token with 'enc:' prefix
+            Base64-encoded encrypted token with format 'enc:{salt_b64}:{encrypted_data_b64}'
 
         Raises:
             ValueError: If token cannot be encrypted
         """
         try:
-            encrypted_bytes = self._cipher.encrypt(token.encode())
+            # Generate a unique salt for this encryption
+            unique_salt = os.urandom(16)  # 16 bytes = 128 bits of salt
+            
+            # Create cipher with unique salt
+            cipher = self._create_cipher(unique_salt)
+            
+            # Encrypt the token
+            encrypted_bytes = cipher.encrypt(token.encode())
+            
+            # Encode salt and encrypted data
+            salt_b64 = base64.urlsafe_b64encode(unique_salt).decode()
             encrypted_b64 = base64.urlsafe_b64encode(encrypted_bytes).decode()
-            return f"enc:{encrypted_b64}"
+            
+            return f"enc:{salt_b64}:{encrypted_b64}"
         except Exception as e:
             raise ValueError(f"Failed to encrypt token: {e}")
 
     def decrypt_token(self, encrypted_token: str) -> str:
-        """Decrypt an encrypted token.
+        """Decrypt an encrypted token with backward compatibility.
+
+        Supports both formats:
+        - New format: 'enc:{salt_b64}:{encrypted_data_b64}' (unique salt per token)
+        - Old format: 'enc:{encrypted_data_b64}' (static salt for backward compatibility)
 
         Args:
             encrypted_token: Encrypted token with 'enc:' prefix
@@ -139,13 +162,36 @@ class TokenEncryption:
                 # Token is not encrypted, return as-is (for backward compatibility)
                 return encrypted_token
 
-            # Remove prefix and decode
-            encrypted_b64 = encrypted_token[4:]  # Remove 'enc:' prefix
-            encrypted_bytes = base64.urlsafe_b64decode(encrypted_b64.encode())
-
-            # Decrypt and return
-            decrypted_bytes = self._cipher.decrypt(encrypted_bytes)
-            return decrypted_bytes.decode()
+            # Remove 'enc:' prefix
+            token_parts = encrypted_token[4:].split(":")
+            
+            if len(token_parts) == 2:
+                # New format: enc:{salt_b64}:{encrypted_data_b64}
+                salt_b64, encrypted_b64 = token_parts
+                
+                # Decode salt and encrypted data
+                salt = base64.urlsafe_b64decode(salt_b64.encode())
+                encrypted_bytes = base64.urlsafe_b64decode(encrypted_b64.encode())
+                
+                # Create cipher with the stored salt
+                cipher = self._create_cipher(salt)
+                
+                # Decrypt and return
+                decrypted_bytes = cipher.decrypt(encrypted_bytes)
+                return decrypted_bytes.decode()
+                
+            elif len(token_parts) == 1:
+                # Old format: enc:{encrypted_data_b64} (backward compatibility)
+                encrypted_b64 = token_parts[0]
+                encrypted_bytes = base64.urlsafe_b64decode(encrypted_b64.encode())
+                
+                # Use default cipher with static salt for backward compatibility
+                decrypted_bytes = self._cipher.decrypt(encrypted_bytes)
+                return decrypted_bytes.decode()
+                
+            else:
+                raise ValueError("Invalid encrypted token format")
+                
         except Exception as e:
             raise ValueError(f"Failed to decrypt token: {e}")
 
