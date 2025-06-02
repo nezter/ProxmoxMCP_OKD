@@ -7,7 +7,7 @@ This roadmap outlines the planned development and improvement efforts for the Pr
 These items address critical security vulnerabilities and must be implemented immediately:
 
 ### Secure Token Storage
-- [ ] **Token Encryption**: Implement token encryption at rest in `src/proxmox_mcp/config/loader.py`
+- [ ] **Token Encryption**: Implement token encryption at rest in `proxmox_mcp/config/loader.py`
   ```python
   # Add cryptography.fernet for token encryption
   import os
@@ -23,7 +23,7 @@ These items address critical security vulnerabilities and must be implemented im
 - [x] **Enable SSL Verification**: Change default from `"verify_ssl": false` to `"verify_ssl": true` in `proxmox-config/config.example.json`
 
 ### Input Validation
-- [ ] **VM Command Validation**: Add input validation and sanitization in `src/proxmox_mcp/tools/vm.py`
+- [ ] **VM Command Validation**: Add input validation and sanitization in `proxmox_mcp/tools/vm.py`
   ```python
   import shlex
   def validate_command(command: str) -> str:
@@ -95,7 +95,7 @@ Enhance Docker security and deployment:
 Standardize error handling across the codebase:
 
 ### Exception Hierarchy
-- [ ] **Specific Exception Classes**: Create ProxmoxMCP-specific exceptions in `src/proxmox_mcp/tools/base.py`
+- [ ] **Specific Exception Classes**: Create ProxmoxMCP-specific exceptions in `proxmox_mcp/tools/base.py`
   ```python
   class ProxmoxError(Exception):
       """Base exception for Proxmox operations"""
@@ -136,7 +136,7 @@ Standardize error handling across the codebase:
 Optimize performance for production workloads:
 
 ### Connection Management
-- [ ] **Connection Pooling**: Implement connection pooling in `src/proxmox_mcp/core/proxmox.py`
+- [ ] **Connection Pooling**: Implement connection pooling in `proxmox_mcp/core/proxmox.py`
   ```python
   from functools import lru_cache
   import asyncio
@@ -163,7 +163,7 @@ Add new functionality after core improvements:
 ### LXC Support
 - [ ] **Container Tools**: Add LXC container support
   ```python
-  # In src/proxmox_mcp/tools/container.py
+  # In proxmox_mcp/tools/container.py
   class ContainerTools(ProxmoxTool):
       def get_containers(self) -> List[Content]:
           """List LXC containers"""
