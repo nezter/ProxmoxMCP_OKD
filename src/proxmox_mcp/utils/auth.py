@@ -51,7 +51,7 @@ def load_auth_from_env() -> ProxmoxAuth:
     assert user is not None
     assert token_name is not None
     assert token_value is not None
-    
+
     return ProxmoxAuth(
         user=user,
         token_name=token_name,
