@@ -131,7 +131,7 @@ cp proxmox-config/config.example.json proxmox-config/config.json
 
 * Built on Model Context Protocol (MCP) SDK for tool interface
 * Uses `proxmoxer` library for Proxmox API communication
-* Requires Python 3.9+ with modern async/await support
+* Requires Python 3.10+ with modern async/await support
 
 ## Memories
 - "ruff isn't available in this environment"
