@@ -35,18 +35,41 @@ from proxmox_mcp.config.loader import encrypt_config_file
 
 
 def generate_master_key() -> None:
-    """Generate and display a new master key."""
+    """Generate and display a new master key securely."""
     key = TokenEncryption.generate_master_key()
-    print("🔑 Generated new master key:")
+    
+    print("🔐 Generating new encryption master key...")
+    print()
+    print("✅ Master key generated successfully!")
+    print()
+    print("🔑 Your encryption master key (save this securely):")
     print(f"   PROXMOX_MCP_MASTER_KEY={key}")
     print()
     print("📋 To use this key:")
-    print("   1. Set the environment variable in your shell:")
-    print(f"      export PROXMOX_MCP_MASTER_KEY={key}")
-    print("   2. Or add it to your .env file")
-    print("   3. Store this key securely - you'll need it to decrypt your config!")
+    print("   1. Copy the key above and store it in a secure location")
+    print("   2. Set the environment variable in your shell:")
+    print("      export PROXMOX_MCP_MASTER_KEY=<the_key_above>")
+    print("   3. Or add it to your shell profile (~/.bashrc, ~/.zshrc, etc.)")
+    print("   4. Or add it to your .env file")
     print()
-    print("⚠️  WARNING: Losing this key means losing access to encrypted tokens!")
+    print("⚠️  SECURITY WARNING:")
+    print("   - Store this key securely - losing it means losing access to encrypted tokens!")
+    print("   - Consider using a secure password manager")
+    print("   - Clear your terminal history if needed")
+    print("   - This key will only be displayed once")
+    print()
+    
+    # Prompt user to confirm they've saved it
+    try:
+        confirm = input("Have you securely saved the master key? (yes/no): ").strip().lower()
+        if confirm not in ['yes', 'y']:
+            print("❌ Please save the key before continuing.")
+            print("💡 TIP: You can regenerate a key anytime with --generate-key")
+            sys.exit(1)
+        print("✅ Key generation complete!")
+    except KeyboardInterrupt:
+        print("\n❌ Key generation cancelled.")
+        sys.exit(1)
 
 
 def encrypt_config(config_path: str, output_path: Optional[str] = None) -> None:

@@ -38,8 +38,19 @@ class TestTokenEncryption:
         encryptor = TokenEncryption()
         assert encryptor._master_key is not None
         assert len(encryptor._master_key) > 0
-        # Verify warning was printed
+        # Verify warning was printed but key was NOT exposed
         assert mock_print.called
+        
+        # Check that no call to print contains the actual master key
+        for call_args in mock_print.call_args_list:
+            printed_text = str(call_args[0][0]) if call_args[0] else ""
+            # The master key should not appear in any print statement
+            assert encryptor._master_key not in printed_text
+        
+        # Verify security messaging is included
+        printed_messages = [str(call[0][0]) for call in mock_print.call_args_list if call[0]]
+        security_message_found = any("SECURITY" in msg or "security" in msg for msg in printed_messages)
+        assert security_message_found, "Security warning should be displayed"
 
     def test_encrypt_decrypt_roundtrip_new_format(self):
         """Test that encryption and decryption work correctly with new format."""
@@ -202,3 +213,65 @@ class TestConvenienceFunctions:
         decrypted = decrypt_sensitive_value(encrypted, encryptor)
         
         assert decrypted == value
+
+
+class TestSecureKeyGeneration:
+    """Test cases for secure key generation features."""
+
+    @patch.dict(os.environ, {}, clear=True)
+    @patch("builtins.print")
+    def test_secure_key_generation_no_key_exposure(self, mock_print):
+        """Test that master key is not exposed in console output during generation."""
+        encryptor = TokenEncryption()
+        master_key = encryptor._master_key
+        
+        # Verify key was generated and works
+        assert master_key is not None
+        assert len(master_key) > 0
+        
+        # Verify the key can be used for encryption/decryption
+        test_token = "test-token-value"
+        encrypted = encryptor.encrypt_token(test_token)
+        decrypted = encryptor.decrypt_token(encrypted)
+        assert decrypted == test_token
+        
+        # Verify security warnings are present but key is not exposed
+        printed_messages = [str(call[0][0]) for call in mock_print.call_args_list if call[0]]
+        
+        # Should contain security messaging
+        has_security_warning = any("SECURITY" in msg or "security" in msg for msg in printed_messages)
+        assert has_security_warning, "Should contain security warnings"
+        
+        # Should contain instructions for setting environment variable
+        has_env_instruction = any("environment variable" in msg.lower() for msg in printed_messages)
+        assert has_env_instruction, "Should contain environment variable instructions"
+        
+        # Should NOT contain the actual master key value
+        key_exposed = any(master_key in msg for msg in printed_messages)
+        assert not key_exposed, f"Master key should not be exposed in console output"
+
+    @patch.dict(os.environ, {"PROXMOX_MCP_MASTER_KEY": "existing_key"})
+    @patch("builtins.print")
+    def test_existing_key_no_generation_warning(self, mock_print):
+        """Test that no generation warning is shown when key exists in environment."""
+        encryptor = TokenEncryption()
+        assert encryptor._master_key == "existing_key"
+        
+        # Should not have printed any warning messages
+        assert not mock_print.called, "Should not print warnings when key exists"
+
+    def test_generated_key_format_and_security(self):
+        """Test that generated keys have proper format and security properties."""
+        key1 = TokenEncryption.generate_master_key()
+        key2 = TokenEncryption.generate_master_key()
+        
+        # Keys should be different (randomness)
+        assert key1 != key2
+        
+        # Keys should be valid base64
+        base64.urlsafe_b64decode(key1.encode())
+        base64.urlsafe_b64decode(key2.encode())
+        
+        # Keys should be appropriate length (32 bytes = 43-44 chars base64)
+        assert 40 <= len(key1) <= 50
+        assert 40 <= len(key2) <= 50
