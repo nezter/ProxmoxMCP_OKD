@@ -9,11 +9,22 @@ This module tests the encrypt_config command-line utility including:
 """
 
 import io
+import json
+import os
 import sys
+import tempfile
+from pathlib import Path
 from unittest.mock import patch, MagicMock
 import pytest
 
-from proxmox_mcp.utils.encrypt_config import generate_master_key
+from proxmox_mcp.utils.encrypt_config import (
+    generate_master_key,
+    create_backup,
+    verify_config_decryption,
+    rotate_master_key,
+    rotate_master_key_all,
+)
+from proxmox_mcp.utils.encryption import TokenEncryption
 
 
 class TestSecureKeyGeneration:
@@ -102,3 +113,270 @@ class TestSecureKeyGeneration:
         assert "Anyone with this key can decrypt" in all_output
         assert "clearing your terminal history" in all_output
         assert "Losing this key means losing access" in all_output
+
+
+class TestKeyRotation:
+    """Test cases for master key rotation functionality."""
+
+    def test_create_backup(self):
+        """Test that backup creation works correctly."""
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as f:
+            test_config = {"test": "data"}
+            json.dump(test_config, f)
+            f.flush()
+            
+            try:
+                backup_path = create_backup(f.name)
+                
+                # Verify backup exists
+                assert os.path.exists(backup_path)
+                
+                # Verify backup contains same data
+                with open(backup_path) as backup_f:
+                    backup_data = json.load(backup_f)
+                assert backup_data == test_config
+                
+                # Verify backup path format
+                assert backup_path.startswith(f.name + ".backup.")
+                
+                # Clean up
+                os.unlink(backup_path)
+            finally:
+                os.unlink(f.name)
+
+    def test_verify_config_decryption_with_encrypted_token(self):
+        """Test config decryption verification with encrypted token."""
+        # Create test config with encrypted token
+        master_key = TokenEncryption.generate_master_key()
+        encryptor = TokenEncryption(master_key=master_key)
+        encrypted_token = encryptor.encrypt_token("test-token")
+        
+        test_config = {
+            "auth": {
+                "token_value": encrypted_token
+            }
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as f:
+            json.dump(test_config, f)
+            f.flush()
+            
+            try:
+                # Should verify successfully with correct key
+                assert verify_config_decryption(f.name, master_key) == True
+                
+                # Should fail with wrong key
+                wrong_key = TokenEncryption.generate_master_key()
+                assert verify_config_decryption(f.name, wrong_key) == False
+            finally:
+                os.unlink(f.name)
+
+    def test_verify_config_decryption_with_plain_token(self):
+        """Test config decryption verification with plain text token."""
+        test_config = {
+            "auth": {
+                "token_value": "plain-text-token"
+            }
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as f:
+            json.dump(test_config, f)
+            f.flush()
+            
+            try:
+                # Should pass verification even with random key since token is plain text
+                random_key = TokenEncryption.generate_master_key()
+                assert verify_config_decryption(f.name, random_key) == True
+            finally:
+                os.unlink(f.name)
+
+    def test_verify_config_decryption_no_token(self):
+        """Test config decryption verification with no token."""
+        test_config = {"other": "data"}
+        
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as f:
+            json.dump(test_config, f)
+            f.flush()
+            
+            try:
+                # Should pass verification when no encrypted tokens exist
+                random_key = TokenEncryption.generate_master_key()
+                assert verify_config_decryption(f.name, random_key) == True
+            finally:
+                os.unlink(f.name)
+
+    @patch.dict(os.environ, {}, clear=True)
+    def test_rotate_master_key_no_env_key(self):
+        """Test key rotation fails when no environment key is set."""
+        test_config = {"auth": {"token_value": "enc:test"}}
+        
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as f:
+            json.dump(test_config, f)
+            f.flush()
+            
+            try:
+                with pytest.raises(SystemExit):
+                    rotate_master_key(f.name)
+            finally:
+                os.unlink(f.name)
+
+    @patch.dict(os.environ, {"PROXMOX_MCP_MASTER_KEY": "invalid_key"})
+    def test_rotate_master_key_invalid_env_key(self):
+        """Test key rotation fails when environment key can't decrypt config."""
+        # Create config with token encrypted with different key
+        actual_key = TokenEncryption.generate_master_key()
+        encryptor = TokenEncryption(master_key=actual_key)
+        encrypted_token = encryptor.encrypt_token("test-token")
+        
+        test_config = {
+            "auth": {
+                "token_value": encrypted_token
+            }
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as f:
+            json.dump(test_config, f)
+            f.flush()
+            
+            try:
+                with pytest.raises(SystemExit):
+                    rotate_master_key(f.name)
+            finally:
+                os.unlink(f.name)
+
+    def test_rotate_master_key_successful(self):
+        """Test successful key rotation."""
+        # Create original key and encrypted config
+        old_key = TokenEncryption.generate_master_key()
+        old_encryptor = TokenEncryption(master_key=old_key)
+        encrypted_token = old_encryptor.encrypt_token("test-token-value")
+        
+        test_config = {
+            "auth": {
+                "token_value": encrypted_token
+            },
+            "other": "data"
+        }
+        
+        with tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.json') as f:
+            json.dump(test_config, f)
+            f.flush()
+            
+            try:
+                # Set old key in environment
+                with patch.dict(os.environ, {"PROXMOX_MCP_MASTER_KEY": old_key}):
+                    # Generate new key for rotation
+                    new_key = TokenEncryption.generate_master_key()
+                    
+                    # Perform rotation
+                    rotate_master_key(f.name, new_key)
+                    
+                    # Verify config was updated
+                    with open(f.name) as config_f:
+                        rotated_config = json.load(config_f)
+                    
+                    # Should have different encrypted token
+                    new_encrypted_token = rotated_config["auth"]["token_value"]
+                    assert new_encrypted_token != encrypted_token
+                    assert new_encrypted_token.startswith("enc:")
+                    
+                    # Should decrypt to same value with new key
+                    new_encryptor = TokenEncryption(master_key=new_key)
+                    decrypted_token = new_encryptor.decrypt_token(new_encrypted_token)
+                    assert decrypted_token == "test-token-value"
+                    
+                    # Other data should be unchanged
+                    assert rotated_config["other"] == "data"
+                    
+                    # Backup should exist
+                    backup_files = [file for file in os.listdir(os.path.dirname(f.name)) 
+                                  if file.startswith(os.path.basename(f.name) + ".backup.")]
+                    assert len(backup_files) == 1
+                    
+                    # Clean up backup
+                    backup_path = os.path.join(os.path.dirname(f.name), backup_files[0])
+                    os.unlink(backup_path)
+                    
+            finally:
+                os.unlink(f.name)
+
+    def test_rotate_master_key_all_successful(self):
+        """Test successful bulk key rotation."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # Create test keys
+            old_key = TokenEncryption.generate_master_key()
+            old_encryptor = TokenEncryption(master_key=old_key)
+            
+            # Create multiple config files
+            config1_path = os.path.join(temp_dir, "config1.json")
+            config2_path = os.path.join(temp_dir, "config2.json")
+            config3_path = os.path.join(temp_dir, "config_plain.json")
+            
+            # Config 1: encrypted token
+            config1 = {
+                "auth": {"token_value": old_encryptor.encrypt_token("token1")},
+                "name": "config1"
+            }
+            
+            # Config 2: encrypted token
+            config2 = {
+                "auth": {"token_value": old_encryptor.encrypt_token("token2")},
+                "name": "config2"
+            }
+            
+            # Config 3: plain token (should be skipped)
+            config3 = {
+                "auth": {"token_value": "plain-token"},
+                "name": "config3"
+            }
+            
+            # Write configs
+            with open(config1_path, 'w') as f:
+                json.dump(config1, f)
+            with open(config2_path, 'w') as f:
+                json.dump(config2, f)
+            with open(config3_path, 'w') as f:
+                json.dump(config3, f)
+            
+            # Set old key in environment and perform bulk rotation
+            with patch.dict(os.environ, {"PROXMOX_MCP_MASTER_KEY": old_key}):
+                new_key = TokenEncryption.generate_master_key()
+                rotate_master_key_all(temp_dir, new_key)
+                
+                # Verify encrypted configs were rotated
+                new_encryptor = TokenEncryption(master_key=new_key)
+                
+                # Check config1
+                with open(config1_path) as f:
+                    rotated_config1 = json.load(f)
+                decrypted_token1 = new_encryptor.decrypt_token(rotated_config1["auth"]["token_value"])
+                assert decrypted_token1 == "token1"
+                assert rotated_config1["name"] == "config1"
+                
+                # Check config2
+                with open(config2_path) as f:
+                    rotated_config2 = json.load(f)
+                decrypted_token2 = new_encryptor.decrypt_token(rotated_config2["auth"]["token_value"])
+                assert decrypted_token2 == "token2"
+                assert rotated_config2["name"] == "config2"
+                
+                # Check config3 (should be unchanged)
+                with open(config3_path) as f:
+                    unchanged_config3 = json.load(f)
+                assert unchanged_config3["auth"]["token_value"] == "plain-token"
+                assert unchanged_config3["name"] == "config3"
+                
+                # Verify backups were created for rotated configs
+                backup_files = [f for f in os.listdir(temp_dir) if ".backup." in f]
+                assert len(backup_files) == 2  # Only encrypted configs should have backups
+
+    def test_rotate_master_key_all_no_configs(self):
+        """Test bulk rotation with no configuration files."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            with pytest.raises(SystemExit):
+                rotate_master_key_all(temp_dir)
+
+    def test_rotate_master_key_all_invalid_directory(self):
+        """Test bulk rotation with invalid directory."""
+        with pytest.raises(SystemExit):
+            rotate_master_key_all("/nonexistent/directory")
