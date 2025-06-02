@@ -1,0 +1,31 @@
+# GitBook Configuration
+root: ./docs/
+
+# Structure
+structure:
+  readme: ../README.md
+  summary: SUMMARY.md
+
+# Git integration
+git:
+  branch: main
+
+# Plugins (optional)
+plugins:
+  - search
+  - lunr
+  - sharing
+  - fontsettings
+  - theme-default
+
+# PDF options (optional)
+pdf:
+  pageNumbers: true
+  fontSize: 12
+  fontFamily: "Arial"
+  paperSize: a4
+  margin:
+    right: 62
+    left: 62
+    top: 56
+    bottom: 56
