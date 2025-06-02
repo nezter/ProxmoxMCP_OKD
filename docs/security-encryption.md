@@ -73,6 +73,46 @@ python -m src.proxmox_mcp.utils.encrypt_config --generate-key
 # No key exposure in logs or terminal history during automatic generation
 ```
 
+### Master Key Rotation
+
+ProxmoxMCP supports secure master key rotation for enhanced security compliance and incident response.
+
+#### Rotate Key for Single Configuration
+
+```bash
+# Rotate master key for a specific configuration file
+python -m src.proxmox_mcp.utils.encrypt_config --rotate-key config.encrypted.json
+
+# The tool will:
+# 1. Verify current master key can decrypt the configuration
+# 2. Create a timestamped backup of the original file
+# 3. Generate a new master key
+# 4. Re-encrypt all tokens with the new key
+# 5. Provide instructions for updating environment variables
+```
+
+#### Rotate Key for All Configurations
+
+```bash
+# Rotate master key for all configuration files in a directory
+python -m src.proxmox_mcp.utils.encrypt_config --rotate-key-all proxmox-config/
+
+# Bulk rotation will:
+# - Process all *.json files in the directory (except examples)
+# - Skip files without encrypted content
+# - Use the same new master key for all files
+# - Create individual backups for each rotated file
+# - Provide summary of successful and failed rotations
+```
+
+#### Key Rotation Best Practices
+
+1. **Schedule Regular Rotations**: Rotate master keys annually or after security incidents
+2. **Test Before Production**: Always test rotated configurations before deploying
+3. **Coordinate Updates**: Ensure all systems using the configuration are updated with the new key
+4. **Secure Backup Storage**: Store configuration backups securely and separately from the new key
+5. **Monitor Rotation**: Keep audit logs of key rotation activities
+
 ## Configuration Format
 
 ### Before Encryption
@@ -113,6 +153,9 @@ python -m src.proxmox_mcp.utils.encrypt_config --generate-key
 5. **Backup Safely**: Ensure encrypted backups include both data and key recovery procedures
 6. **Clear Terminal History**: After key generation, consider clearing terminal history to prevent exposure
 7. **Use CLI Tool**: Always use the provided CLI tool for key generation rather than manual methods
+8. **Test After Rotation**: Always verify configurations work after key rotation before production use
+9. **Coordinate Key Updates**: Ensure all systems are updated with new keys during rotation
+10. **Audit Key Operations**: Maintain logs of key generation, rotation, and usage activities
 
 ## Migration from Plain Text
 
