@@ -73,7 +73,9 @@ def load_config(config_path: Optional[str] = None) -> Config:
     if not config_path:
         config_path = os.environ.get("PROXMOX_MCP_CONFIG")
         if not config_path:
-            raise ValueError("Config path must be provided either as parameter or via PROXMOX_MCP_CONFIG environment variable")
+            raise ValueError(
+                "Config path must be provided either as parameter or via PROXMOX_MCP_CONFIG environment variable"
+            )
 
     try:
         with open(config_path) as f:

@@ -16,24 +16,24 @@ def mock_proxmox():
     mock.nodes.return_value.qemu.return_value.status.current.get.return_value = {
         "status": "running"
     }
-    
+
     # Setup agent endpoint
     agent_mock = mock.nodes.return_value.qemu.return_value.agent
-    
+
     # Mock exec endpoint - returns PID
     exec_mock = Mock()
     exec_mock.post.return_value = {"pid": 12345}
     agent_mock.return_value = exec_mock
-    
+
     # Mock exec-status endpoint - returns command result
     exec_status_mock = Mock()
     exec_status_mock.get.return_value = {
         "out-data": "command output",
         "err-data": "",
         "exitcode": 0,
-        "exited": 1
+        "exited": 1,
     }
-    
+
     # Set up the agent call chain
     def agent_endpoint(endpoint_name):
         if endpoint_name == "exec":
@@ -41,9 +41,9 @@ def mock_proxmox():
         elif endpoint_name == "exec-status":
             return exec_status_mock
         return Mock()
-    
+
     agent_mock.side_effect = agent_endpoint
-    
+
     return mock
 
 
@@ -95,14 +95,14 @@ async def test_execute_command_failure(vm_console, mock_proxmox):
     """Test command execution failure."""
     # Override the agent mock to raise an exception on exec
     agent_mock = mock_proxmox.nodes.return_value.qemu.return_value.agent
-    
+
     def agent_endpoint_failure(endpoint_name):
         if endpoint_name == "exec":
             exec_mock = Mock()
             exec_mock.post.side_effect = Exception("Command failed")
             return exec_mock
         return Mock()
-    
+
     agent_mock.side_effect = agent_endpoint_failure
 
     with pytest.raises(RuntimeError, match="Failed to execute command"):
@@ -119,9 +119,9 @@ async def test_execute_command_with_error_output(vm_console, mock_proxmox):
         "out-data": "",
         "err-data": "command error",
         "exitcode": 1,
-        "exited": 1
+        "exited": 1,
     }
-    
+
     def agent_endpoint(endpoint_name):
         if endpoint_name == "exec":
             exec_mock = Mock()
@@ -130,7 +130,7 @@ async def test_execute_command_with_error_output(vm_console, mock_proxmox):
         elif endpoint_name == "exec-status":
             return exec_status_mock
         return Mock()
-    
+
     agent_mock.side_effect = agent_endpoint
 
     result = await vm_console.execute_command("node1", "100", "invalid-command")

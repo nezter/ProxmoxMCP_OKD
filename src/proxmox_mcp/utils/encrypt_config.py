@@ -12,10 +12,10 @@ Usage:
 Examples:
     # Encrypt tokens in existing config
     python -m proxmox_mcp.utils.encrypt_config proxmox-config/config.json
-    
+
     # Encrypt and save to specific file
     python -m proxmox_mcp.utils.encrypt_config config.json -o config.encrypted.json
-    
+
     # Generate a new master key
     python -m proxmox_mcp.utils.encrypt_config --generate-key
 """

@@ -2,7 +2,7 @@
 Utility functions and helpers for the Proxmox MCP server.
 
 This package contains various utility modules:
-- encryption: Token encryption/decryption utilities  
+- encryption: Token encryption/decryption utilities
 - encrypt_config: Command-line tool for encrypting configuration files
 - auth: Authentication utilities
 - logging: Logging utilities
