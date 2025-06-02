@@ -23,6 +23,7 @@ from proxmox_mcp.utils.encrypt_config import (
     verify_config_decryption,
     rotate_master_key,
     rotate_master_key_all,
+    clear_terminal_if_requested,
 )
 from proxmox_mcp.utils.encryption import TokenEncryption
 
@@ -53,7 +54,9 @@ class TestSecureKeyGeneration:
         written_key = mock_write_text.call_args[0][0]
         # Key should be base64 encoded string, not prefixed with PROXMOX_MCP_MASTER_KEY=
         assert len(written_key) > 0, "Key should be written"
-        assert not written_key.startswith("PROXMOX_MCP_MASTER_KEY="), "Key should be stored without prefix"
+        assert not written_key.startswith(
+            "PROXMOX_MCP_MASTER_KEY="
+        ), "Key should be stored without prefix"
 
         # Verify file permissions were set to 600 (owner read/write only)
         mock_chmod.assert_called_once_with(0o600)
@@ -423,3 +426,253 @@ class TestKeyRotation:
         """Test bulk rotation with invalid directory."""
         with pytest.raises(SystemExit):
             rotate_master_key_all("/nonexistent/directory")
+
+
+class TestTerminalClearing:
+    """Test cases for terminal clearing functionality."""
+
+    @patch("subprocess.run")
+    @patch("platform.system")
+    @patch("builtins.input")
+    @patch("builtins.print")
+    def test_clear_terminal_if_requested_yes_linux(
+        self,
+        mock_print: MagicMock,
+        mock_input: MagicMock,
+        mock_system: MagicMock,
+        mock_subprocess: MagicMock,
+    ) -> None:
+        """Test terminal clearing when user agrees on Linux/macOS."""
+        # Mock user saying yes and platform being Linux
+        mock_input.return_value = "y"
+        mock_system.return_value = "Linux"
+        mock_subprocess.return_value = MagicMock()
+
+        clear_terminal_if_requested()
+
+        # Verify correct command was called
+        mock_subprocess.assert_called_once_with(["clear"], shell=True, check=True)
+
+        # Verify success message was printed
+        printed_calls = [str(call) for call in mock_print.call_args_list]
+        success_messages = [
+            call for call in printed_calls if "Terminal cleared for security" in call
+        ]
+        assert len(success_messages) > 0
+
+    @patch("subprocess.run")
+    @patch("platform.system")
+    @patch("builtins.input")
+    @patch("builtins.print")
+    def test_clear_terminal_if_requested_yes_windows(
+        self,
+        mock_print: MagicMock,
+        mock_input: MagicMock,
+        mock_system: MagicMock,
+        mock_subprocess: MagicMock,
+    ) -> None:
+        """Test terminal clearing when user agrees on Windows."""
+        # Mock user saying yes and platform being Windows
+        mock_input.return_value = "yes"
+        mock_system.return_value = "Windows"
+        mock_subprocess.return_value = MagicMock()
+
+        clear_terminal_if_requested()
+
+        # Verify correct command was called
+        mock_subprocess.assert_called_once_with(["cls"], shell=True, check=True)
+
+        # Verify success message was printed
+        printed_calls = [str(call) for call in mock_print.call_args_list]
+        success_messages = [
+            call for call in printed_calls if "Terminal cleared for security" in call
+        ]
+        assert len(success_messages) > 0
+
+    @patch("subprocess.run")
+    @patch("platform.system")
+    @patch("builtins.input")
+    @patch("builtins.print")
+    def test_clear_terminal_if_requested_no(
+        self,
+        mock_print: MagicMock,
+        mock_input: MagicMock,
+        mock_system: MagicMock,
+        mock_subprocess: MagicMock,
+    ) -> None:
+        """Test when user declines terminal clearing."""
+        # Mock user saying no
+        mock_input.return_value = "n"
+        mock_system.return_value = "Linux"
+
+        clear_terminal_if_requested()
+
+        # Verify no subprocess was called
+        mock_subprocess.assert_not_called()
+
+        # Verify manual instruction was printed
+        printed_calls = [str(call) for call in mock_print.call_args_list]
+        manual_instructions = [
+            call for call in printed_calls if "clear terminal manually" in call
+        ]
+        assert len(manual_instructions) > 0
+
+    @patch("subprocess.run")
+    @patch("platform.system")
+    @patch("builtins.input")
+    @patch("builtins.print")
+    def test_clear_terminal_if_requested_keyboard_interrupt(
+        self,
+        mock_print: MagicMock,
+        mock_input: MagicMock,
+        mock_system: MagicMock,
+        mock_subprocess: MagicMock,
+    ) -> None:
+        """Test handling of keyboard interrupt during terminal clearing."""
+        # Mock user pressing Ctrl+C
+        mock_input.side_effect = KeyboardInterrupt()
+        mock_system.return_value = "Linux"
+
+        # Should not raise exception
+        clear_terminal_if_requested()
+
+        # Verify no subprocess was called
+        mock_subprocess.assert_not_called()
+
+        # Verify manual instruction was printed - look for the specific message from KeyboardInterrupt handler
+        printed_calls = [str(call) for call in mock_print.call_args_list]
+        interrupt_instructions = [
+            call
+            for call in printed_calls
+            if "Consider clearing terminal manually for security" in call
+        ]
+        assert len(interrupt_instructions) > 0
+
+    @patch("subprocess.run")
+    @patch("platform.system")
+    @patch("builtins.input")
+    @patch("builtins.print")
+    def test_clear_terminal_if_requested_eof_error(
+        self,
+        mock_print: MagicMock,
+        mock_input: MagicMock,
+        mock_system: MagicMock,
+        mock_subprocess: MagicMock,
+    ) -> None:
+        """Test handling of EOF error during terminal clearing."""
+        # Mock EOF error
+        mock_input.side_effect = EOFError()
+        mock_system.return_value = "Linux"
+
+        # Should not raise exception
+        clear_terminal_if_requested()
+
+        # Verify no subprocess was called
+        mock_subprocess.assert_not_called()
+
+        # Verify manual instruction was printed - look for the specific message from EOFError handler
+        printed_calls = [str(call) for call in mock_print.call_args_list]
+        eof_instructions = [
+            call
+            for call in printed_calls
+            if "Consider clearing terminal manually for security" in call
+        ]
+        assert len(eof_instructions) > 0
+
+    @patch("subprocess.run")
+    @patch("platform.system")
+    @patch("builtins.input")
+    @patch("builtins.print")
+    def test_clear_terminal_if_requested_subprocess_error(
+        self,
+        mock_print: MagicMock,
+        mock_input: MagicMock,
+        mock_system: MagicMock,
+        mock_subprocess: MagicMock,
+    ) -> None:
+        """Test handling of subprocess error during terminal clearing."""
+        # Mock user saying yes but subprocess failing
+        mock_input.return_value = "y"
+        mock_system.return_value = "Linux"
+        mock_subprocess.side_effect = Exception("Command failed")
+
+        # Should not raise exception
+        clear_terminal_if_requested()
+
+        # Verify error message was printed
+        printed_calls = [str(call) for call in mock_print.call_args_list]
+        error_messages = [
+            call for call in printed_calls if "Could not clear terminal" in call
+        ]
+        assert len(error_messages) > 0
+
+        # Verify manual instruction was printed
+        manual_instructions = [
+            call for call in printed_calls if "clear terminal manually" in call
+        ]
+        assert len(manual_instructions) > 0
+
+    @patch("proxmox_mcp.utils.encrypt_config.clear_terminal_if_requested")
+    @patch("builtins.input")
+    @patch("builtins.print")
+    def test_generate_master_key_calls_terminal_clearing(
+        self, mock_print: MagicMock, mock_input: MagicMock, mock_clear: MagicMock
+    ) -> None:
+        """Test that master key generation calls terminal clearing."""
+        # Mock user pressing Enter twice (to confirm and after storing)
+        mock_input.side_effect = ["", ""]
+
+        generate_master_key()
+
+        # Verify terminal clearing was called
+        mock_clear.assert_called_once()
+
+    @patch("platform.system")
+    @patch("builtins.input")
+    @patch("builtins.print")
+    def test_clear_terminal_case_insensitive_responses(
+        self, mock_print: MagicMock, mock_input: MagicMock, mock_system: MagicMock
+    ) -> None:
+        """Test that terminal clearing accepts case-insensitive responses."""
+        mock_system.return_value = "Linux"
+
+        # Test various positive responses
+        positive_responses = ["Y", "YES", "Yes", "y", "yes"]
+
+        for response in positive_responses:
+            mock_input.return_value = response
+            with patch("subprocess.run") as mock_subprocess:
+                mock_subprocess.return_value = MagicMock()
+
+                clear_terminal_if_requested()
+
+                # Should call subprocess for all positive responses
+                mock_subprocess.assert_called_once_with(
+                    ["clear"], shell=True, check=True
+                )
+                mock_subprocess.reset_mock()
+
+    @patch("platform.system")
+    @patch("builtins.input")
+    @patch("builtins.print")
+    def test_clear_terminal_whitespace_handling(
+        self, mock_print: MagicMock, mock_input: MagicMock, mock_system: MagicMock
+    ) -> None:
+        """Test that terminal clearing handles whitespace in responses."""
+        mock_system.return_value = "Linux"
+
+        # Test responses with whitespace
+        responses_with_whitespace = ["  y  ", "\ty\t", "\n yes \n"]
+
+        for response in responses_with_whitespace:
+            mock_input.return_value = response
+            with patch("subprocess.run") as mock_subprocess:
+                mock_subprocess.return_value = MagicMock()
+
+                clear_terminal_if_requested()
+
+                # Should call subprocess after stripping whitespace
+                mock_subprocess.assert_called_once_with(
+                    ["clear"], shell=True, check=True
+                )
+                mock_subprocess.reset_mock()

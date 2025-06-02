@@ -47,6 +47,11 @@ def load_auth_from_env() -> ProxmoxAuth:
             f"Missing required environment variables: {', '.join(missing)}"
         )
 
+    # At this point we know they're not None due to the check above
+    assert user is not None
+    assert token_name is not None
+    assert token_value is not None
+
     return ProxmoxAuth(
         user=user,
         token_name=token_name,

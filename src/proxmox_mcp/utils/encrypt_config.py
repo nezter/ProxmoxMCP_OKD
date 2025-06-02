@@ -23,7 +23,9 @@ Examples:
 import argparse
 import json
 import os
+import platform
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 from typing import Optional, List
@@ -34,6 +36,26 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from proxmox_mcp.utils.encryption import TokenEncryption
 from proxmox_mcp.config.loader import encrypt_config_file
+
+
+def clear_terminal_if_requested() -> None:
+    """Offer to clear terminal for security after key operations."""
+    try:
+        response = input("🧹 Clear terminal for security? (y/n): ").strip().lower()
+        if response in ["y", "yes"]:
+            clear_cmd = "cls" if platform.system() == "Windows" else "clear"
+            subprocess.run([clear_cmd], shell=True, check=True)
+            print("✅ Terminal cleared for security")
+            print("💡 Consider also clearing your shell history if needed")
+        else:
+            print(
+                "💡 Remember to clear terminal manually: clear (Linux/Mac) or cls (Windows)"
+            )
+    except (KeyboardInterrupt, EOFError):
+        print("\n💡 Consider clearing terminal manually for security")
+    except Exception as e:
+        print(f"⚠️  Could not clear terminal: {e}")
+        print("💡 Please clear terminal manually for security")
 
 
 def generate_master_key() -> None:
@@ -62,6 +84,10 @@ def generate_master_key() -> None:
     print()
     print("⚠️  WARNING: Losing this key means losing access to encrypted tokens!")
     print("✅ Key generation complete.")
+    print()
+
+    # Offer to clear terminal for security
+    clear_terminal_if_requested()
 
 
 def encrypt_config(config_path: str, output_path: Optional[str] = None) -> None:
@@ -289,6 +315,10 @@ def rotate_master_key(config_path: str, new_key: Optional[str] = None) -> None:
         )
         print("   3. If successful, you can safely delete the backup file")
         print("   4. Update any other systems using the old key")
+        print()
+
+        # Offer to clear terminal for security
+        clear_terminal_if_requested()
 
     except Exception as e:
         print(f"❌ Error during key rotation: {e}")
@@ -336,7 +366,6 @@ def rotate_master_key_all(directory: str, new_key: Optional[str] = None) -> None
             except Exception as e:
                 print(f"⚠️  Warning: Could not save key file: {e}")
                 print("   Please save the key manually after rotation")
-
         print(f"🔄 Starting bulk key rotation in: {directory}")
         print(f"   Found {len(config_files)} configuration files")
         print()
@@ -397,6 +426,10 @@ def rotate_master_key_all(directory: str, new_key: Optional[str] = None) -> None
             print("   2. Test each rotated configuration")
             print("   3. If successful, delete backup files")
             print("   4. Update any other systems using the old key")
+            print()
+
+            # Offer to clear terminal for security
+            clear_terminal_if_requested()
 
     except Exception as e:
         print(f"❌ Error during bulk key rotation: {e}")

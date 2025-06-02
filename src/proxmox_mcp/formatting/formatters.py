@@ -2,7 +2,7 @@
 Core formatting functions for Proxmox MCP output.
 """
 
-from typing import List, Union, Dict, Any
+from typing import List, Union, Dict, Any, Optional
 from .theme import ProxmoxTheme
 from .colors import ProxmoxColors
 
@@ -20,11 +20,12 @@ class ProxmoxFormatters:
         Returns:
             Formatted string with appropriate unit
         """
+        value: float = float(bytes_value)
         for unit in ["B", "KB", "MB", "GB", "TB"]:
-            if bytes_value < 1024:
-                return f"{bytes_value:.2f} {unit}"
-            bytes_value /= 1024
-        return f"{bytes_value:.2f} TB"
+            if value < 1024:
+                return f"{value:.2f} {unit}"
+            value /= 1024
+        return f"{value:.2f} TB"
 
     @staticmethod
     def format_uptime(seconds: int) -> str:
@@ -131,7 +132,7 @@ class ProxmoxFormatters:
 
     @staticmethod
     def format_command_output(
-        success: bool, command: str, output: str, error: str = None
+        success: bool, command: str, output: str, error: Optional[str] = None
     ) -> str:
         """Format command execution output.
 
