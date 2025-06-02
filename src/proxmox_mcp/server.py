@@ -31,6 +31,7 @@ from .core.logging import setup_logging
 from .core.proxmox import ProxmoxManager
 from .tools.node import NodeTools
 from .tools.vm import VMTools
+from .tools.container import ContainerTools
 from .tools.storage import StorageTools
 from .tools.cluster import ClusterTools
 from .tools.definitions import (
@@ -63,6 +64,7 @@ class ProxmoxMCPServer:
         # Initialize tools
         self.node_tools = NodeTools(self.proxmox)
         self.vm_tools = VMTools(self.proxmox)
+        self.container_tools = ContainerTools(self.proxmox)
         self.storage_tools = StorageTools(self.proxmox)
         self.cluster_tools = ClusterTools(self.proxmox)
 
@@ -103,6 +105,11 @@ class ProxmoxMCPServer:
         @self.mcp.tool(description=GET_VMS_DESC)
         def get_vms():
             return self.vm_tools.get_vms()
+
+        # Container tools
+        @self.mcp.tool(description=GET_CONTAINERS_DESC)
+        def get_containers():
+            return self.container_tools.get_containers()
 
         @self.mcp.tool(description=EXECUTE_VM_COMMAND_DESC)
         async def execute_vm_command(

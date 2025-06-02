@@ -1,0 +1,18 @@
+{
+    "proxmox": {
+        "host": "your-proxmox-host-ip",
+        "port": 8006,
+        "verify_ssl": true,
+        "service": "PVE"
+    },
+    "auth": {
+        "user": "username@pve",
+        "token_name": "your-token-name",
+        "token_value": "enc:Z0FBQUFBQm9QYnNHbkRQOEJ1T3JtaDZyVUlMN3lZRkg0TDdLQXp6ZzdBekd3NzljekdPcGpoVFRrbjY0Rm1BajRyQ2hIZ1VEUXZWcnZEWWZKS2swTlNIT1pmemY2QzlMZEpQRkp6NFYwTkVqeC1oeVdvS1ZYSDg9"
+    },
+    "logging": {
+        "level": "DEBUG",
+        "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        "file": "proxmox_mcp.log"
+    }
+}
