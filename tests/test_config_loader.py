@@ -3,7 +3,7 @@ Tests for configuration loader with enhanced error handling.
 
 This module tests the enhanced decryption error handling functionality including:
 - Field-specific error messages
-- Distinction between format errors and decryption errors  
+- Distinction between format errors and decryption errors
 - Actionable error messages with suggestions
 - Security considerations (no sensitive data exposure)
 """

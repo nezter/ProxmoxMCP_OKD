@@ -54,7 +54,9 @@ class TestSecureKeyGeneration:
         written_key = mock_write_text.call_args[0][0]
         # Key should be base64 encoded string, not prefixed with PROXMOX_MCP_MASTER_KEY=
         assert len(written_key) > 0, "Key should be written"
-        assert not written_key.startswith("PROXMOX_MCP_MASTER_KEY="), "Key should be stored without prefix"
+        assert not written_key.startswith(
+            "PROXMOX_MCP_MASTER_KEY="
+        ), "Key should be stored without prefix"
 
         # Verify file permissions were set to 600 (owner read/write only)
         mock_chmod.assert_called_once_with(0o600)
