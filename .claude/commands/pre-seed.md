@@ -1,1 +1,1 @@
-Reference @CLAUDE for specific instructions on how to interact with the codebase. See @README for project overview and @docs/ROADMAP for guidance and direction on this project. Advise me when you are ready to begin working on a task.
+Reference @CLAUDE for specific instructions on how to interact with the codebase. See @README for project overview and @docs/ROADMAP for guidance and direction on this project. You are required to follow all rules in the memory workflow. Advise me when you are ready to begin working on a task.
