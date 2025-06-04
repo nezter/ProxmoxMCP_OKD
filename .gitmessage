@@ -3,34 +3,57 @@
 
 # Remember blank line between title and body.
 
-# Body: Explain *what* and *why* (not *how*). For Deployarr infrastructure:
-# - Mention affected services/components (traefik, authentik, crowdsec, etc.)
-# - Include security/networking impact if applicable
-# - Note breaking changes or required manual steps
+# Body: Explain *what* and *why* (not *how*). For ProxmoxMCP:
+# - Mention affected components (tools, formatting, config, core)
+# - Include MCP protocol or Proxmox API impact if applicable
+# - Note breaking changes or required configuration updates
+# - Reference security implications for encryption/auth changes
+# - Mention Docker/container impact if applicable
 # Wrap at 72 chars. ################################## which is here:  #
 
+# Type prefixes (use consistently):
+# feat:     New feature or tool implementation
+# fix:      Bug fix or issue resolution
+# security: Security-related changes (encryption, validation, etc.)
+# config:   Configuration or setup changes
+# docker:   Docker/containerization changes
+# refactor: Code refactoring without functional changes
+# test:     Adding or updating tests
+# docs:     Documentation updates
+# ci:       CI/CD pipeline changes
+# perf:     Performance improvements
 
 # At the end: Include Co-authored-by for all contributors. 
 # Include "Fixes #issue" or "Closes #issue" for GitHub issues.
 # Format: 
 # Co-authored-by: name <user@users.noreply.github.com>
 #
-# Deployarr Examples:
-# feat: add CrowdSec integration for enhanced security
+# ProxmoxMCP Examples:
+# feat: add VM console management functionality
 #
-# Implement real-time intrusion prevention with automatic IP
-# blocking and Cloudflare bouncer integration. Affects all
-# external-facing services through Traefik middleware.
+# Implement interactive console access for VMs through QEMU
+# guest agent integration. Adds new MCP tools for command
+# execution and console interaction. Updates server.py tool
+# registration and extends VM tool capabilities.
 #
-# config: update Traefik SSL entrypoints configuration
+# security: implement token encryption at rest
 #
-# Separate internal (443) and external (444) HTTPS endpoints
-# for improved security isolation. Requires service restart.
+# Add Fernet-based encryption for Proxmox API tokens in
+# config files. Updates config/loader.py with automatic
+# decryption and maintains backward compatibility with
+# plain-text tokens. Requires PROXMOX_MCP_MASTER_KEY env var.
 #
-# fix: resolve Authentik SSO authentication loop
+# docker: enhance container security with non-root user
 #
-# Update OAuth redirect URIs and session configuration to
-# prevent infinite redirects on protected services.
+# Update Dockerfile to run as dedicated mcp user instead
+# of root. Implements security best practices with proper
+# file permissions and resource limits in compose.yaml.
+#
+# fix: resolve VM status polling timeout issues
+#
+# Adjust polling intervals and add retry logic for VM status
+# checks to handle slow Proxmox API responses gracefully.
+# Improves core/proxmox.py connection handling.
 #
 # Fixes #123
 # Co-authored-by: name <email@example.com>#

@@ -6,7 +6,8 @@ See @README for project overview and @docs/ROADMAP for guidance and direction on
 
 # Additional Instructions
 - memory workflow @/workspaces/ProxmoxMCP/docs/ai-instructions/memory-instructions.md
-
+- context workflow @/workspaces/ProxmoxMCP/docs/ai-instructions/context-instructions.md
+- github workflow @/workspaces/ProxmoxMCP/docs/ai-instructions/github-instructions.md
 
 ## Development Commands
 
