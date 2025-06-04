@@ -1,0 +1,76 @@
+[safe]
+        directory = /workspaces/ProxmoxMCP
+[core]
+        editor = vscode
+        ignorecase = false
+        autocrlf = input
+        whitespace = trailing-space,space-before-tab
+        preloadindex = true
+        fscache = true
+        filemode = false
+        bigFileThreshold = 100m
+[user]
+        email = crashoverride6545@gmail.com
+        name = basher83
+[init]
+        defaultBranch = main
+[pull]
+        rebase = true
+[rebase]
+        autoStash = true
+[push]
+        default = current
+        autoSetupRemote = true
+[diff]
+        algorithm = histogram
+[diff "python"]
+        xfuncname = "^[ \t]*((class|def)[ \t].*)$"
+[diff "json"]
+        textconv = python -m json.tool
+[diff "dockerfile"]
+        xfuncname = "^(FROM|RUN|COPY|ADD|ENTRYPOINT|CMD).*$"
+[merge]
+        conflictStyle = diff3
+        tool = vscode
+[mergetool "vscode"]
+        cmd = code --wait $MERGED
+[alias]
+        st = status
+        co = checkout
+        br = branch
+        cm = commit
+        cl = clone
+        lg = log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+        last = log -1 HEAD
+        unstage = reset HEAD --
+        changed = diff --name-only
+        staged = diff --staged
+        logs = log --oneline --graph --decorate --all
+        files = diff --name-only
+        sync = !git fetch origin && git status
+        ahead = log origin/main..HEAD --oneline
+        behind = log HEAD..origin/main --oneline
+        s = status --short --branch
+        last-files = diff-tree --no-commit-id --name-only -r HEAD
+        cleanup = "!git branch --merged main | grep -v main | xargs -n 1 git branch -d"
+        stats = diff --stat
+        amend = commit --amend --no-edit
+        tree = log --graph --oneline --all --decorate
+[help]
+        autocorrect = 10
+[rerere]
+        enabled = true
+[credential]
+        helper = store
+[gc]
+        auto = 256
+[commit]
+        template = .gitmessage
+[fetch]
+        prune = true
+[stash]
+        showPatch = true
+[submodule]
+        recurse = true
+[remote "origin"]
+        fetch = +refs/heads/*:refs/remotes/origin/*

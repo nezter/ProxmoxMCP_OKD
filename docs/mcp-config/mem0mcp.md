@@ -8,6 +8,15 @@
 I am using the cloud hosted version of mem0, which is available at https://mem0.ai/
 There is a selfhosted version that can be run locally in Docker, but I am not using that at this time. I have tested it and it works great but there are extra steps needed for memory to be persistant across restarts. I will likely eventually move to this method.
 
+# Pre-requisites
+- UV (Universal Virtual Environment) installed
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+# Add uv to your PATH
+source $HOME/.local/share/../bin/env
+```
+
 ```bash
 cd /workspace
 git clone https://github.com/mem0ai/mem0-mcp.git

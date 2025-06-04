@@ -1,0 +1,36 @@
+# Title: Summary, imperative, start upper case, don't end with a period
+# No more than 50 chars. #### 50 chars is here:  #
+
+# Remember blank line between title and body.
+
+# Body: Explain *what* and *why* (not *how*). For Deployarr infrastructure:
+# - Mention affected services/components (traefik, authentik, crowdsec, etc.)
+# - Include security/networking impact if applicable
+# - Note breaking changes or required manual steps
+# Wrap at 72 chars. ################################## which is here:  #
+
+
+# At the end: Include Co-authored-by for all contributors. 
+# Include "Fixes #issue" or "Closes #issue" for GitHub issues.
+# Format: 
+# Co-authored-by: name <user@users.noreply.github.com>
+#
+# Deployarr Examples:
+# feat: add CrowdSec integration for enhanced security
+#
+# Implement real-time intrusion prevention with automatic IP
+# blocking and Cloudflare bouncer integration. Affects all
+# external-facing services through Traefik middleware.
+#
+# config: update Traefik SSL entrypoints configuration
+#
+# Separate internal (443) and external (444) HTTPS endpoints
+# for improved security isolation. Requires service restart.
+#
+# fix: resolve Authentik SSO authentication loop
+#
+# Update OAuth redirect URIs and session configuration to
+# prevent infinite redirects on protected services.
+#
+# Fixes #123
+# Co-authored-by: name <email@example.com>#
