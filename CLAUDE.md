@@ -2,8 +2,6 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-See @README for project overview and @docs/ROADMAP for guidance and direction on this project. Referance @CLAUDE for specific instructions on how to interact with the codebase.
-
 # Additional Instructions
 - memory workflow @/workspaces/ProxmoxMCP/docs/ai-instructions/memory-instructions.md
 - context workflow @/workspaces/ProxmoxMCP/docs/ai-instructions/context-instructions.md
