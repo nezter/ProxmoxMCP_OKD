@@ -46,18 +46,43 @@ By participating in this project, you agree to abide by our Code of Conduct. Ple
     git clone https://github.com/yourusername/ProxmoxMCP.git
     cd ProxmoxMCP
     ```
-2.  Create a virtual environment:
+
+2.  Set up git configuration for development:
+
+    ```bash
+    # Option 1: Copy project git configuration (recommended)
+    cp example.gitconfig .git/config
+    
+    # Then update with your personal details
+    git config user.name "Your Name"
+    git config user.email "your.email@example.com"
+    
+    # Option 2: Manual configuration
+    git config user.name "Your Name"
+    git config user.email "your.email@example.com"
+    git config core.editor "vscode"
+    git config init.defaultBranch "main"
+    git config pull.rebase true
+    git config push.autoSetupRemote true
+    ```
+
+    The `example.gitconfig` includes development-friendly settings like:
+    - Python/JSON/Dockerfile diff patterns
+    - Useful aliases (`git lg`, `git st`, `git sync`)
+    - Performance and security optimizations
+
+3.  Create a virtual environment:
 
     ```bash
     python -m venv venv
     source venv/bin/activate  # On Windows: venv\Scripts\activate
     ```
-3.  Install development dependencies:
+4.  Install development dependencies:
 
     ```bash
     pip install -e ".[dev]"
     ```
-4.  Configure your Proxmox connection:
+5.  Configure your Proxmox connection:
 
     ```bash
     cp proxmox-config/config.example.json proxmox-config/config.json

@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 See @README for project overview and @docs/ROADMAP for guidance and direction on this project. Referance @CLAUDE for specific instructions on how to interact with the codebase.
 
 # Additional Instructions
-- memory workflow @docs/memory-instructions.md
+- memory workflow @/workspaces/ProxmoxMCP/docs/ai-instructions/memory-instructions.md
 
 
 ## Development Commands
@@ -13,6 +13,11 @@ See @README for project overview and @docs/ROADMAP for guidance and direction on
 ### Environment Setup
 
 ```bash
+# Set up git configuration (recommended for development)
+cp example.gitconfig .git/config
+git config user.name "Your Name"
+git config user.email "your.email@example.com"
+
 # Create and activate virtual environment
 uv venv
 source .venv/bin/activate  # Linux/macOS

@@ -56,6 +56,31 @@ Before starting, ensure you have:
 * [ ] Proxmox API token (see [API Token Setup](./#proxmox-api-token-setup))
 * [ ] UV installed (`pip install uv`)
 
+#### Git Configuration Setup
+
+For development work, it's recommended to configure git with the project-specific settings:
+
+```bash
+# Copy the example gitconfig to your local git configuration
+cp example.gitconfig .git/config
+
+# Or manually configure git settings (recommended for contributors)
+git config user.name "Your Name"
+git config user.email "your.email@example.com"
+git config core.editor "vscode"
+git config init.defaultBranch "main"
+git config pull.rebase true
+git config push.autoSetupRemote true
+```
+
+The `example.gitconfig` file contains optimized settings for this project including:
+- Python-specific diff patterns
+- JSON and Dockerfile diff improvements  
+- Useful git aliases (`lg`, `st`, `co`, etc.)
+- Security and performance optimizations
+
+**Note**: Review the example file before copying, as it contains sample user credentials that should be replaced with your own.
+
 #### Option 1: Quick Install (Recommended)
 
 1.  Clone and set up environment:
