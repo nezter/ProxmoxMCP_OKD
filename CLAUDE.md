@@ -134,5 +134,4 @@ cp proxmox-config/config.example.json proxmox-config/config.json
 * Requires Python 3.10+ with modern async/await support
 
 ## Memories
-- "ruff isn't available in this environment"
 - "When tasked are completed you must commit changes to github"

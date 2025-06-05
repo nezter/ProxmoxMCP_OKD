@@ -27,6 +27,7 @@ Extract the Following Information:
 """
 mem0_client.update_project(custom_instructions=CUSTOM_INSTRUCTIONS)
 
+
 @mcp.tool(
     description="""Add a new coding preference to mem0. This tool stores code snippets, implementation details,
     and coding patterns for future reference. Store every code snippet. When storing code, you should include:
@@ -63,6 +64,7 @@ async def add_coding_preference(text: str) -> str:
     except Exception as e:
         return f"Error adding preference: {str(e)}"
 
+
 @mcp.tool(
     description="""Retrieve all stored coding preferences for the default user. Call this tool when you need 
     complete context of all previously stored preferences. This is useful when:
@@ -94,6 +96,7 @@ async def get_all_coding_preferences() -> str:
     except Exception as e:
         return f"Error getting preferences: {str(e)}"
 
+
 @mcp.tool(
     description="""Search through stored coding preferences using semantic search. This tool should be called 
     for EVERY user query to find relevant code and implementation details. It helps find:
@@ -121,11 +124,14 @@ async def search_coding_preferences(query: str) -> str:
               or specific technical terms.
     """
     try:
-        memories = mem0_client.search(query, user_id=DEFAULT_USER_ID, output_format="v1.1")
+        memories = mem0_client.search(
+            query, user_id=DEFAULT_USER_ID, output_format="v1.1"
+        )
         flattened_memories = [memory["memory"] for memory in memories["results"]]
         return json.dumps(flattened_memories, indent=2)
     except Exception as e:
         return f"Error searching preferences: {str(e)}"
+
 
 def create_starlette_app(mcp_server: Server, *, debug: bool = False) -> Starlette:
     """Create a Starlette application that can server the provied mcp server with SSE."""
@@ -133,9 +139,9 @@ def create_starlette_app(mcp_server: Server, *, debug: bool = False) -> Starlett
 
     async def handle_sse(request: Request) -> None:
         async with sse.connect_sse(
-                request.scope,
-                request.receive,
-                request._send,  # noqa: SLF001
+            request.scope,
+            request.receive,
+            request._send,  # noqa: SLF001
         ) as (read_stream, write_stream):
             await mcp_server.run(
                 read_stream,
@@ -157,9 +163,9 @@ if __name__ == "__main__":
 
     import argparse
 
-    parser = argparse.ArgumentParser(description='Run MCP SSE-based server')
-    parser.add_argument('--host', default='0.0.0.0', help='Host to bind to')
-    parser.add_argument('--port', type=int, default=8080, help='Port to listen on')
+    parser = argparse.ArgumentParser(description="Run MCP SSE-based server")
+    parser.add_argument("--host", default="0.0.0.0", help="Host to bind to")
+    parser.add_argument("--port", type=int, default=8080, help="Port to listen on")
     args = parser.parse_args()
 
     # Bind SSE request handling to MCP server
