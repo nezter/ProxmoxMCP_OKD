@@ -3,7 +3,7 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 # Additional Instructions
-- memory workflow @/workspaces/ProxmoxMCP/docs/ai-instructions/memory-instructions.md
+- memory workflow @/workspaces/ProxmoxMCP/docs/ai-instructions/memory-instructions.md (not supported in Codex)
 - context workflow @/workspaces/ProxmoxMCP/docs/ai-instructions/context-instructions.md
 - github workflow @/workspaces/ProxmoxMCP/docs/ai-instructions/github-instructions.md
 - issue creation workflow @/workspaces/ProxmoxMCP/docs/ai-instructions/issue-creation-instructions.md
