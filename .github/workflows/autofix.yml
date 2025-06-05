@@ -96,23 +96,34 @@ jobs:
   # Optional: Run tests if they exist
   test:
     runs-on: ubuntu-latest
-    if: hashFiles('tests/**/*.py') != ''
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check for test files
+        id: check-tests
+        run: |
+          if find tests -name "*.py" -type f | grep -q .; then
+            echo "tests-exist=true" >> $GITHUB_OUTPUT
+          else
+            echo "tests-exist=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Set up Python
+        if: steps.check-tests.outputs.tests-exist == 'true'
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
           cache: 'pip'
 
       - name: Install UV
+        if: steps.check-tests.outputs.tests-exist == 'true'
         uses: astral-sh/setup-uv@v4
         with:
           enable-cache: true
           cache-dependency-glob: "pyproject.toml"
 
       - name: Cache UV venv
+        if: steps.check-tests.outputs.tests-exist == 'true'
         uses: actions/cache@v4
         with:
           path: .venv
@@ -121,9 +132,11 @@ jobs:
             venv-${{ runner.os }}-
 
       - name: Install dependencies
+        if: steps.check-tests.outputs.tests-exist == 'true'
         run: uv sync --extra dev
 
       - name: Run tests
+        if: steps.check-tests.outputs.tests-exist == 'true'
         run: |
           uv run pytest -v --tb=short
 
