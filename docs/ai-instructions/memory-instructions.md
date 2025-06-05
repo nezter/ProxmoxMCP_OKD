@@ -1,5 +1,6 @@
 # docs
 
+> **Warning**: The mem0 server is not accessible in Codex. These instructions are informational only.
 
 The mem0 server provides three main tools for managing code preferences:
 
