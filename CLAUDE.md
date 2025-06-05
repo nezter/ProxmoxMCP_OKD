@@ -6,6 +6,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - memory workflow @/workspaces/ProxmoxMCP/docs/ai-instructions/memory-instructions.md
 - context workflow @/workspaces/ProxmoxMCP/docs/ai-instructions/context-instructions.md
 - github workflow @/workspaces/ProxmoxMCP/docs/ai-instructions/github-instructions.md
+- issue creation workflow @/workspaces/ProxmoxMCP/docs/ai-instructions/issue-creation-instructions.md
+- issue resolution workflow @/workspaces/ProxmoxMCP/docs/ai-instructions/issue-resolution-instructions.md
 
 ## Development Commands
 
