@@ -7,8 +7,9 @@ import os
 import tempfile
 from unittest.mock import patch
 
-import pytest
 from mcp.server.fastmcp.exceptions import ToolError
+import pytest
+
 from proxmox_mcp.server import ProxmoxMCPServer
 
 

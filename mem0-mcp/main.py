@@ -1,6 +1,5 @@
 import json
 
-import uvicorn
 from dotenv import load_dotenv
 from mcp.server import Server
 from mcp.server.fastmcp import FastMCP
@@ -9,6 +8,7 @@ from mem0 import MemoryClient
 from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.routing import Mount, Route
+import uvicorn
 
 load_dotenv()
 

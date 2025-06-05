@@ -14,6 +14,7 @@ import tempfile
 from unittest.mock import MagicMock, patch
 
 import pytest
+
 from proxmox_mcp.config.loader import (
     _decrypt_config_tokens,
     _handle_decryption_error,

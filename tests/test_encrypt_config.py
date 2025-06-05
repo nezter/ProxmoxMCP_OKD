@@ -10,11 +10,12 @@ This module tests the encrypt_config command-line utility including:
 
 import json
 import os
-import tempfile
 from pathlib import Path
+import tempfile
 from unittest.mock import MagicMock, patch
 
 import pytest
+
 from proxmox_mcp.utils.encrypt_config import (
     clear_terminal_if_requested,
     create_backup,

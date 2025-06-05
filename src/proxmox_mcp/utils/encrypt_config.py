@@ -21,14 +21,14 @@ Examples:
 """
 
 import argparse
+from datetime import datetime
 import json
 import os
+from pathlib import Path
 import platform
 import shutil
 import subprocess
 import sys
-from datetime import datetime
-from pathlib import Path
 from typing import List, Optional
 
 # Add the src directory to the path so we can import our modules

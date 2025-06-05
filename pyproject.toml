@@ -78,6 +78,13 @@ ignore = []
 line-length = 100
 target-version = "py310"
 
+[tool.ruff.isort]
+force-sort-within-sections = true
+known-first-party = ["proxmox_mcp"]
+known-third-party = ["mcp", "proxmoxer", "pydantic", "cryptography", "requests"]
+section-order = ["future", "standard-library", "third-party", "first-party", "local-folder"]
+split-on-trailing-comma = true
+
 [dependency-groups]
 dev = [
     "ruff>=0.1.15",

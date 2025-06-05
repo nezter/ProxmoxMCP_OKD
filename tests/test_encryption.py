@@ -14,6 +14,7 @@ import os
 from unittest.mock import patch
 
 import pytest
+
 from proxmox_mcp.utils.encryption import (
     TokenEncryption,
     decrypt_sensitive_value,

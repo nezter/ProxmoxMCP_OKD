@@ -5,6 +5,7 @@ Tests for VM console operations.
 from unittest.mock import Mock
 
 import pytest
+
 from proxmox_mcp.tools.console import VMConsoleManager
 
 
