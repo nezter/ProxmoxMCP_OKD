@@ -22,11 +22,11 @@ assignees: ''
 <!-- What actually happened -->
 
 ## Environment
-- ProxmoxMCP Version: <!-- e.g. 1.0.0 -->
-- Proxmox Version: <!-- e.g. 7.4-3 -->
-- Python Version: <!-- e.g. 3.10.4 -->
-- Operating System: <!-- e.g. Ubuntu 22.04 -->
-- Deployment Method: <!-- e.g. Docker, pip install -->
+- **ProxmoxMCP Version**: <!-- e.g., 1.0.0 -->
+- **Proxmox Version**: <!-- e.g., 7.4-3 -->
+- **Python Version**: <!-- e.g., 3.10.4 -->
+- **Operating System**: <!-- e.g., Ubuntu 22.04 -->
+- **Deployment Method**: <!-- e.g., Docker, pip install -->
 
 ## Logs/Error Messages
 <!-- Include any relevant logs or error messages -->
