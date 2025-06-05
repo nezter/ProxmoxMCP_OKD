@@ -93,9 +93,10 @@ jobs:
         run: |
           uv run mypy . || true
 
-  # Run tests
+  # Optional: Run tests if they exist
   test:
     runs-on: ubuntu-latest
+    if: hashFiles('tests/**/*.py') != ''
     steps:
       - uses: actions/checkout@v4
 
@@ -134,8 +135,11 @@ jobs:
     steps:
       - name: Check all jobs status
         run: |
-          if [[ "${{ needs.lint-and-format.result }}" != "success" || "${{ needs.type-check.result }}" != "success" || "${{ needs.test.result }}" != "success" ]]; then
-            echo "One or more checks failed"
+          if [[ "${{ needs.lint-and-format.result }}" != "success" || "${{ needs.type-check.result }}" != "success" ]]; then
+            echo "Required checks failed"
+            exit 1
+          elif [[ "${{ needs.test.result }}" == "failure" ]]; then
+            echo "Tests failed"
             exit 1
           else
             echo "All checks passed!"
