@@ -137,3 +137,7 @@ cp proxmox-config/config.example.json proxmox-config/config.json
 
 ## Memories
 - "When tasked are completed you must commit changes to github"
+- When submitting PR reviews with complex text containing special shell characters, it's better to:
+  1. Use simpler review text, or
+  2. Escape special characters properly, or
+  3. Submit reviews through the GitHub web interface for complex formatting
