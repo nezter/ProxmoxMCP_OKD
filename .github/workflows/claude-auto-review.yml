@@ -1,8 +1,9 @@
 name: Claude Auto Review
 
 on:
-  pull_request:
-    types: [opened, synchronize]
+  workflow_dispatch:
+  # pull_request:
+    # types: [opened, synchronize]
 
 jobs:
   auto-review:
