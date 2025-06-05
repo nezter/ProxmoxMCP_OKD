@@ -15,7 +15,8 @@ The models provide:
 - Support for encrypted sensitive values
 """
 
-from typing import Optional, Annotated
+from typing import Annotated, Optional
+
 from pydantic import BaseModel, Field, field_validator
 
 
@@ -108,9 +109,9 @@ class LoggingConfig(BaseModel):
     format: str = (
         "%(asctime)s - %(name)s - %(levelname)s - %(message)s"  # Optional: Log format
     )
-    file: Optional[str] = (
-        None  # Optional: Log file path (default: None for console logging)
-    )
+    file: Optional[
+        str
+    ] = None  # Optional: Log file path (default: None for console logging)
 
 
 class Config(BaseModel):

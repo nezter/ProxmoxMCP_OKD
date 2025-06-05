@@ -14,9 +14,10 @@ detailed container information might be temporarily unavailable.
 """
 
 from typing import List
+
 from mcp.types import TextContent as Content
+
 from .base import ProxmoxTool
-from .definitions import GET_CONTAINERS_DESC
 
 
 class ContainerTools(ProxmoxTool):

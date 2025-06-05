@@ -2,9 +2,10 @@
 Core formatting functions for Proxmox MCP output.
 """
 
-from typing import List, Union, Dict, Any, Optional
-from .theme import ProxmoxTheme
+from typing import Optional
+
 from .colors import ProxmoxColors
+from .theme import ProxmoxTheme
 
 
 class ProxmoxFormatters:

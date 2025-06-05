@@ -15,9 +15,10 @@ detailed VM information might be temporarily unavailable.
 """
 
 from typing import List
+
 from mcp.types import TextContent as Content
+
 from .base import ProxmoxTool
-from .definitions import GET_VMS_DESC, EXECUTE_VM_COMMAND_DESC
 from .console.manager import VMConsoleManager
 
 

@@ -10,8 +10,8 @@ This package contains various utility modules:
 
 from .encryption import (
     TokenEncryption,
-    encrypt_sensitive_value,
     decrypt_sensitive_value,
+    encrypt_sensitive_value,
 )
 
 __all__ = [

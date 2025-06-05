@@ -2,13 +2,12 @@
 Tests for the Proxmox MCP server.
 """
 
-import os
 import json
-import pytest
+import os
 import tempfile
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
-from mcp.server.fastmcp import FastMCP
+import pytest
 from mcp.server.fastmcp.exceptions import ToolError
 from proxmox_mcp.server import ProxmoxMCPServer
 

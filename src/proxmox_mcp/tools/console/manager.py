@@ -15,7 +15,7 @@ The module implements a robust command execution system with:
 """
 
 import logging
-from typing import Dict, Any
+from typing import Any, Dict
 
 
 class VMConsoleManager:

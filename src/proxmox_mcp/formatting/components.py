@@ -3,6 +3,7 @@ Reusable UI components for Proxmox MCP output.
 """
 
 from typing import List, Optional
+
 from .colors import ProxmoxColors
 from .theme import ProxmoxTheme
 
@@ -66,7 +67,7 @@ class ProxmoxComponents:
             "|"
             + "|".join(
                 f" {ProxmoxColors.colorize(h, ProxmoxColors.CYAN):<{w}} "
-                for w, h in zip(widths, headers)
+                for w, h in zip(widths, headers, strict=False)
             )
             + "|"
         )

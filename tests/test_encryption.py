@@ -9,14 +9,15 @@ This module tests the TokenEncryption class functionality including:
 - Master key generation and management
 """
 
-import os
-import pytest
 import base64
-from unittest.mock import patch, mock_open
+import os
+from unittest.mock import patch
+
+import pytest
 from proxmox_mcp.utils.encryption import (
     TokenEncryption,
-    encrypt_sensitive_value,
     decrypt_sensitive_value,
+    encrypt_sensitive_value,
 )
 
 

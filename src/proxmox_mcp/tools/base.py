@@ -12,9 +12,11 @@ consistent behavior and error handling across the MCP server.
 """
 
 import logging
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, List, Optional
+
 from mcp.types import TextContent as Content
 from proxmoxer import ProxmoxAPI
+
 from ..formatting import ProxmoxTemplates
 
 

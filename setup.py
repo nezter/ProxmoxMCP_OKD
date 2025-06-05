@@ -4,7 +4,7 @@ This file is maintained for compatibility with older tools.
 For modern Python packaging, see pyproject.toml.
 """
 
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 # Metadata and dependencies are primarily managed in pyproject.toml
 # This file exists for compatibility with tools that don't support pyproject.toml

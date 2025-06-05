@@ -8,22 +8,20 @@ This module tests the encrypt_config command-line utility including:
 - Configuration encryption workflows
 """
 
-import io
 import json
 import os
-import sys
 import tempfile
 from pathlib import Path
-from unittest.mock import patch, MagicMock
-import pytest
+from unittest.mock import MagicMock, patch
 
+import pytest
 from proxmox_mcp.utils.encrypt_config import (
-    generate_master_key,
+    clear_terminal_if_requested,
     create_backup,
-    verify_config_decryption,
+    generate_master_key,
     rotate_master_key,
     rotate_master_key_all,
-    clear_terminal_if_requested,
+    verify_config_decryption,
 )
 from proxmox_mcp.utils.encryption import TokenEncryption
 

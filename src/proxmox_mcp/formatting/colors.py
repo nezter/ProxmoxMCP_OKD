@@ -3,6 +3,7 @@ Color utilities for Proxmox MCP output styling.
 """
 
 from typing import Optional
+
 from .theme import ProxmoxTheme
 
 

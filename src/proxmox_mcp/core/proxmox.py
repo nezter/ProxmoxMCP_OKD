@@ -13,9 +13,11 @@ across the MCP server.
 """
 
 import logging
-from typing import Dict, Any
+from typing import Any, Dict
+
 from proxmoxer import ProxmoxAPI
-from ..config.models import ProxmoxConfig, AuthConfig
+
+from ..config.models import AuthConfig, ProxmoxConfig
 
 
 class ProxmoxManager:

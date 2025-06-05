@@ -27,15 +27,15 @@ import platform
 import shutil
 import subprocess
 import sys
-from pathlib import Path
-from typing import Optional, List
 from datetime import datetime
+from pathlib import Path
+from typing import List, Optional
 
 # Add the src directory to the path so we can import our modules
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from proxmox_mcp.utils.encryption import TokenEncryption
 from proxmox_mcp.config.loader import encrypt_config_file
+from proxmox_mcp.utils.encryption import TokenEncryption
 
 
 def clear_terminal_if_requested() -> None:
@@ -389,13 +389,13 @@ def rotate_master_key_all(directory: str, new_key: Optional[str] = None) -> None
                         has_encrypted_content = True
 
                 if not has_encrypted_content:
-                    print(f"   ⏭️  Skipping (no encrypted content)")
+                    print("   ⏭️  Skipping (no encrypted content)")
                     continue
 
                 # Perform rotation
                 rotate_master_key(config_file, new_key)
                 successful_rotations.append(config_file)
-                print(f"   ✅ Rotated successfully")
+                print("   ✅ Rotated successfully")
 
             except Exception as e:
                 print(f"   ❌ Failed: {e}")

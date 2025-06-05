@@ -4,7 +4,7 @@ Logging configuration for the Proxmox MCP server.
 
 import logging
 import sys
-from typing import Optional, List
+from typing import List, Optional
 
 
 def setup_logging(

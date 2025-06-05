@@ -15,34 +15,31 @@ The server exposes a set of tools for managing Proxmox resources including:
 - Cluster status monitoring
 """
 
-import logging
 import os
-import sys
 import signal
-from typing import Optional, List, Annotated
+import sys
+from typing import Annotated, Optional
 
 from mcp.server.fastmcp import FastMCP
-from mcp.server.fastmcp.tools import Tool
-from mcp.types import TextContent as Content
 from pydantic import Field
 
 from .config.loader import load_config
 from .core.logging import setup_logging
 from .core.proxmox import ProxmoxManager
-from .tools.node import NodeTools
-from .tools.vm import VMTools
-from .tools.container import ContainerTools
-from .tools.storage import StorageTools
 from .tools.cluster import ClusterTools
+from .tools.container import ContainerTools
 from .tools.definitions import (
-    GET_NODES_DESC,
-    GET_NODE_STATUS_DESC,
-    GET_VMS_DESC,
     EXECUTE_VM_COMMAND_DESC,
-    GET_CONTAINERS_DESC,
-    GET_STORAGE_DESC,
     GET_CLUSTER_STATUS_DESC,
+    GET_CONTAINERS_DESC,
+    GET_NODE_STATUS_DESC,
+    GET_NODES_DESC,
+    GET_STORAGE_DESC,
+    GET_VMS_DESC,
 )
+from .tools.node import NodeTools
+from .tools.storage import StorageTools
+from .tools.vm import VMTools
 
 
 class ProxmoxMCPServer:

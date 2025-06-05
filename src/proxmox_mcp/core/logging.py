@@ -17,7 +17,7 @@ The logging system supports:
 
 import logging
 import os
-from typing import Optional
+
 from ..config.models import LoggingConfig
 
 
