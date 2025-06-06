@@ -4,6 +4,9 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+overrides:
+  axios: ^1.8.2
+
 importers:
 
   .:
@@ -15,8 +18,8 @@ importers:
         specifier: ^16.5.0
         version: 16.5.0
       mem0ai:
-        specifier: ^2.1.11
-        version: 2.1.25(@anthropic-ai/sdk@0.40.1(encoding@0.1.13))(@google/genai@0.7.0(encoding@0.1.13))(@langchain/core@0.3.55(openai@4.98.0(encoding@0.1.13)(ws@8.18.2)(zod@3.24.4)))(@mistralai/mistralai@1.6.0(zod@3.24.4))(@qdrant/js-client-rest@1.13.0(typescript@5.8.3))(@supabase/supabase-js@2.49.4)(@types/jest@29.5.14)(@types/pg@8.11.0)(@types/sqlite3@3.1.11)(encoding@0.1.13)(groq-sdk@0.3.0(encoding@0.1.13))(neo4j-driver@5.28.1)(ollama@0.5.15)(pg@8.11.3)(redis@4.7.1)(sqlite3@5.1.7)(ws@8.18.2)
+        specifier: ^2.1.29
+        version: 2.1.29(@anthropic-ai/sdk@0.40.1(encoding@0.1.13))(@google/genai@0.7.0(encoding@0.1.13))(@langchain/core@0.3.55(openai@4.98.0(encoding@0.1.13)(ws@8.18.2)(zod@3.24.4)))(@mistralai/mistralai@1.6.0(zod@3.24.4))(@qdrant/js-client-rest@1.13.0(typescript@5.8.3))(@supabase/supabase-js@2.49.4)(@types/jest@29.5.14)(@types/pg@8.11.0)(@types/sqlite3@3.1.11)(encoding@0.1.13)(groq-sdk@0.3.0(encoding@0.1.13))(neo4j-driver@5.28.1)(ollama@0.5.15)(pg@8.11.3)(redis@4.7.1)(sqlite3@5.1.7)(ws@8.18.2)
       tsup:
         specifier: ^8.4.0
         version: 8.4.0(typescript@5.8.3)
@@ -456,9 +459,6 @@ packages:
   '@types/node-fetch@2.6.12':
     resolution: {integrity: sha512-8nneRWKCg3rMtF69nLQJnOYUcbafYeFSjqkw3jCRLsqkWFlHaoQrr5mXmofFGOx3DKn7UfmBMyov8ySvLRVldA==}
 
-  '@types/node@18.19.100':
-    resolution: {integrity: sha512-ojmMP8SZBKprc3qGrGk8Ujpo80AXkrP7G2tOT4VWr5jlr5DHjsJF+emXJz+Wm0glmy4Js62oKMdZZ6B9Y+tEcA==}
-
   '@types/node@18.19.110':
     resolution: {integrity: sha512-WW2o4gTmREtSnqKty9nhqF/vA0GKd0V/rbC0OyjSk9Bz6bzlsXKT+i7WDdS/a0z74rfT2PO4dArVCSnapNLA5Q==}
 
@@ -556,8 +556,8 @@ packages:
   asynckit@0.4.0:
     resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
 
-  axios@1.7.7:
-    resolution: {integrity: sha512-S4kL7XrjgBmvdGut0sN3yJxqYzrDOnivkBiN0OFs6hLiUam3UPvswUo0kqGyhqUZGEOytHyumEdXsAkgCOUf3Q==}
+  axios@1.9.0:
+    resolution: {integrity: sha512-re4CqKTJaURpzbLHtIi6XpDv20/CnpXOtjRY5/CU32L8gU8ek9UIivcfvSWvmKEngmVbrUtPpdDwWDWL7DNHvg==}
 
   balanced-match@1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
@@ -1200,12 +1200,12 @@ packages:
     resolution: {integrity: sha512-aisnrDP4GNe06UcKFnV5bfMNPBUw4jsLGaWwWfnH3v02GnBuXX2MCVn5RbrWo0j3pczUilYblq7fQ7Nw2t5XKw==}
     engines: {node: '>= 0.8'}
 
-  mem0ai@2.1.25:
-    resolution: {integrity: sha512-ydxT6mT12TJi8QIxKdhBNX3PNu/R/AFhQdlOpwlruoNnGIRZTfucZESy3SHmUeBdZ9XvhQ21ozApmowEw4O7ug==}
+  mem0ai@2.1.29:
+    resolution: {integrity: sha512-op+lHtwuOK9MFmRDapjrVea+e8WKrqqMGfEcP0TKVzdg6ux+eTw12P1qmVOCiWvs1y2vY6Skdwcrnl8mrMbO0Q==}
     engines: {node: '>=18'}
     peerDependencies:
       '@anthropic-ai/sdk': ^0.40.1
-      '@google/genai': ^0.7.0
+      '@google/genai': ^1.2.0
       '@langchain/core': ^0.3.44
       '@mistralai/mistralai': ^1.5.2
       '@qdrant/js-client-rest': 1.13.0
@@ -2353,12 +2353,8 @@ snapshots:
 
   '@types/node-fetch@2.6.12':
     dependencies:
-      '@types/node': 22.15.17
+      '@types/node': 22.15.29
       form-data: 4.0.2
-
-  '@types/node@18.19.100':
-    dependencies:
-      undici-types: 5.26.5
 
   '@types/node@18.19.110':
     dependencies:
@@ -2456,7 +2452,7 @@ snapshots:
 
   asynckit@0.4.0: {}
 
-  axios@1.7.7:
+  axios@1.9.0:
     dependencies:
       follow-redirects: 1.15.9
       form-data: 4.0.2
@@ -3221,7 +3217,7 @@ snapshots:
 
   media-typer@1.1.0: {}
 
-  mem0ai@2.1.25(@anthropic-ai/sdk@0.40.1(encoding@0.1.13))(@google/genai@0.7.0(encoding@0.1.13))(@langchain/core@0.3.55(openai@4.98.0(encoding@0.1.13)(ws@8.18.2)(zod@3.24.4)))(@mistralai/mistralai@1.6.0(zod@3.24.4))(@qdrant/js-client-rest@1.13.0(typescript@5.8.3))(@supabase/supabase-js@2.49.4)(@types/jest@29.5.14)(@types/pg@8.11.0)(@types/sqlite3@3.1.11)(encoding@0.1.13)(groq-sdk@0.3.0(encoding@0.1.13))(neo4j-driver@5.28.1)(ollama@0.5.15)(pg@8.11.3)(redis@4.7.1)(sqlite3@5.1.7)(ws@8.18.2):
+  mem0ai@2.1.29(@anthropic-ai/sdk@0.40.1(encoding@0.1.13))(@google/genai@0.7.0(encoding@0.1.13))(@langchain/core@0.3.55(openai@4.98.0(encoding@0.1.13)(ws@8.18.2)(zod@3.24.4)))(@mistralai/mistralai@1.6.0(zod@3.24.4))(@qdrant/js-client-rest@1.13.0(typescript@5.8.3))(@supabase/supabase-js@2.49.4)(@types/jest@29.5.14)(@types/pg@8.11.0)(@types/sqlite3@3.1.11)(encoding@0.1.13)(groq-sdk@0.3.0(encoding@0.1.13))(neo4j-driver@5.28.1)(ollama@0.5.15)(pg@8.11.3)(redis@4.7.1)(sqlite3@5.1.7)(ws@8.18.2):
     dependencies:
       '@anthropic-ai/sdk': 0.40.1(encoding@0.1.13)
       '@google/genai': 0.7.0(encoding@0.1.13)
@@ -3232,16 +3228,16 @@ snapshots:
       '@types/jest': 29.5.14
       '@types/pg': 8.11.0
       '@types/sqlite3': 3.1.11
-      axios: 1.7.7
+      axios: 1.9.0
       groq-sdk: 0.3.0(encoding@0.1.13)
       neo4j-driver: 5.28.1
       ollama: 0.5.15
-      openai: 4.98.0(encoding@0.1.13)(ws@8.18.2)(zod@3.24.4)
+      openai: 4.98.0(encoding@0.1.13)(ws@8.18.2)(zod@3.25.51)
       pg: 8.11.3
       redis: 4.7.1
       sqlite3: 5.1.7
       uuid: 9.0.1
-      zod: 3.24.4
+      zod: 3.25.51
     transitivePeerDependencies:
       - debug
       - encoding
@@ -3420,7 +3416,7 @@ snapshots:
 
   openai@4.98.0(encoding@0.1.13)(ws@8.18.2)(zod@3.24.4):
     dependencies:
-      '@types/node': 18.19.100
+      '@types/node': 18.19.110
       '@types/node-fetch': 2.6.12
       abort-controller: 3.0.0
       agentkeepalive: 4.6.0
@@ -3430,6 +3426,22 @@ snapshots:
     optionalDependencies:
       ws: 8.18.2
       zod: 3.24.4
+    transitivePeerDependencies:
+      - encoding
+    optional: true
+
+  openai@4.98.0(encoding@0.1.13)(ws@8.18.2)(zod@3.25.51):
+    dependencies:
+      '@types/node': 18.19.110
+      '@types/node-fetch': 2.6.12
+      abort-controller: 3.0.0
+      agentkeepalive: 4.6.0
+      form-data-encoder: 1.7.2
+      formdata-node: 4.4.1
+      node-fetch: 2.7.0(encoding@0.1.13)
+    optionalDependencies:
+      ws: 8.18.2
+      zod: 3.25.51
     transitivePeerDependencies:
       - encoding
 
