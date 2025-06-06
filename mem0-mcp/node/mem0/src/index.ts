@@ -75,8 +75,7 @@ const server = new Server(
 async function addMemory(content: string, userId: string) {
   try {
     const messages = [
-      { role: 'system', content: 'Memory storage system' },
-      { role: 'user', content }
+      { role: 'user' as const, content }
     ];
     await memoryClient.add(messages, { user_id: userId });
     return true;
