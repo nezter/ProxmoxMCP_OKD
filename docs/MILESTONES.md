@@ -1,5 +1,5 @@
 v0.9.0 - Pre-Release Stabilization
-Due by July 15, 2025
+Due by August 15, 2025
 
 Security improvements
 Core functionality testing
@@ -9,7 +9,7 @@ Docker optimization
 ---
 
 v1.0.0 - First Stable Release
-Due by August 14, 2025
+Due by October 31, 2025
 
 🎯 First stable release of ProxmoxMCP
 
@@ -30,7 +30,7 @@ Target Users: Home lab enthusiasts, small business IT, automation developers
 ---
 
 v1.1.0 - Enhanced Features
-Due by October 31, 2025
+Due by January 31, 2026
 
 🚀 Enhanced features and user experience improvements
 
@@ -49,7 +49,7 @@ Target Users: Power users, automation specialists, enterprise evaluators
 ---
 
 v1.2.0 - Production Hardening
-Due by December 31, 2025
+Due by April 30, 2026
 
 🏢 Enterprise-grade features and production readiness
 
