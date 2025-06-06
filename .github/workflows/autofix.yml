@@ -27,7 +27,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-          cache: 'pip'  # Cache pip dependencies
+          # Removed cache: 'pip' - conflicts with UV dependency management
 
       - name: Install UV
         uses: astral-sh/setup-uv@v4
@@ -70,7 +70,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-          cache: 'pip'
+          # Removed cache: 'pip' - conflicts with UV dependency management
 
       - name: Install UV
         uses: astral-sh/setup-uv@v4
@@ -102,7 +102,7 @@ jobs:
       - name: Check for test files
         id: check-tests
         run: |
-          if find tests -name "*.py" -type f | grep -q .; then
+          if find . -name "test*.py" -o -name "*_test.py" -o -path "*/tests/*" -name "*.py" | grep -q .; then
             echo "tests-exist=true" >> $GITHUB_OUTPUT
           else
             echo "tests-exist=false" >> $GITHUB_OUTPUT
@@ -113,7 +113,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-          cache: 'pip'
+          # Removed cache: 'pip' - conflicts with UV dependency management
 
       - name: Install UV
         if: steps.check-tests.outputs.tests-exist == 'true'
@@ -148,12 +148,32 @@ jobs:
     steps:
       - name: Check all jobs status
         run: |
-          if [[ "${{ needs.lint-and-format.result }}" != "success" || "${{ needs.type-check.result }}" != "success" ]]; then
-            echo "Required checks failed"
+          echo "Checking job results:"
+          echo "  lint-and-format: ${{ needs.lint-and-format.result }}"
+          echo "  type-check: ${{ needs.type-check.result }}"
+          echo "  test: ${{ needs.test.result }}"
+          
+          # Check if required jobs failed
+          if [[ "${{ needs.lint-and-format.result }}" == "failure" ]]; then
+            echo "❌ Lint and format job failed"
             exit 1
-          elif [[ "${{ needs.test.result }}" == "failure" ]]; then
-            echo "Tests failed"
-            exit 1
-          else
-            echo "All checks passed!"
           fi
+          
+          if [[ "${{ needs.type-check.result }}" == "failure" ]]; then
+            echo "❌ Type check job failed"
+            exit 1
+          fi
+          
+          # Test job failure is also a failure (if tests exist)
+          if [[ "${{ needs.test.result }}" == "failure" ]]; then
+            echo "❌ Test job failed"
+            exit 1
+          fi
+          
+          # Check if any required job was cancelled
+          if [[ "${{ needs.lint-and-format.result }}" == "cancelled" || "${{ needs.type-check.result }}" == "cancelled" ]]; then
+            echo "❌ Required jobs were cancelled"
+            exit 1
+          fi
+          
+          echo "✅ All checks passed!"
