@@ -9,6 +9,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - issue creation workflow @/workspaces/ProxmoxMCP/docs/ai-instructions/issue-creation-instructions.md
 - issue resolution workflow @/workspaces/ProxmoxMCP/docs/ai-instructions/issue-resolution-instructions.md
 - pr workflow @/workspaces/ProxmoxMCP/docs/ai-instructions/pr-instructions.md
+- milestone workflow @/workspaces/ProxmoxMCP/docs/ai-instructions/milestone-instructions.md
 
 ## Development Commands
 
