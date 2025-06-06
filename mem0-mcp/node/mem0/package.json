@@ -41,7 +41,8 @@
   },
   "pnpm": {
     "overrides": {
-      "axios": "^1.8.2"
+      "axios": "^1.8.2",
+      "undici": "^5.29.0"
     }
   }
 }
