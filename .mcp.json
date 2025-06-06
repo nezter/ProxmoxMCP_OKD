@@ -13,6 +13,13 @@
         "mcp-server-fetch"
       ]
     },
+    "puppeteer": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-puppeteer"
+      ]
+    },
     "mem0": {
       "type": "sse",
       "url": "http://0.0.0.0:8080/sse"
