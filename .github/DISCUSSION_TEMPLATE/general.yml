@@ -4,12 +4,12 @@ body:
     attributes:
       value: |
         Thank you for starting a discussion! This is the place for open-ended conversations about ProxmoxMCP.
-        
+
         Before posting, please check:
         - [ ] [Existing discussions](https://github.com/basher83/ProxmoxMCP/discussions) for similar topics
         - [ ] [README documentation](https://github.com/basher83/ProxmoxMCP#readme) for basic information
         - [ ] [Issues](https://github.com/basher83/ProxmoxMCP/issues) if this is a bug report or feature request
-        
+
   - type: input
     attributes:
       label: "Discussion Topic"
@@ -17,7 +17,7 @@ body:
       placeholder: "e.g., Best practices for ProxmoxMCP in production environments"
     validations:
       required: true
-      
+
   - type: textarea
     attributes:
       label: "Description"
@@ -25,7 +25,7 @@ body:
       placeholder: "Share your thoughts, experiences, or questions..."
     validations:
       required: true
-      
+
   - type: dropdown
     attributes:
       label: "Discussion Category"
@@ -43,13 +43,13 @@ body:
         - Other
     validations:
       required: true
-      
+
   - type: textarea
     attributes:
       label: "Your Experience"
       description: "Tell us about your experience with ProxmoxMCP (optional)"
       placeholder: "e.g., New user, been using for 6 months, production deployment..."
-      
+
   - type: textarea
     attributes:
       label: "Additional Context"

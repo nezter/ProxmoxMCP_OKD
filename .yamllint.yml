@@ -1,0 +1,63 @@
+# yamllint configuration for ProxmoxMCP
+# Documentation: https://yamllint.readthedocs.io/en/stable/configuration.html
+
+extends: default
+
+rules:
+  # Line length - be more flexible for complex GitHub Actions
+  line-length:
+    max: 120
+    level: warning
+
+  # Indentation - standard 2 spaces
+  indentation:
+    spaces: 2
+    indent-sequences: true
+    check-multi-line-strings: false
+
+  # Comments - allow comments to be longer
+  comments:
+    min-spaces-from-content: 1
+    require-starting-space: true
+
+  # Allow empty lines in documents
+  empty-lines:
+    max: 2
+    max-start: 1
+    max-end: 1
+
+  # Brackets - be flexible with GitHub Actions syntax
+  brackets:
+    max-spaces-inside: 1
+    max-spaces-inside-empty: 0
+
+  # Braces - be flexible with GitHub Actions syntax
+  braces:
+    max-spaces-inside: 1
+    max-spaces-inside-empty: 0
+
+  # Truthy values - allow yes/no, on/off for GitHub Actions
+  truthy:
+    allowed-values: ["true", "false", "yes", "no", "on", "off"]
+    check-keys: false
+
+  # Document separators
+  document-start:
+    present: false
+
+  # Octal values
+  octal-values:
+    forbid-implicit-octal: true
+    forbid-explicit-octal: true
+
+ignore: |
+  # Ignore lock files and generated files
+  */pnpm-lock.yaml
+  */yarn.lock
+  */package-lock.json
+  */.github/workflows/*-lock.yml
+
+  # Ignore template files that may have special formatting
+  .github/ISSUE_TEMPLATE/
+  .github/DISCUSSION_TEMPLATE/
+

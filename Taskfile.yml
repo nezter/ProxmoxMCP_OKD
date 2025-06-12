@@ -1,0 +1,253 @@
+# Taskfile for ProxmoxMCP
+# Documentation: https://taskfile.dev/
+version: "3"
+
+vars:
+  PYTHON_VERSION: "3.12"
+  UV_EXTRA: "dev"
+
+env:
+  PYTHONPATH: "src:{{.PYTHONPATH}}"
+
+tasks:
+  # Default task
+  default:
+    desc: Show available tasks
+    cmds:
+      - task --list-all
+    silent: true
+
+  # Development setup
+  setup:
+    desc: Set up development environment
+    cmds:
+      - echo "Setting up ProxmoxMCP development environment..."
+      - uv sync --extra {{.UV_EXTRA}}
+      - echo "✅ Development environment ready!"
+
+  # YAML linting tasks
+  yaml:lint:
+    desc: Lint all YAML files
+    cmds:
+      - ./scripts/yaml-lint.sh
+    sources:
+      - "**/*.yml"
+      - "**/*.yaml"
+      - ".yamllint.yml"
+    generates:
+      - .task/yaml-lint-{{.CHECKSUM}}
+
+  yaml:fix:
+    desc: Show detailed YAML linting issues
+    cmds:
+      - ./scripts/yaml-lint.sh --fix
+
+  yaml:check:
+    desc: Check YAML files (strict mode - exits with error)
+    cmds:
+      - ./scripts/yaml-lint.sh --check
+
+  # Python code quality tasks
+  format:
+    desc: Format Python code with black
+    cmds:
+      - uv run black .
+    sources:
+      - "**/*.py"
+    generates:
+      - .task/format-{{.CHECKSUM}}
+
+  format:check:
+    desc: Check Python code formatting
+    cmds:
+      - uv run black . --check --diff
+
+  lint:
+    desc: Lint Python code with ruff
+    cmds:
+      - uv run ruff check .
+
+  lint:fix:
+    desc: Lint and auto-fix Python code with ruff
+    cmds:
+      - uv run ruff check . --fix
+
+  type:check:
+    desc: Run mypy type checking
+    cmds:
+      - uv run mypy .
+
+  # Testing tasks
+  test:
+    desc: Run all tests
+    cmds:
+      - uv run pytest -v
+
+  test:watch:
+    desc: Run tests in watch mode
+    cmds:
+      - uv run pytest-watch
+
+  test:coverage:
+    desc: Run tests with coverage report
+    cmds:
+      - uv run pytest --cov=src --cov-report=html --cov-report=term
+
+  # Combined quality checks
+  check:
+    desc: Run all code quality checks
+    deps:
+      - format:check
+      - lint
+      - type:check
+      - yaml:check
+
+  fix:
+    desc: Auto-fix all fixable issues (Python + YAML)
+    cmds:
+      - task: format
+      - task: lint:fix
+      - task: yaml:autofix
+
+  yaml:autofix:
+    desc: Auto-fix YAML spacing issues (trailing spaces, newlines, etc.)
+    cmds:
+      - ./scripts/yaml-autofix.sh
+    sources:
+      - "**/*.yml"
+      - "**/*.yaml"
+    generates:
+      - .task/yaml-autofix-{{.CHECKSUM}}
+
+  yaml:check-fixes:
+    desc: Check which YAML files need auto-fixing
+    cmds:
+      - echo "Running yamllint to show remaining issues..."
+      - ./scripts/yaml-lint.sh --fix || true
+
+  # Legacy alias - keeping for backward compatibility
+  autofix:
+    desc: Auto-fix YAML files (alias for yaml:autofix)
+    cmds:
+      - task: yaml:autofix
+
+  # Pre-commit style checks
+  pre-commit:
+    desc: Run pre-commit checks (format, lint, type-check, yaml)
+    cmds:
+      - task: format
+      - task: lint:fix
+      - task: type:check
+      - task: yaml:lint
+      - echo "✅ All pre-commit checks passed!"
+
+  # CI simulation
+  ci:
+    desc: Run CI checks locally
+    cmds:
+      - echo "🚀 Running CI checks locally..."
+      - task: check
+      - task: test
+      - echo "✅ All CI checks passed!"
+
+  # Development server tasks (if applicable)
+  dev:
+    desc: Start development environment
+    cmds:
+      - echo "Starting ProxmoxMCP development server..."
+      - uv run python -m src.proxmox_mcp.server
+
+  # Dependency management
+  deps:update:
+    desc: Update dependencies
+    cmds:
+      - uv sync --upgrade
+      - echo "✅ Dependencies updated!"
+
+  deps:lock:
+    desc: Update lock file
+    cmds:
+      - uv lock
+      - echo "✅ Lock file updated!"
+
+  # Docker tasks
+  docker:build:
+    desc: Build Docker image
+    cmds:
+      - docker build -t proxmox-mcp:latest .
+
+  docker:run:
+    desc: Run Docker container
+    cmds:
+      - docker run --rm -it proxmox-mcp:latest
+
+  # Cleanup tasks
+  clean:
+    desc: Clean up generated files
+    cmds:
+      - rm -rf .pytest_cache/
+      - rm -rf .mypy_cache/
+      - rm -rf .ruff_cache/
+      - rm -rf htmlcov/
+      - rm -rf dist/
+      - rm -rf build/
+      - rm -rf *.egg-info/
+      - find . -type d -name __pycache__ -exec rm -rf {} +
+      - find . -type f -name "*.pyc" -delete
+      - echo "✅ Cleanup completed!"
+
+  clean:all:
+    desc: Deep clean including virtual environment
+    deps: [clean]
+    cmds:
+      - rm -rf .venv/
+      - rm -rf .task/
+      - echo "✅ Deep cleanup completed!"
+
+  # Documentation tasks
+  docs:serve:
+    desc: Serve documentation locally
+    cmds:
+      - echo "📚 Serving documentation..."
+      - python -m http.server 8000 -d docs/
+
+  # Release tasks
+  build:
+    desc: Build package for distribution
+    cmds:
+      - uv build
+
+  # Git hooks integration
+  hooks:install:
+    desc: Install git hooks (if using pre-commit)
+    cmds:
+      - echo "Installing git hooks..."
+      - |
+        if command -v pre-commit >/dev/null 2>&1; then
+          pre-commit install
+        else
+          echo "⚠️  pre-commit not found. Install with: pip install pre-commit"
+        fi
+
+  # Utility tasks
+  info:
+    desc: Show project information
+    cmds:
+      - echo "📋 ProxmoxMCP Project Information"
+      - echo "=================================="
+      - echo "Python version:" {{.PYTHON_VERSION}}
+      - echo "UV version:" && uv --version
+      - echo "Project root:" && pwd
+      - echo "Virtual env:" && uv run python -c 'import sys; print(sys.executable)'
+      - echo ""
+      - echo "🔧 Available tasks:"
+      - task --list-all
+
+  # Quick development workflow
+  quick:
+    desc: Quick development check (format + lint + test)
+    cmds:
+      - task: format
+      - task: lint:fix
+      - task: test
+      - echo "✅ Quick check completed!"

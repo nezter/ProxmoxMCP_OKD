@@ -4,14 +4,14 @@ body:
     attributes:
       value: |
         🎉 **Show and Tell** - Share your ProxmoxMCP projects and implementations!
-        
+
         This is the perfect place to:
         - Show off your ProxmoxMCP setup
         - Share creative use cases
         - Demonstrate integrations
         - Display monitoring dashboards
         - Share automation workflows
-        
+
   - type: input
     attributes:
       label: "Project Title"
@@ -19,7 +19,7 @@ body:
       placeholder: "e.g., Automated VM Deployment Pipeline with ProxmoxMCP"
     validations:
       required: true
-      
+
   - type: textarea
     attributes:
       label: "Project Description"
@@ -27,7 +27,7 @@ body:
       placeholder: "Describe what you built, what problem it solves, and how ProxmoxMCP fits in..."
     validations:
       required: true
-      
+
   - type: dropdown
     attributes:
       label: "Project Type"
@@ -44,7 +44,7 @@ body:
         - Other
     validations:
       required: true
-      
+
   - type: textarea
     attributes:
       label: "Technical Details"
@@ -55,7 +55,7 @@ body:
         - Integration tools:
         - Architecture overview:
         - Key challenges solved:
-      
+
   - type: textarea
     attributes:
       label: "Code/Configuration Snippets"
@@ -65,28 +65,28 @@ body:
         ```python
         # Your code here
         ```
-        
+
         ```json
         {
           "your": "config here"
         }
         ```
-        
+
   - type: textarea
     attributes:
       label: "Screenshots/Demos"
       description: "Share screenshots, videos, or demo links"
       placeholder: |
         - Screenshots: (drag and drop images here)
-        - Demo video: 
+        - Demo video:
         - Live demo:
-        
+
   - type: textarea
     attributes:
       label: "Lessons Learned"
       description: "What did you learn? Any tips for others?"
       placeholder: "Share insights, gotchas, best practices, or advice for others doing similar projects..."
-      
+
   - type: textarea
     attributes:
       label: "Future Plans"

@@ -10,7 +10,7 @@ updates:
       interval: "weekly"
       day: "monday"
       time: "09:00"
-      timezone: "UTC"
+      timezone: "Etc/UTC"
     open-pull-requests-limit: 10
     assignees:
       - "basher83"
@@ -56,7 +56,7 @@ updates:
       interval: "weekly"
       day: "tuesday"
       time: "09:00"
-      timezone: "UTC"
+      timezone: "Etc/UTC"
     open-pull-requests-limit: 5
     assignees:
       - "basher83"
@@ -74,7 +74,7 @@ updates:
       interval: "weekly"
       day: "wednesday"
       time: "09:00"
-      timezone: "UTC"
+      timezone: "Etc/UTC"
     open-pull-requests-limit: 5
     assignees:
       - "basher83"

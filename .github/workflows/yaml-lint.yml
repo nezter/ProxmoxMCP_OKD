@@ -1,0 +1,65 @@
+name: YAML Linting
+
+on:
+  pull_request:
+    paths:
+      - '**.yml'
+      - '**.yaml'
+      - '.yamllint.yml'
+      - 'scripts/yaml-lint.sh'
+  push:
+    branches: [ "main" ]
+    paths:
+      - '**.yml'
+      - '**.yaml'
+      - '.yamllint.yml'
+      - 'scripts/yaml-lint.sh'
+
+# Cancel redundant runs
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  yaml-lint:
+    runs-on: ubuntu-latest
+    name: YAML Linting
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install UV
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: "pyproject.toml"
+
+      # Cache UV virtual environment
+      - name: Cache UV venv
+        uses: actions/cache@v4
+        continue-on-error: true
+        with:
+          path: .venv
+          key: venv-yaml-${{ runner.os }}-${{ hashFiles('pyproject.toml') }}
+          restore-keys: |
+            venv-yaml-${{ runner.os }}-
+            venv-${{ runner.os }}-
+
+      - name: Install dependencies
+        run: uv sync --extra dev
+
+      - name: Lint YAML files
+        run: ./scripts/yaml-lint.sh --check
+
+      - name: Show detailed issues (if any)
+        if: failure()
+        run: ./scripts/yaml-lint.sh --fix

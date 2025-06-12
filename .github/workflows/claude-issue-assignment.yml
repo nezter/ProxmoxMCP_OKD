@@ -28,17 +28,17 @@ jobs:
         with:
           script: |
             const comment = `🤖 **Claude Code has been assigned to this issue!**
-            
+
             I'll start working on this issue and create a pull request when ready.
-            
+
             **What happens next:**
             1. I'll analyze the issue requirements
             2. Implement the necessary changes
             3. Run tests and quality checks
             4. Create a pull request for review
-            
+
             You can track my progress by watching for commits on the new branch that will be created.`;
-            
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
@@ -67,12 +67,12 @@ jobs:
           timeout_minutes: "120"
           direct_prompt: |
             I've been assigned to work on GitHub Issue #${{ github.event.issue.number }}.
-            
+
             **Issue Title:** ${{ github.event.issue.title }}
-            
+
             **Issue Description:**
             ${{ github.event.issue.body }}
-            
+
             **Instructions:**
             1. Analyze the issue requirements carefully
             2. Implement the necessary changes following the project's coding standards
@@ -81,11 +81,11 @@ jobs:
             5. Run quality checks (pytest, black, mypy) to ensure code quality
             6. Commit changes with clear, descriptive commit messages
             7. When implementation is complete, create a pull request
-            
+
             **Branch:** I'll create a new branch for this work
-            
+
             Please implement the solution for this issue following the project's guidelines in CLAUDE.md and the development workflow.
-            
+
             Remember to:
             - Follow the existing code patterns and architecture
             - Add appropriate tests for new functionality
@@ -104,27 +104,27 @@ jobs:
             // Look for branches that start with claude/issue-{number}
             const issueNumber = ${{ github.event.issue.number }};
             const branchPrefix = `claude/issue-${issueNumber}`;
-            
+
             // Get all branches and find the one Claude created
             const branches = await github.rest.repos.listBranches({
               owner: context.repo.owner,
               repo: context.repo.repo,
               per_page: 100
             });
-            
-            const claudeBranch = branches.data.find(branch => 
-              branch.name.startsWith(branchPrefix) && 
+
+            const claudeBranch = branches.data.find(branch =>
+              branch.name.startsWith(branchPrefix) &&
               branch.name !== `${branchPrefix}-security-replace-static-salt-with-unique-salt-per-`
             );
-            
+
             if (!claudeBranch) {
               console.log('No Claude branch found for this issue');
               return;
             }
-            
+
             const branchName = claudeBranch.name;
             console.log(`Found Claude branch: ${branchName}`);
-            
+
             // Check if there are any commits on the branch different from main
             const comparison = await github.rest.repos.compareCommits({
               owner: context.repo.owner,
@@ -132,7 +132,7 @@ jobs:
               base: 'main',
               head: branchName
             });
-            
+
             // Only create PR if there are commits ahead of main
             if (comparison.data.ahead_by > 0) {
               const pr = await github.rest.pulls.create({
@@ -142,30 +142,30 @@ jobs:
                 head: branchName,
                 base: 'main',
                 body: `Closes #${{ github.event.issue.number }}
-                
+
                 ## Summary
                 This PR implements the solution for the assigned issue.
-                
+
                 ## Changes Made
                 - [List of changes will be added by Claude Code]
-                
+
                 ## Testing
                 - All existing tests pass
                 - New tests added where appropriate
                 - Code quality checks pass
-                
+
                 🤖 This PR was created automatically by Claude Code.`
               });
-              
+
               // Link the PR to the issue
               await github.rest.issues.createComment({
                 issue_number: ${{ github.event.issue.number }},
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 body: `✅ **Implementation Complete!**
-                
+
                 I've finished working on this issue and created pull request #${pr.data.number} for review.
-                
+
                 The solution has been implemented and all quality checks have passed.`
               });
             }

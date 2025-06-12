@@ -10,13 +10,13 @@ description: Tracking development progress for Proxmox MCP based on the reposito
 columns:
   - name: To Do
     description: Tasks that are planned but not yet started
-    
+
   - name: In Progress
     description: Tasks that are currently being worked on
-    
+
   - name: Review
     description: Tasks that are completed and awaiting review
-    
+
   - name: Done
     description: Tasks that are completed and approved
 
@@ -26,17 +26,17 @@ automation:
   - event: issues.opened
     action: add_to_column
     column: To Do
-    
+
   # When pull requests are opened, add them to the Review column
   - event: pull_request.opened
     action: add_to_column
     column: Review
-    
+
   # When pull requests are merged, move associated issues to Done
   - event: pull_request.merged
     action: move_to_column
     column: Done
-    
+
   # When issues are closed, move them to Done
   - event: issues.closed
     action: move_to_column

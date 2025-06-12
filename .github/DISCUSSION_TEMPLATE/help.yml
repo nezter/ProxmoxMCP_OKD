@@ -4,19 +4,19 @@ body:
     attributes:
       value: |
         🤝 **Community Help** - Get help from the community!
-        
+
         This is for:
         - General usage questions
         - Best practice discussions
         - Architecture advice
         - Integration guidance
         - Troubleshooting assistance
-        
+
         **Before posting:**
         - [ ] Check the [README](https://github.com/basher83/ProxmoxMCP#readme)
         - [ ] Search [existing discussions](https://github.com/basher83/ProxmoxMCP/discussions)
         - [ ] Consider if this should be an [issue](https://github.com/basher83/ProxmoxMCP/issues/new/choose) instead
-        
+
   - type: input
     attributes:
       label: "What do you need help with?"
@@ -24,7 +24,7 @@ body:
       placeholder: "e.g., Setting up ProxmoxMCP in a Docker Swarm environment"
     validations:
       required: true
-      
+
   - type: textarea
     attributes:
       label: "Detailed Description"
@@ -32,7 +32,7 @@ body:
       placeholder: "What are you trying to achieve? What challenges are you facing?"
     validations:
       required: true
-      
+
   - type: dropdown
     attributes:
       label: "Help Category"
@@ -50,7 +50,7 @@ body:
         - Other
     validations:
       required: true
-      
+
   - type: textarea
     attributes:
       label: "Your Environment"
@@ -61,13 +61,13 @@ body:
         - Deployment method:
         - Operating system:
         - Special requirements:
-        
+
   - type: textarea
     attributes:
       label: "What You've Tried"
       description: "What have you already attempted?"
       placeholder: "Steps taken, documentation read, solutions tried..."
-      
+
   - type: textarea
     attributes:
       label: "Current Configuration"
@@ -79,7 +79,7 @@ body:
           "your": "config here"
         }
         ```
-        
+
   - type: dropdown
     attributes:
       label: "Urgency"
@@ -89,7 +89,7 @@ body:
         - Medium - Important for project
         - Low - Nice to resolve
         - Learning - No rush
-        
+
   - type: textarea
     attributes:
       label: "Additional Context"
