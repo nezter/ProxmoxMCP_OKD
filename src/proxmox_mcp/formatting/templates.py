@@ -31,9 +31,7 @@ class ProxmoxTemplates:
             memory = node.get("memory", {})
             memory_used = memory.get("used", 0)
             memory_total = memory.get("total", 0)
-            memory_percent = (
-                (memory_used / memory_total * 100) if memory_total > 0 else 0
-            )
+            memory_percent = (memory_used / memory_total * 100) if memory_total > 0 else 0
 
             # Format node info
             result.extend(
@@ -115,9 +113,7 @@ class ProxmoxTemplates:
             memory = vm.get("memory", {})
             memory_used = memory.get("used", 0)
             memory_total = memory.get("total", 0)
-            memory_percent = (
-                (memory_used / memory_total * 100) if memory_total > 0 else 0
-            )
+            memory_percent = (memory_used / memory_total * 100) if memory_total > 0 else 0
 
             result.extend(
                 [
@@ -182,14 +178,13 @@ class ProxmoxTemplates:
             memory = container.get("memory", {})
             memory_used = memory.get("used", 0)
             memory_total = memory.get("total", 0)
-            memory_percent = (
-                (memory_used / memory_total * 100) if memory_total > 0 else 0
-            )
+            memory_percent = (memory_used / memory_total * 100) if memory_total > 0 else 0
 
             result.extend(
                 [
                     "",  # Empty line between containers
-                    f"{ProxmoxTheme.RESOURCES['container']} {container['name']} (ID: {container['vmid']})",
+                    f"{ProxmoxTheme.RESOURCES['container']} {container['name']} "
+                    f"(ID: {container['vmid']})",
                     f"  • Status: {container['status'].upper()}",
                     f"  • Node: {container['node']}",
                     f"  • CPU Cores: {container.get('cpus', 'N/A')}",

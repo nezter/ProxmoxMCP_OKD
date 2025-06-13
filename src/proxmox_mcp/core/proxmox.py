@@ -103,7 +103,7 @@ class ProxmoxManager:
             return api
         except Exception as e:
             self.logger.error(f"Failed to connect to Proxmox: {e}")
-            raise RuntimeError(f"Failed to connect to Proxmox: {e}")
+            raise RuntimeError(f"Failed to connect to Proxmox: {e}") from e
 
     def get_api(self) -> ProxmoxAPI:
         """Get the initialized Proxmox API instance.

@@ -75,7 +75,8 @@ def load_config(config_path: Optional[str] = None) -> Config:
         config_path = os.environ.get("PROXMOX_MCP_CONFIG")
         if not config_path:
             raise ValueError(
-                "Config path must be provided either as parameter or via PROXMOX_MCP_CONFIG environment variable"
+                "Config path must be provided either as parameter or via "
+                "PROXMOX_MCP_CONFIG environment variable"
             )
 
     try:
@@ -89,9 +90,9 @@ def load_config(config_path: Optional[str] = None) -> Config:
 
             return Config(**config_data)
     except json.JSONDecodeError as e:
-        raise ValueError(f"Invalid JSON in config file: {e}")
+        raise ValueError(f"Invalid JSON in config file: {e}") from e
     except Exception as e:
-        raise ValueError(f"Failed to load config: {e}")
+        raise ValueError(f"Failed to load config: {e}") from e
 
 
 def _decrypt_config_tokens(config_data: dict) -> dict:
@@ -234,4 +235,4 @@ def encrypt_config_file(config_path: str, output_path: Optional[str] = None) -> 
 
         return output_path
     except Exception as e:
-        raise ValueError(f"Failed to encrypt configuration file: {e}")
+        raise ValueError(f"Failed to encrypt configuration file: {e}") from e

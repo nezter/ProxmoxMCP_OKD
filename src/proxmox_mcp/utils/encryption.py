@@ -72,15 +72,9 @@ class TokenEncryption:
         print("   A temporary key has been generated for this session only.")
         print("   To generate and set a permanent master key:")
         print("   1. Run: python -m proxmox_mcp.utils.encrypt_config --generate-key")
-        print(
-            "   2. Copy the key to your environment: export PROXMOX_MCP_MASTER_KEY=<key>"
-        )
-        print(
-            "   3. Any tokens encrypted with the temporary key will need re-encryption."
-        )
-        print(
-            "   ⚠️  WARNING: Terminal history may expose keys - use the utility for security!"
-        )
+        print("   2. Copy the key to your environment: export PROXMOX_MCP_MASTER_KEY=<key>")
+        print("   3. Any tokens encrypted with the temporary key will need re-encryption.")
+        print("   ⚠️  WARNING: Terminal history may expose keys - use the utility for security!")
 
         # Return the generated key for this session but don't expose it in logs
         return new_key
@@ -117,7 +111,7 @@ class TokenEncryption:
 
             return Fernet(fernet_key)
         except Exception as e:
-            raise ValueError(f"Invalid master key: {e}")
+            raise ValueError(f"Invalid master key: {e}") from e
 
     def encrypt_token(self, token: str) -> str:
         """Encrypt a token for secure storage with unique salt.
@@ -147,7 +141,7 @@ class TokenEncryption:
 
             return f"enc:{salt_b64}:{encrypted_b64}"
         except Exception as e:
-            raise ValueError(f"Failed to encrypt token: {e}")
+            raise ValueError(f"Failed to encrypt token: {e}") from e
 
     def decrypt_token(self, encrypted_token: str) -> str:
         """Decrypt an encrypted token with backward compatibility.
@@ -202,7 +196,7 @@ class TokenEncryption:
                 raise ValueError("Invalid encrypted token format")
 
         except Exception as e:
-            raise ValueError(f"Failed to decrypt token: {e}")
+            raise ValueError(f"Failed to decrypt token: {e}") from e
 
     def is_encrypted(self, token: str) -> bool:
         """Check if a token is encrypted.
@@ -241,9 +235,7 @@ class TokenEncryption:
         return base64.urlsafe_b64encode(os.urandom(32)).decode()
 
 
-def encrypt_sensitive_value(
-    value: str, encryptor: Optional[TokenEncryption] = None
-) -> str:
+def encrypt_sensitive_value(value: str, encryptor: Optional[TokenEncryption] = None) -> str:
     """Convenience function to encrypt a sensitive value.
 
     Args:

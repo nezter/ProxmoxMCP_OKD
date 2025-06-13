@@ -215,11 +215,11 @@ class TestKeyRotation:
 
             try:
                 # Should verify successfully with correct key
-                assert verify_config_decryption(f.name, master_key) == True
+                assert verify_config_decryption(f.name, master_key)
 
                 # Should fail with wrong key
                 wrong_key = TokenEncryption.generate_master_key()
-                assert verify_config_decryption(f.name, wrong_key) == False
+                assert not verify_config_decryption(f.name, wrong_key)
             finally:
                 os.unlink(f.name)
 
@@ -234,7 +234,7 @@ class TestKeyRotation:
             try:
                 # Should pass verification even with random key since token is plain text
                 random_key = TokenEncryption.generate_master_key()
-                assert verify_config_decryption(f.name, random_key) == True
+                assert verify_config_decryption(f.name, random_key)
             finally:
                 os.unlink(f.name)
 
@@ -249,7 +249,7 @@ class TestKeyRotation:
             try:
                 # Should pass verification when no encrypted tokens exist
                 random_key = TokenEncryption.generate_master_key()
-                assert verify_config_decryption(f.name, random_key) == True
+                assert verify_config_decryption(f.name, random_key)
             finally:
                 os.unlink(f.name)
 

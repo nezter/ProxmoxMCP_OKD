@@ -43,9 +43,7 @@ class VMConsoleManager:
         self.proxmox = proxmox_api
         self.logger = logging.getLogger("proxmox-mcp.vm-console")
 
-    async def execute_command(
-        self, node: str, vmid: str, command: str
-    ) -> Dict[str, Any]:
+    async def execute_command(self, node: str, vmid: str, command: str) -> Dict[str, Any]:
         """Execute a command in a VM's console via QEMU guest agent.
 
         Implements a two-phase command execution process:
@@ -92,15 +90,11 @@ class VMConsoleManager:
             # Verify VM exists and is running
             vm_status = self.proxmox.nodes(node).qemu(vmid).status.current.get()
             if vm_status["status"] != "running":
-                self.logger.error(
-                    f"Failed to execute command on VM {vmid}: VM is not running"
-                )
+                self.logger.error(f"Failed to execute command on VM {vmid}: VM is not running")
                 raise ValueError(f"VM {vmid} on node {node} is not running")
 
             # Get VM's console
-            self.logger.info(
-                f"Executing command on VM {vmid} (node: {node}): {command}"
-            )
+            self.logger.info(f"Executing command on VM {vmid} (node: {node}): {command}")
 
             # Get the API endpoint
             # Use the guest agent exec endpoint
@@ -118,7 +112,7 @@ class VMConsoleManager:
                     self.logger.info(f"Command started with result: {exec_result}")
                 except Exception as e:
                     self.logger.error(f"Failed to start command: {str(e)}")
-                    raise RuntimeError(f"Failed to start command: {str(e)}")
+                    raise RuntimeError(f"Failed to start command: {str(e)}") from e
 
                 if "pid" not in exec_result:
                     raise RuntimeError("No PID returned from command execution")
@@ -140,11 +134,11 @@ class VMConsoleManager:
                         raise RuntimeError("No response from exec-status")
                 except Exception as e:
                     self.logger.error(f"Failed to get command status: {str(e)}")
-                    raise RuntimeError(f"Failed to get command status: {str(e)}")
+                    raise RuntimeError(f"Failed to get command status: {str(e)}") from e
                 self.logger.info(f"Command completed with status: {console}")
             except Exception as e:
                 self.logger.error(f"API call failed: {str(e)}")
-                raise RuntimeError(f"API call failed: {str(e)}")
+                raise RuntimeError(f"API call failed: {str(e)}") from e
             self.logger.debug(f"Raw API response type: {type(console)}")
             self.logger.debug(f"Raw API response: {console}")
 
@@ -169,9 +163,7 @@ class VMConsoleManager:
             self.logger.debug(f"Processed error: {error}")
             self.logger.debug(f"Processed exit code: {exit_code}")
 
-            self.logger.debug(
-                f"Executed command '{command}' on VM {vmid} (node: {node})"
-            )
+            self.logger.debug(f"Executed command '{command}' on VM {vmid} (node: {node})")
 
             return {
                 "success": True,
@@ -186,5 +178,5 @@ class VMConsoleManager:
         except Exception as e:
             self.logger.error(f"Failed to execute command on VM {vmid}: {str(e)}")
             if "not found" in str(e).lower():
-                raise ValueError(f"VM {vmid} not found on node {node}")
-            raise RuntimeError(f"Failed to execute command: {str(e)}")
+                raise ValueError(f"VM {vmid} not found on node {node}") from e
+            raise RuntimeError(f"Failed to execute command: {str(e)}") from e
