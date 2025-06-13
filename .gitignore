@@ -63,3 +63,10 @@ coverage.xml
 # Local configuration
 config/config.json
 proxmox-config/config.json
+
+
+#Ignore vscode AI rules
+.github/copilot-instructions.md
+
+# Ignore local codacy
+.codacy/
