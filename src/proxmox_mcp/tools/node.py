@@ -100,6 +100,7 @@ class NodeTools(ProxmoxTool):
             return self._format_response(nodes, "nodes")
         except Exception as e:
             self._handle_error("get nodes", e)
+            return []
 
     def get_node_status(self, node: str) -> List[Content]:
         """Get detailed status information for a specific node.
@@ -140,3 +141,4 @@ class NodeTools(ProxmoxTool):
             return self._format_response((node, result), "node_status")
         except Exception as e:
             self._handle_error(f"get status for node {node}", e)
+            return []

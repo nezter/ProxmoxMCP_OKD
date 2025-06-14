@@ -538,7 +538,8 @@ class TestTerminalClearing:
         # Verify no subprocess was called
         mock_subprocess.assert_not_called()
 
-        # Verify manual instruction was printed - look for the specific message from KeyboardInterrupt handler
+        # Verify manual instruction was printed - look for the specific message from
+        # KeyboardInterrupt handler
         printed_calls = [str(call) for call in mock_print.call_args_list]
         interrupt_instructions = [
             call
@@ -569,7 +570,8 @@ class TestTerminalClearing:
         # Verify no subprocess was called
         mock_subprocess.assert_not_called()
 
-        # Verify manual instruction was printed - look for the specific message from EOFError handler
+        # Verify manual instruction was printed - look for the specific message from
+        # EOFError handler
         printed_calls = [str(call) for call in mock_print.call_args_list]
         eof_instructions = [
             call

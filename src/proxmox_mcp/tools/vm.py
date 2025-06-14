@@ -14,7 +14,7 @@ The tools implement fallback mechanisms for scenarios where
 detailed VM information might be temporarily unavailable.
 """
 
-from typing import List
+from typing import Any, List
 
 from mcp.types import TextContent as Content
 
@@ -36,7 +36,7 @@ class VMTools(ProxmoxTool):
     with QEMU guest agent for VM command execution.
     """
 
-    def __init__(self, proxmox_api):
+    def __init__(self, proxmox_api: Any) -> None:
         """Initialize VM tools.
 
         Args:
@@ -117,6 +117,7 @@ class VMTools(ProxmoxTool):
             return self._format_response(result, "vms")
         except Exception as e:
             self._handle_error("get VMs", e)
+            return []
 
     async def execute_command(
         self, node: str, vmid: str, command: str
@@ -160,3 +161,4 @@ class VMTools(ProxmoxTool):
             return [Content(type="text", text=formatted)]
         except Exception as e:
             self._handle_error(f"execute command on VM {vmid}", e)
+            return []

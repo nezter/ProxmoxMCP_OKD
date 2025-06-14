@@ -288,18 +288,16 @@ async def test_get_cluster_status(server, mock_proxmox):
 async def test_execute_vm_command_success(server, mock_proxmox):
     """Test successful VM command execution."""
     # Mock VM status check
-    mock_proxmox.return_value.nodes.return_value.qemu.return_value.status.current.get.return_value = {
-        "status": "running"
-    }
+    mock_status = mock_proxmox.return_value.nodes.return_value.qemu.return_value.status
+    mock_status.current.get.return_value = {"status": "running"}
 
     # Mock the two-phase command execution
     # Phase 1: exec returns PID
-    mock_proxmox.return_value.nodes.return_value.qemu.return_value.agent.return_value.post.return_value = {
-        "pid": 12345
-    }
+    mock_agent = mock_proxmox.return_value.nodes.return_value.qemu.return_value.agent
+    mock_agent.return_value.post.return_value = {"pid": 12345}
 
     # Phase 2: exec-status returns results
-    mock_proxmox.return_value.nodes.return_value.qemu.return_value.agent.return_value.get.return_value = {
+    mock_agent.return_value.get.return_value = {
         "out-data": "command output",
         "err-data": "",
         "exitcode": 0,
@@ -325,9 +323,8 @@ async def test_execute_vm_command_missing_parameters(server):
 @pytest.mark.asyncio
 async def test_execute_vm_command_vm_not_running(server, mock_proxmox):
     """Test VM command execution when VM is not running."""
-    mock_proxmox.return_value.nodes.return_value.qemu.return_value.status.current.get.return_value = {
-        "status": "stopped"
-    }
+    mock_status = mock_proxmox.return_value.nodes.return_value.qemu.return_value.status
+    mock_status.current.get.return_value = {"status": "stopped"}
 
     with pytest.raises(ToolError, match="not running"):
         await server.mcp.call_tool(
@@ -339,18 +336,16 @@ async def test_execute_vm_command_vm_not_running(server, mock_proxmox):
 async def test_execute_vm_command_with_error(server, mock_proxmox):
     """Test VM command execution with command error."""
     # Mock VM status check
-    mock_proxmox.return_value.nodes.return_value.qemu.return_value.status.current.get.return_value = {
-        "status": "running"
-    }
+    mock_status = mock_proxmox.return_value.nodes.return_value.qemu.return_value.status
+    mock_status.current.get.return_value = {"status": "running"}
 
     # Mock the two-phase command execution
     # Phase 1: exec returns PID
-    mock_proxmox.return_value.nodes.return_value.qemu.return_value.agent.return_value.post.return_value = {
-        "pid": 12346
-    }
+    mock_agent = mock_proxmox.return_value.nodes.return_value.qemu.return_value.agent
+    mock_agent.return_value.post.return_value = {"pid": 12346}
 
     # Phase 2: exec-status returns error results
-    mock_proxmox.return_value.nodes.return_value.qemu.return_value.agent.return_value.get.return_value = {
+    mock_agent.return_value.get.return_value = {
         "out-data": "",
         "err-data": "command not found",
         "exitcode": 1,

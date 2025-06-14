@@ -211,7 +211,9 @@ class TestTokenEncryption:
         assert base64.urlsafe_b64decode(key2.encode())
 
     def test_different_encryptors_same_master_key(self):
-        """Test that different encryptor instances with same master key can decrypt each other's tokens."""
+        """Test that different encryptor instances with same master key can decrypt each
+        other's tokens.
+        """
         master_key = TokenEncryption.generate_master_key()
 
         encryptor1 = TokenEncryption(master_key=master_key)

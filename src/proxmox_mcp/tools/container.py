@@ -109,3 +109,4 @@ class ContainerTools(ProxmoxTool):
             return self._format_response(result, "containers")
         except Exception as e:
             self._handle_error("get containers", e)
+            return []

@@ -17,6 +17,7 @@ The logging system supports:
 
 import logging
 import os
+from typing import List, Union
 
 from ..config.models import LoggingConfig
 
@@ -62,7 +63,7 @@ def setup_logging(config: LoggingConfig) -> logging.Logger:
         log_file = os.path.join(os.getcwd(), log_file)
 
     # Create handlers
-    handlers = []
+    handlers: List[Union[logging.FileHandler, logging.StreamHandler]] = []
 
     if log_file:
         file_handler = logging.FileHandler(log_file)
@@ -84,7 +85,7 @@ def setup_logging(config: LoggingConfig) -> logging.Logger:
     root_logger.setLevel(getattr(logging, config.level.upper()))
 
     # Remove any existing handlers
-    for handler in root_logger.handlers[:]:
+    for handler in list(root_logger.handlers):  # type: ignore[assignment]
         root_logger.removeHandler(handler)
 
     # Add new handlers

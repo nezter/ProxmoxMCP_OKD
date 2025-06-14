@@ -18,9 +18,10 @@ The server exposes a set of tools for managing Proxmox resources including:
 import os
 import signal
 import sys
-from typing import Annotated, Optional
+from typing import Annotated, List, Optional
 
 from mcp.server.fastmcp import FastMCP
+from mcp.types import TextContent
 from pydantic import Field
 
 from .config.loader import load_config
@@ -84,7 +85,7 @@ class ProxmoxMCPServer:
 
         # Node tools
         @self.mcp.tool(description=GET_NODES_DESC)
-        def get_nodes():
+        def get_nodes() -> List[TextContent]:
             return self.node_tools.get_nodes()
 
         @self.mcp.tool(description=GET_NODE_STATUS_DESC)
@@ -95,17 +96,17 @@ class ProxmoxMCPServer:
                     description="Name/ID of node to query (e.g. 'pve1', 'proxmox-node2')"
                 ),
             ],
-        ):
+        ) -> List[TextContent]:
             return self.node_tools.get_node_status(node)
 
         # VM tools
         @self.mcp.tool(description=GET_VMS_DESC)
-        def get_vms():
+        def get_vms() -> List[TextContent]:
             return self.vm_tools.get_vms()
 
         # Container tools
         @self.mcp.tool(description=GET_CONTAINERS_DESC)
-        def get_containers():
+        def get_containers() -> List[TextContent]:
             return self.container_tools.get_containers()
 
         @self.mcp.tool(description=EXECUTE_VM_COMMAND_DESC)
@@ -120,17 +121,17 @@ class ProxmoxMCPServer:
                     description="Shell command to run (e.g. 'uname -a', 'systemctl status nginx')"
                 ),
             ],
-        ):
+        ) -> List[TextContent]:
             return await self.vm_tools.execute_command(node, vmid, command)
 
         # Storage tools
         @self.mcp.tool(description=GET_STORAGE_DESC)
-        def get_storage():
+        def get_storage() -> List[TextContent]:
             return self.storage_tools.get_storage()
 
         # Cluster tools
         @self.mcp.tool(description=GET_CLUSTER_STATUS_DESC)
-        def get_cluster_status():
+        def get_cluster_status() -> List[TextContent]:
             return self.cluster_tools.get_cluster_status()
 
     def start(self) -> None:
@@ -145,7 +146,7 @@ class ProxmoxMCPServer:
         """
         import anyio
 
-        def signal_handler(signum, frame):
+        def signal_handler(signum: int, frame: object) -> None:
             self.logger.info("Received signal to shutdown...")
             sys.exit(0)
 

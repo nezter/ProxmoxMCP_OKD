@@ -84,7 +84,7 @@ class AuthConfig(BaseModel):
 
     @field_validator("token_value")
     @classmethod
-    def validate_token_value(cls, v):
+    def validate_token_value(cls, v: str) -> str:
         """Validate that token_value is not empty after potential decryption."""
         if not v or not v.strip():
             raise ValueError("Token value cannot be empty")
