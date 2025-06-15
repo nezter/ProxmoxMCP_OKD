@@ -40,9 +40,13 @@ class ProxmoxTool:
             proxmox_api: Initialized ProxmoxAPI instance
         """
         self.proxmox = proxmox_api
-        self.logger = logging.getLogger(f"proxmox-mcp.{self.__class__.__name__.lower()}")
+        self.logger = logging.getLogger(
+            f"proxmox-mcp.{self.__class__.__name__.lower()}"
+        )
 
-    def _format_response(self, data: Any, resource_type: Optional[str] = None) -> List[Content]:
+    def _format_response(
+        self, data: Any, resource_type: Optional[str] = None
+    ) -> List[Content]:
         """Format response data into MCP content using templates.
 
         This method handles formatting of various Proxmox resource types into
@@ -74,17 +78,17 @@ class ProxmoxTool:
         if resource_type == "node_status":
             return self._format_node_status(data)
 
-        # Use dictionary lookup for simple template mappings
-        template_mapping = {
-            "nodes": ProxmoxTemplates.node_list,
-            "vms": ProxmoxTemplates.vm_list,
-            "storage": ProxmoxTemplates.storage_list,
-            "containers": ProxmoxTemplates.container_list,
-            "cluster": ProxmoxTemplates.cluster_status,
-        }
-
-        if resource_type in template_mapping:
-            return template_mapping[resource_type](data)
+        # Use explicit conditionals for better type checking
+        if resource_type == "nodes":
+            return ProxmoxTemplates.node_list(data)
+        elif resource_type == "vms":
+            return ProxmoxTemplates.vm_list(data)
+        elif resource_type == "storage":
+            return ProxmoxTemplates.storage_list(data)
+        elif resource_type == "containers":
+            return ProxmoxTemplates.container_list(data)
+        elif resource_type == "cluster":
+            return ProxmoxTemplates.cluster_status(data)
 
         # Fallback to JSON formatting for unknown types
         import json
