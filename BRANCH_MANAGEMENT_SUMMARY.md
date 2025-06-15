@@ -9,6 +9,7 @@ Successfully implemented a comprehensive branch management system for the Proxmo
 ### Shell Script Issues (~30 issues)
 
 #### File: `scripts/branch-templates/config.sh`
+
 - ✅ **Missing shebang (SC2148)**: Added proper `#!/usr/bin/env bash` shebang
 - ✅ **Multiple unused variables (SC2034)**: All variables are now properly exported for external use
 - ✅ **Error handling**: Added `set -euo pipefail` for robust error handling
