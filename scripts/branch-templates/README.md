@@ -30,6 +30,7 @@ A comprehensive branch management system for the ProxmoxMCP project that enforce
 All branches must follow the format: `<type>/<component>-<description>`
 
 ### Valid Types
+
 - `feature` - New features and enhancements
 - `fix` - Bug fixes and patches  
 - `security` - Security improvements
