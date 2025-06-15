@@ -139,6 +139,7 @@ $ ./scripts/branch-templates/branch-manager.sh help
 ## 🔧 Integration Options
 
 ### Git Hooks Integration
+
 The system can be integrated with Git hooks for automatic enforcement:
 - Pre-push validation to prevent invalid branch names
 - Pre-commit validation for branch name compliance
