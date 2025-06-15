@@ -1,0 +1,27 @@
+{
+  "agentCanUpdateSnapshot": true,
+  "snapshot": "POPULATED_FROM_SETTINGS",
+  "install": "pip install uv && uv sync --extra dev",
+  "terminals": [
+    {
+      "name": "Run Tests",
+      "command": "uv run pytest -v"
+    },
+    {
+      "name": "Type Check",
+      "command": "uv run mypy . --exclude mem0-mcp"
+    },
+    {
+      "name": "Lint & Format",
+      "command": "uv run ruff check . --fix && uv run black ."
+    },
+    {
+      "name": "Pre-commit Checks",
+      "command": "task pre-commit"
+    },
+    {
+      "name": "CI Checks",
+      "command": "task ci"
+    }
+  ]
+}
