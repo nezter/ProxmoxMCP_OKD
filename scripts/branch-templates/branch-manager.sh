@@ -154,10 +154,10 @@ list_branches() {
     print_status "Branch Status Report"
     echo ""
     
-    # Get list of branches
+    # Get list of branches and remove prefixes in a single `sed` call
     local branches
     if [[ "$show_all" == "true" ]]; then
-        branches=$(git branch -a | sed 's/^[* ] //' | sed 's/remotes\/origin\///' | sort -u)
+        branches=$(git branch -a | sed -E 's/^[* ] |remotes\/origin\///g' | sort -u)
     else
         branches=$(git branch | sed 's/^[* ] //' | sort)
     fi
