@@ -41,6 +41,7 @@ All branches must follow the format: `<type>/<component>-<description>`
 - `perf` - Performance improvements
 
 ### Valid Components
+
 - `vm` - Virtual machine management
 - `container` - Container operations
 - `storage` - Storage management
