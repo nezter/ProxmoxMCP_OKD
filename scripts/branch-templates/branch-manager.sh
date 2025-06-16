@@ -56,7 +56,6 @@ create_branch() {
     local branch_type="$1"
     local component="$2"
     local description="$3"
-    if [ "$switch_to_branch" = true ]; then git checkout "$branch_name"; fi
 
     # Generate branch name
     local branch_name
