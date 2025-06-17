@@ -80,6 +80,7 @@ class ProxmoxTool:
 
         # Use dictionary lookup for simple template mappings
         from typing import Callable, Dict
+
         template_mapping: Dict[str, Callable[[Any], str]] = {
             "nodes": ProxmoxTemplates.node_list,
             "vms": ProxmoxTemplates.vm_list,
