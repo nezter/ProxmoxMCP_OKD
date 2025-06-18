@@ -113,19 +113,66 @@ tasks:
 
   # Testing tasks
   test:
-    desc: Run all tests
+    desc: Run all tests with enhanced validation
     cmds:
-      - uv run pytest -v
+      - echo "🧪 Running comprehensive test suite..."
+      - uv run pytest -v --tb=short
+      - echo "📊 Test Summary - All unit tests completed"
+
+  test:unit:
+    desc: Run unit tests only
+    cmds:
+      - uv run pytest -v tests/ --tb=short
+
+  test:coverage:
+    desc: Run tests with coverage report (requires pytest-cov)
+    cmds:
+      - |
+        if uv run python -c "import pytest_cov" 2>/dev/null; then
+          uv run pytest --cov=src --cov-report=html --cov-report=term-missing --cov-fail-under=80
+        else
+          echo "⚠️  pytest-cov not installed. Running tests without coverage..."
+          echo "💡 Install with: uv add pytest-cov --group dev"
+          uv run pytest -v
+        fi
 
   test:watch:
     desc: Run tests in watch mode
     cmds:
-      - uv run pytest-watch
+      - |
+        if uv run python -c "import pytest_watch" 2>/dev/null; then
+          uv run pytest-watch
+        else
+          echo "⚠️  pytest-watch not installed. Install with: uv add pytest-watch --group dev"
+          echo "🔄 Running tests once instead..."
+          uv run pytest -v
+        fi
 
-  test:coverage:
-    desc: Run tests with coverage report
+  test:integration:
+    desc: Run integration tests (requires Proxmox connection)
     cmds:
-      - uv run pytest --cov=src --cov-report=html --cov-report=term
+      - echo "🔗 Integration tests require live Proxmox connection"
+      - echo "⚠️  Set PROXMOX_MCP_CONFIG before running integration tests"
+      - echo "🚧 Integration test suite not yet implemented"
+      - echo "💡 Consider adding integration tests in tests/integration/"
+
+  test:security:
+    desc: Run security-focused tests
+    cmds:
+      - echo "🔒 Running security-focused test subset..."
+      - uv run pytest -v -k "encrypt or security or auth" --tb=short
+
+  test:tools:
+    desc: Run MCP tools tests
+    cmds:
+      - echo "🔧 Running MCP tools test subset..."
+      - uv run pytest -v tests/test_server.py tests/test_vm_console.py --tb=short
+
+  test:config:
+    desc: Run configuration and encryption tests
+    cmds:
+      - echo "⚙️  Running configuration test subset..."
+      - uv run pytest -v tests/test_config_loader.py tests/test_encrypt_config.py tests/test_encryption.py --tb=short
 
   # Combined quality checks
   check:
