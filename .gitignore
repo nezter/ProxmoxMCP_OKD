@@ -59,6 +59,7 @@ coverage.xml
 
 # UV
 .uv/
+uv.lock
 
 # Local configuration
 config/config.json
