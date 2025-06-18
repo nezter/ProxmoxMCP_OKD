@@ -497,6 +497,33 @@ After activating your virtual environment:
 - Type checking: `mypy .`
 - Lint: `ruff .`
 
+For enhanced development workflow with Taskfile (recommended):
+
+- Run all tests: `task test`
+- Run pre-commit checks: `task pre-commit`
+- Run security tests: `task test:security`
+- Run with coverage: `task test:coverage`
+- Watch mode testing: `task test:watch`
+
+See [Testing Workflow Documentation](docs/testing-workflow.md) for comprehensive testing guide.
+
+### 🧪 Testing
+
+ProxmoxMCP provides a comprehensive testing workflow with specialized test tasks:
+
+- **`task test`** - Run all tests with enhanced validation (71 tests)
+- **`task test:security`** - Security-focused tests (encryption, auth)
+- **`task test:tools`** - MCP tools and server functionality
+- **`task test:config`** - Configuration and encryption tests
+- **`task test:coverage`** - Coverage analysis with intelligent fallback
+- **`task test:watch`** - Continuous testing during development
+
+**Current Coverage**: Core functionality, configuration management, encryption, MCP server implementation, and VM console operations.
+
+**Future Improvements**: See [GitHub Issue #75](https://github.com/basher83/ProxmoxMCP/issues/75) for planned testing enhancements including AI diagnostics coverage, formatting module tests, and integration testing.
+
+For detailed testing workflows and best practices, see the [Testing Workflow Documentation](docs/testing-workflow.md).
+
 ### 📁 Project Structure
 
 ```
