@@ -19,10 +19,23 @@ tasks:
 
   # Development setup
   setup:
-    desc: Set up development environment
+    desc: Set up development environment (safe frozen install)
     cmds:
-      - echo "Setting up ProxmoxMCP development environment..."
+      - task: setup:frozen
+
+  setup:frozen:
+    desc: Set up development environment (frozen dependencies - no lock changes)
+    cmds:
+      - echo "🔧 Setting up ProxmoxMCP development environment (frozen)..."
+      - uv sync --extra {{.UV_EXTRA}} --frozen
+      - echo "✅ Development environment ready!"
+
+  setup:update:
+    desc: Set up development environment and update dependencies
+    cmds:
+      - echo "🔧 Setting up ProxmoxMCP development environment with updates..."
       - uv sync --extra {{.UV_EXTRA}}
+      - echo "⚠️  Dependencies may have been updated - check git status"
       - echo "✅ Development environment ready!"
 
   # YAML linting tasks
