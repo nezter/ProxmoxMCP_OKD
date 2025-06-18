@@ -4,40 +4,63 @@ Comprehensive branch analysis and merge strategy workflow: $ARGUMENTS
 
 This workflow systematically analyzes all branches to optimize merge strategy and maintain branch purpose alignment. Execute each phase methodically and maintain detailed analysis throughout.
 
+**IMPORTANT**: Always verify branch analysis against current GitHub state to ensure accuracy.
+
 ## Phase 1: Branch Discovery and Initial Assessment
 
-Step 1.1: **Enumerate All Branches**
+Step 1.1: **Enumerate All Branches (Local and Remote)**
 
 ```bash
-# Get all branches with last commit info
+# Get all local branches with last commit info
 git for-each-ref --format='%(refname:short) %(committerdate) %(authorname) %(subject)' refs/heads/ --sort=-committerdate
+
+# Get all remote branches
+git branch -r
+
+# Verify against GitHub API for authoritative branch list
+gh api repos/OWNER/REPO/branches | jq '.[].name'
 ```
 
-Step 1.2: **Identify Active Development Branches**
+Step 1.2: **Cross-Reference Local vs Remote State**
+
+- Compare local branch list with GitHub remote branches
+- Identify any stale local branches that no longer exist on GitHub
+- Note discrepancies that may indicate outdated local state
+- Focus on branches that exist on GitHub (authoritative source)
+
+Step 1.3: **Identify Active Development Branches**
 
 - Focus on branches modified within the last 30 days
 - Exclude main/master and any deployment branches
 - Note branch naming patterns (feature/, bugfix/, chore/, etc.)
+- Verify branch existence on GitHub before detailed analysis
 
-Step 1.3: **Create Branch Analysis Matrix**
-For each active branch, create an initial assessment:
+Step 1.4: **Create Branch Analysis Matrix**
+For each GitHub-verified branch, create an initial assessment:
 
 - Branch name and inferred purpose
 - Last activity date and author
 - Commit count vs main
 - Estimated complexity (file count in diff)
+- GitHub branch status confirmation
 
 ## Phase 2: Detailed Diff Analysis Per Branch
 
-For each branch identified in Phase 1, perform comprehensive analysis:
+For each GitHub-verified branch identified in Phase 1, perform comprehensive analysis:
 
-Step 2.1: **Get Complete Diff Against Main**
+Step 2.1: **Verify Branch Exists and Get Complete Diff Against Main**
 
 ```bash
-# For each branch, get detailed diff
+# First verify branch exists on GitHub
+gh api repos/OWNER/REPO/branches/BRANCH_NAME || echo "Branch not found on GitHub"
+
+# For each verified branch, get detailed diff
 git diff main..BRANCH_NAME --name-status
 git diff main..BRANCH_NAME --stat
 git log main..BRANCH_NAME --oneline
+
+# Check if branch has associated PRs
+gh pr list --head BRANCH_NAME
 ```
 
 Step 2.2: **Categorize Changes by Type**
@@ -108,13 +131,15 @@ Changes that should remain in feature branch:
 - Breaking changes that require coordination
 - Feature-specific documentation for unreleased features
 
-Step 3.3: **Anomaly Detection**
+Step 3.3: **Anomaly Detection and Stale Branch Identification**
 Flag branches with concerning patterns:
 
 - Feature branches with extensive unrelated changes
 - Old branches with changes that should have been merged
 - Branches with conflicting approaches to same problem
 - Branches that might have merge conflicts
+- **Stale local branches**: Local branches that no longer exist on GitHub
+- **Analysis report inconsistencies**: Branches mentioned in previous reports but missing from GitHub
 
 ## Phase 4: Strategic Recommendations
 
@@ -192,10 +217,13 @@ Step 6.1: **Create Comprehensive Report**
 Generate detailed report including:
 
 - Executive summary of findings
-- Branch-by-branch analysis
+- **GitHub branch verification status**
+- Branch-by-branch analysis (GitHub-verified only)
+- **Stale branch cleanup recommendations**
 - Immediate action items with timelines
 - Long-term branch strategy recommendations
 - Metrics: lines of code, file changes, estimated merge complexity
+- **Discrepancy analysis**: Previous reports vs current GitHub state
 
 Step 6.2: **Update Project Documentation**
 
@@ -256,15 +284,27 @@ Save the analysis in this structured format to the report file:
 **Report Location:** .claude/reports/branch-analysis/branch-analysis-YYYYMMDD-HHMMSS.md
 **Analysis Scope:** $ARGUMENTS
 **Git Commit:** $(git rev-parse HEAD)
+**GitHub Verification:** $(date) - Authoritative source check completed
 
 ## Executive Summary
-- Total branches analyzed: X
+- Total GitHub branches: X
+- Total local branches: X
+- Stale local branches detected: X
 - Immediate merge candidates: X files across Y branches
 - Estimated effort for immediate merges: X hours
 - Branches requiring attention: X
 
+## GitHub Branch Verification
+- ✅ Verified GitHub branches: [list]
+- ❌ Stale local branches: [list]
+- 🔄 Analysis report discrepancies: [previous vs current]
+
 ## Detailed Findings
-[For each branch...]
+[For each GitHub-verified branch...]
+
+## Stale Branch Cleanup
+- Local branches to delete: [list with cleanup commands]
+- Previous analysis inconsistencies: [explanation]
 
 ## Immediate Action Plan
 [Prioritized list with commands...]
@@ -274,8 +314,10 @@ Save the analysis in this structured format to the report file:
 
 ## Report Metadata
 - Analysis Duration: X minutes
-- Branches Examined: [list]
+- GitHub Branches Examined: [list]
+- Local Branches Examined: [list]
 - Git Status at Analysis: [clean/dirty]
+- GitHub API Status: [success/failure]
 - Next Recommended Analysis: [date]
 ```
 
@@ -300,7 +342,11 @@ Maintain an index of all branch analyses:
 
 **Important:**
 
-1. Always save the complete report to the timestamped file before executing any git operations
-2. Present the saved report location for easy reference
-3. This analysis is meant to inform decisions, not automatically execute changes
-4. The report serves as documentation for future development planning
+1. **Always verify against GitHub API** before analyzing any branch
+2. **Cross-reference with previous reports** to identify cleanup opportunities
+3. Always save the complete report to the timestamped file before executing any git operations
+4. Present the saved report location for easy reference
+5. This analysis is meant to inform decisions, not automatically execute changes
+6. The report serves as documentation for future development planning
+7. **Include stale branch cleanup** as part of repository hygiene
+8. **Note any discrepancies** between local state and GitHub authoritative source
