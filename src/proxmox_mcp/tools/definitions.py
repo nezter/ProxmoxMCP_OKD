@@ -54,7 +54,8 @@ Example:
 {"name": "proxmox", "quorum": "ok", "nodes": 3, "ha_status": "active"}"""
 
 # AI Diagnostic tool descriptions
-ANALYZE_CLUSTER_HEALTH_DESC = """AI-powered comprehensive cluster health analysis using Claude Code SDK.
+ANALYZE_CLUSTER_HEALTH_DESC = """AI-powered comprehensive cluster health analysis using
+Claude Code SDK.
 
 Analyzes all cluster components (nodes, VMs, storage, network) and provides intelligent 
 insights, recommendations, and actionable solutions for:
@@ -70,7 +71,8 @@ changes, and implementation guidance.
 Example output includes performance metrics, security assessments, and optimization 
 recommendations with expected impact and implementation complexity."""
 
-DIAGNOSE_VM_ISSUES_DESC = """AI-powered VM issue diagnosis and troubleshooting using Claude Code SDK.
+DIAGNOSE_VM_ISSUES_DESC = """AI-powered VM issue diagnosis and troubleshooting using
+Claude Code SDK.
 
 Parameters:
 node* - Proxmox node name hosting the VM (e.g. 'pve1')
@@ -90,7 +92,8 @@ implementation commands, and prevention measures.
 Example:
 {"vm": "100", "issues": ["High CPU usage", "Network latency"], "solutions": [...]}"""
 
-SUGGEST_RESOURCE_OPTIMIZATION_DESC = """AI-powered resource optimization recommendations using Claude Code SDK.
+SUGGEST_RESOURCE_OPTIMIZATION_DESC = """AI-powered resource optimization recommendations using
+Claude Code SDK.
 
 Analyzes cluster-wide resource utilization patterns and provides intelligent 
 recommendations for:

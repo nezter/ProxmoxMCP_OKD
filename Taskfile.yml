@@ -27,7 +27,7 @@ tasks:
 
   # YAML linting tasks
   yaml:lint:
-    desc: Lint all YAML files
+    desc: Lint all YAML files (including .github, .codacy configs)
     cmds:
       - ./scripts/yaml-lint.sh
     sources:
@@ -36,6 +36,40 @@ tasks:
       - ".yamllint.yml"
     generates:
       - .task/yaml-lint-{{.CHECKSUM}}
+
+  yaml:lint:dev:
+    desc: Lint development YAML files (excludes .github/.codacy config directories)
+    cmds:
+      - |
+        echo "🔍 Linting development YAML files..."
+        find . -type f \( -name "*.yml" -o -name "*.yaml" \) \
+          -not -path "*/.codacy/*" \
+          -not -path "*/.github/*" \
+          -not -path "*/node_modules/*" \
+          -not -path "*/.git/*" \
+          -not -path "*/venv/*" \
+          -not -path "*/.venv/*" \
+          -not -path "*/__pycache__/*" \
+          -not -name "pnpm-lock.yaml" \
+          -not -name "yarn.lock" \
+          -not -name "package-lock.json" \
+          | while read -r file; do
+              printf "Checking %-40s " "$(basename "$file")..."
+              if uv run yamllint -c .yamllint.yml "$file" 2>/dev/null; then
+                echo "✅"
+              else
+                echo "❌"
+                echo "Issues in $file:"
+                uv run yamllint -c .yamllint.yml "$file" 2>&1 || true
+                echo ""
+              fi
+            done
+    sources:
+      - "**/*.yml"
+      - "**/*.yaml"
+      - ".yamllint.yml"
+    generates:
+      - .task/yaml-lint-dev-{{.CHECKSUM}}
 
   yaml:fix:
     desc: Show detailed YAML linting issues
@@ -133,12 +167,12 @@ tasks:
 
   # Pre-commit style checks
   pre-commit:
-    desc: Run pre-commit checks (format, lint, type-check, yaml)
+    desc: Run pre-commit checks (format, lint, type-check, dev yaml)
     cmds:
       - task: format
       - task: lint:fix
       - task: type:check
-      - task: yaml:lint
+      - task: yaml:lint:dev
       - echo "✅ All pre-commit checks passed!"
 
   # CI simulation

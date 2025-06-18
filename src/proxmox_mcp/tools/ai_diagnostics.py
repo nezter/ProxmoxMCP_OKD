@@ -13,7 +13,6 @@ All tools inherit from the ProxmoxTool base class and follow existing patterns f
 error handling, logging, and output formatting.
 """
 
-import asyncio
 import json
 import logging
 from typing import Any, Dict, List, Optional
@@ -24,7 +23,7 @@ from proxmoxer import ProxmoxAPI
 from .base import ProxmoxTool
 
 try:
-    from claude_code_sdk import query, ClaudeCodeOptions
+    from claude_code_sdk import ClaudeCodeOptions, query
 
     CLAUDE_SDK_AVAILABLE = True
 except ImportError:
@@ -59,12 +58,14 @@ class AIProxmoxDiagnostics(ProxmoxTool):
         """
         super().__init__(proxmox_api)
         self.claude_available = CLAUDE_SDK_AVAILABLE
+        self.claude_options: Optional["ClaudeCodeOptions"] = None
 
         if self.claude_available:
             self.claude_options = ClaudeCodeOptions(
-                system_prompt="""You are an expert Proxmox VE administrator and infrastructure analyst. 
-                Analyze the provided Proxmox data and provide actionable insights, recommendations, 
-                and solutions. Focus on performance, security, and best practices.
+                system_prompt="""You are an expert Proxmox VE administrator and 
+                infrastructure analyst. Analyze the provided Proxmox data and provide 
+                actionable insights, recommendations, and solutions. Focus on performance, 
+                security, and best practices.
                 
                 Always provide:
                 1. Clear, prioritized recommendations
@@ -77,7 +78,6 @@ class AIProxmoxDiagnostics(ProxmoxTool):
                 max_turns=1,
             )
         else:
-            self.claude_options = None
             self.logger.warning("Claude Code SDK unavailable - AI features disabled")
 
     async def analyze_cluster_health(self) -> List[Content]:
@@ -113,7 +113,8 @@ class AIProxmoxDiagnostics(ProxmoxTool):
             5. Immediate action items prioritized by urgency
             6. Long-term maintenance recommendations
             
-            Focus on actionable insights with specific commands or configuration changes where applicable.
+            Focus on actionable insights with specific commands or configuration changes
+            where applicable.
             """
 
             ai_response = await self._query_claude(analysis_prompt)
@@ -129,7 +130,8 @@ class AIProxmoxDiagnostics(ProxmoxTool):
 - Storage pools: {len(cluster_data.get('storage', []))}
 - Analysis powered by Claude Code SDK with Proxmox expertise
 
-💡 **Next Steps**: Review high-priority recommendations first, then implement suggested optimizations during maintenance windows.
+💡 **Next Steps**: Review high-priority recommendations first, then implement
+suggested optimizations during maintenance windows.
             """
 
             return [Content(type="text", text=formatted_response)]
@@ -290,7 +292,8 @@ class AIProxmoxDiagnostics(ProxmoxTool):
             return [
                 Content(
                     type="text",
-                    text="❌ AI resource optimization analysis failed. Please check logs for details.",
+                    text="❌ AI resource optimization analysis failed. "
+                    "Please check logs for details.",
                 )
             ]
 
@@ -391,7 +394,7 @@ class AIProxmoxDiagnostics(ProxmoxTool):
 
         except Exception as e:
             self.logger.error(f"Claude Code SDK query failed: {e}")
-            raise RuntimeError(f"AI analysis failed: {e}")
+            raise RuntimeError(f"AI analysis failed: {e}") from e
 
     async def _collect_cluster_metrics(self) -> Dict[str, Any]:
         """Collect comprehensive cluster metrics for AI analysis.
@@ -647,7 +650,10 @@ class AIProxmoxDiagnostics(ProxmoxTool):
                     (memory_used / memory_total) * 100 if memory_total > 0 else 0
                 )
 
-                analysis += f"- {node['name']}: {node['status']} | CPU: {cpu_usage:.1f}% | Memory: {memory_percent:.1f}%\n"
+                analysis += (
+                    f"- {node['name']}: {node['status']} | "
+                    f"CPU: {cpu_usage:.1f}% | Memory: {memory_percent:.1f}%\n"
+                )
             else:
                 analysis += f"- {node['name']}: Error - {node['error']}\n"
 
@@ -707,7 +713,8 @@ class AIProxmoxDiagnostics(ProxmoxTool):
 - Review VM resource allocation for optimization opportunities
 - Consider load balancing if node utilization varies significantly
 
-ℹ️ For detailed AI-powered optimization recommendations, please install and configure Claude Code SDK.
+ℹ️ For detailed AI-powered optimization recommendations, please install and
+configure Claude Code SDK.
 """
 
         return [Content(type="text", text=analysis)]

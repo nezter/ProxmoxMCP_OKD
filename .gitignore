@@ -57,9 +57,14 @@ coverage.xml
 # Type checking
 .mypy_cache/
 
+# Linting cache
+.ruff_cache/
+
+# Task runner cache
+.task/
+
 # UV
 .uv/
-uv.lock
 
 # Local configuration
 config/config.json
