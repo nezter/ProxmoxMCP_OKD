@@ -58,7 +58,7 @@ class AIProxmoxDiagnostics(ProxmoxTool):
         """
         super().__init__(proxmox_api)
         self.claude_available = CLAUDE_SDK_AVAILABLE
-        self.claude_options: Optional["ClaudeCodeOptions"] = None
+        self.claude_options = None
 
         if self.claude_available:
             self.claude_options = ClaudeCodeOptions(
