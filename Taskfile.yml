@@ -253,10 +253,16 @@ tasks:
 
   # Dependency management
   deps:update:
-    desc: Update dependencies
+    desc: Update dependencies (including dev dependencies)
     cmds:
-      - uv sync --upgrade
+      - uv sync --upgrade --extra {{.UV_EXTRA}}
       - echo "✅ Dependencies updated!"
+
+  deps:sync:
+    desc: Sync dependencies without upgrades (safe, frozen versions)
+    cmds:
+      - uv sync --extra {{.UV_EXTRA}} --frozen
+      - echo "✅ Dependencies synced!"
 
   deps:lock:
     desc: Update lock file
