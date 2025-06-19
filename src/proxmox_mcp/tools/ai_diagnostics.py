@@ -15,7 +15,7 @@ error handling, logging, and output formatting.
 
 import json
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from mcp.types import TextContent as Content
 from proxmoxer import ProxmoxAPI
