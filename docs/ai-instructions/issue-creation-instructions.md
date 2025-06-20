@@ -1,6 +1,9 @@
 # Issue Creation Instructions
 
-This document provides comprehensive guidelines for Claude Code when creating GitHub issues in the ProxmoxMCP repository. Follow these instructions to ensure consistent, well-structured issues that align with project standards and facilitate efficient resolution.
+This document provides comprehensive guidelines for Claude Code when creating GitHub
+issues in the ProxmoxMCP repository. Follow these instructions to ensure consistent,
+well-structured issues that align with project standards and facilitate efficient
+resolution.
 
 ## Pre-Creation Analysis
 
@@ -47,7 +50,7 @@ Use clear, descriptive titles following these patterns:
 
 ### 4. Issue Body Template
 
-#### For Bug Reports:
+#### For Bug Reports
 
 ```markdown
 ## Summary
@@ -97,7 +100,7 @@ What actually happens.
 [If you have ideas for fixing the issue]
 ```
 
-#### For Enhancement Requests:
+#### For Enhancement Requests
 
 ````markdown
 ## Summary
@@ -155,7 +158,7 @@ def new_feature():
 
 ```
 
-#### For Security Issues:
+#### For Security Issues
 
 ```markdown
 ## Security Issue Summary
@@ -202,7 +205,7 @@ How to address the security concern.
 
 ### 5. Label Assignment Guidelines
 
-#### Required Labels (Choose One Primary Type):
+#### Required Labels (Choose One Primary Type)
 
 - `bug` - For defects and issues
 - `enhancement` - For new features and improvements
@@ -210,7 +213,7 @@ How to address the security concern.
 - `documentation` - For documentation improvements
 - `performance` - For performance issues
 
-#### Priority Labels (Choose One):
+#### Priority Labels (Choose One)
 
 - `priority:critical` - Immediate attention required, blocks critical functionality
 - `priority:high` - Important issue, should be addressed in current iteration
@@ -334,7 +337,8 @@ After creating an issue:
 [BUG] VM startup command fails with authentication timeout
 
 ## Summary
-When executing VM startup commands through ProxmoxMCP, operations timeout after 30 seconds with authentication errors, even with valid credentials.
+When executing VM startup commands through ProxmoxMCP, operations timeout after 30
+seconds with authentication errors, even with valid credentials.
 
 ## Environment
 - ProxmoxMCP Version: 0.3.0
@@ -363,10 +367,12 @@ Operation fails with: "Authentication timeout after 30 seconds"
 Enable batch operations for common VM tasks (start, stop, reboot) to improve efficiency when managing multiple VMs.
 
 ## Use Case
-System administrators managing large VM deployments need to perform operations on multiple VMs simultaneously rather than executing commands individually.
+System administrators managing large VM deployments need to perform operations on
+multiple VMs simultaneously rather than executing commands individually.
 
 ## Proposed Implementation
-Add batch operation support to existing VM management tools with proper error handling and progress reporting.
+Add batch operation support to existing VM management tools with proper error
+handling and progress reporting.
 ```
 
 ### 14. Anti-Patterns to Avoid
@@ -423,6 +429,9 @@ Following these comprehensive guidelines ensures that issues created in the Prox
 - **Aligned** with project goals and architecture
 - **Helpful** for both maintainers and community contributors
 
-Remember: A well-written issue is the foundation of effective problem-solving and feature development. Take time to provide complete information upfront to facilitate faster resolution and better collaboration.
+Remember: A well-written issue is the foundation of effective problem-solving and
+feature development. Take time to provide complete information upfront to facilitate
+faster resolution and better collaboration.
 
-For questions about these guidelines or help with issue creation, reach out to the maintainers or community through the project's communication channels.
+For questions about these guidelines or help with issue creation, reach out to the
+maintainers or community through the project's communication channels.

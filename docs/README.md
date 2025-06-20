@@ -1,6 +1,7 @@
 # 📚 ProxmoxMCP Documentation
 
-Welcome to the comprehensive documentation for **ProxmoxMCP** - a Python-based Model Context Protocol (MCP) server for managing Proxmox hypervisors.
+Welcome to the comprehensive documentation for **ProxmoxMCP** - a Python-based
+Model Context Protocol (MCP) server for managing Proxmox hypervisors.
 
 ## 🚀 Quick Start
 
@@ -9,20 +10,24 @@ For installation and basic usage, see the [main README](../README.md).
 ## 📖 Documentation Structure
 
 ### **Getting Started**
+
 - **[Project Roadmap](ROADMAP.md)** - Development roadmap and feature planning
 - **[Contributing Guide](../CONTRIBUTING.md)** - How to contribute to the project
 
 ### **Architecture & Development**
+
 - **[Repository Review](repository-review.md)** - Comprehensive code analysis and structure
 - **[Claude Code Automation](claude-code-automation.md)** - Automated development workflow setup
 - **[Testing Workflow](testing-workflow.md)** - Comprehensive testing guide and best practices
 
 ### **Security**
+
 - **[Security & Encryption](security-encryption.md)** - Token encryption and security practices
 
 ## 🛠️ Development
 
 This project uses modern Python development practices:
+
 - **Python 3.10+** for MCP compatibility
 - **FastMCP** for the server framework
 - **Pydantic** for data validation
@@ -30,11 +35,14 @@ This project uses modern Python development practices:
 
 ## 📋 Configuration
 
-The server requires proper configuration for Proxmox API access. See the configuration examples in the `proxmox-config/` directory.
+The server requires proper configuration for Proxmox API access. See the
+configuration examples in the `proxmox-config/` directory.
 
 ## 🤖 Automation
 
-This project includes Claude Code automation for issue resolution. When you assign an issue with the `claude-code` label, it automatically:
+This project includes Claude Code automation for issue resolution. When you
+assign an issue with the `claude-code` label, it automatically:
+
 1. Creates a branch
 2. Implements the solution
 3. Runs tests and quality checks

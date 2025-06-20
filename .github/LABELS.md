@@ -1,6 +1,7 @@
 # GitHub Labels Guide
 
-This document explains the standardized label system used in the ProxmoxMCP repository to help organize and categorize issues, pull requests, and discussions.
+This document explains the standardized label system used in the ProxmoxMCP repository to help
+organize and categorize issues, pull requests, and discussions.
 
 ## Label Categories
 
@@ -125,21 +126,25 @@ This document explains the standardized label system used in the ProxmoxMCP repo
 ### Label Combinations
 
 **Bug Reports:**
+
 ```
 bug + priority:high + component:server + platform:linux
 ```
 
 **Feature Requests:**
+
 ```
 enhancement + effort:medium + component:tools + help-wanted
 ```
 
 **Documentation:**
+
 ```
 documentation + good-first-issue + effort:small
 ```
 
 **Security Issues:**
+
 ```
 security + priority:critical + component:authentication
 ```
@@ -169,7 +174,8 @@ Import all labels from the YAML file:
 
 ```bash
 # Using a YAML processing tool
-cat labels.yml | yq -r '.[] | "gh label create \"" + .name + "\" --color \"" + .color + "\" --description \"" + .description + "\""' | bash
+cat labels.yml | yq -r '.[] | "gh label create \"" + .name + "\" --color \"" + .color + 
+  "\" --description \"" + .description + "\""' | bash
 ```
 
 ## Label Management

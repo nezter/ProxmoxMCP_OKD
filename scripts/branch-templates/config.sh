@@ -1,6 +1,7 @@
-#!/usr/bin/env bash
-# Branch Management System Configuration
-# Configuration file for ProxmoxMCP branch management templates and validation
+#!/bin/bash
+# ProxmoxMCP Branch Template Configuration
+# This file contains configuration for branch creation scripts
+# shellcheck disable=SC2034  # Variables are used when sourced by other scripts
 
 set -euo pipefail
 
@@ -14,8 +15,18 @@ export BRANCH_PREFIX_DOCS="docs"
 export BRANCH_PREFIX_CI="ci"
 export BRANCH_PREFIX_PERF="perf"
 
+# Legacy aliases for backward compatibility with our system
+export FEATURE_PREFIX="$BRANCH_PREFIX_FEATURE"
+export FIX_PREFIX="$BRANCH_PREFIX_FIX"
+export SECURITY_PREFIX="$BRANCH_PREFIX_SECURITY"
+export CHORE_PREFIX="chore"
+export RELEASE_PREFIX="release"
+export HOTFIX_PREFIX="hotfix"
+
 # Main branch settings
 export DEFAULT_BRANCH="main"
+export MAIN_BRANCH="main"
+export REMOTE="origin"
 export PROTECTED_BRANCHES=("main" "develop" "staging")
 
 # Branch naming patterns
@@ -53,6 +64,55 @@ export REQUIRE_LINEAR_HISTORY=true
 export REQUIRE_SIGN_OFF=false
 export AUTO_DELETE_MERGED_BRANCHES=true
 
+# Commit Message Prefixes (following conventional commits)
+export FEATURE_COMMIT_PREFIX="feat"
+export FIX_COMMIT_PREFIX="fix"
+export SECURITY_COMMIT_PREFIX="security"
+export CHORE_COMMIT_PREFIX="chore"
+export RELEASE_COMMIT_PREFIX="release"
+export HOTFIX_COMMIT_PREFIX="hotfix"
+
+# Template Messages
+export FEATURE_TEMPLATE="feat: implement {description}
+
+- Add {description}
+- Include appropriate tests
+- Update documentation if needed
+
+Closes #{issue_number}"
+
+export FIX_TEMPLATE="fix: resolve {description}
+
+- Fix {description}
+- Add regression test
+- Update related documentation
+
+Fixes #{issue_number}"
+
+export SECURITY_TEMPLATE="security: {description}
+
+- Address {description}
+- Follow security best practices
+- Update security documentation if needed
+
+Addresses security concern"
+
+export HOTFIX_TEMPLATE="hotfix: critical fix for {description}
+
+- Address critical {description}
+- Minimal change for immediate resolution
+- Requires expedited review
+
+Critical fix required for production"
+
+# Review Requirements by Branch Type
+export FEATURE_REVIEWERS=1
+export FIX_REVIEWERS=1
+export SECURITY_REVIEWERS=2 # Security changes need additional review
+export HOTFIX_REVIEWERS=1   # But fast-tracked
+export CHORE_REVIEWERS=1
+export RELEASE_REVIEWERS=2 # Release changes need careful review
+
 # Colors for output (used by validation script)
 export COLOR_RED='\033[0;31m'
 export COLOR_GREEN='\033[0;32m'
@@ -62,7 +122,8 @@ export COLOR_NC='\033[0m'
 
 # Paths
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-export REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
+export REPO_ROOT
 export TEMPLATES_DIR="${SCRIPT_DIR}"
 
 # Function to check if a branch name matches valid patterns
@@ -70,7 +131,7 @@ is_valid_branch_prefix() {
     local branch_name="$1"
     local valid_prefixes=(
         "$BRANCH_PREFIX_FEATURE"
-        "$BRANCH_PREFIX_FIX" 
+        "$BRANCH_PREFIX_FIX"
         "$BRANCH_PREFIX_SECURITY"
         "$BRANCH_PREFIX_DOCKER"
         "$BRANCH_PREFIX_CONFIG"
@@ -78,7 +139,7 @@ is_valid_branch_prefix() {
         "$BRANCH_PREFIX_CI"
         "$BRANCH_PREFIX_PERF"
     )
-    
+
     for prefix in "${valid_prefixes[@]}"; do
         if [[ "$branch_name" == "$prefix/"* ]]; then
             return 0
@@ -103,14 +164,14 @@ suggest_branch_name() {
     local type="$1"
     local component="$2"
     local description="$3"
-    
+
     # Sanitize description - replace spaces and special chars with hyphens
-    local clean_description="${description,,}"  # lowercase
-    clean_description="${clean_description//[^a-z0-9]/-}"  # replace non-alphanumeric with hyphens
-    clean_description="${clean_description//--/-}"  # replace double hyphens
-    clean_description="${clean_description#-}"  # remove leading hyphen
-    clean_description="${clean_description%-}"  # remove trailing hyphen
-    
+    local clean_description="${description,,}"            # lowercase
+    clean_description="${clean_description//[^a-z0-9]/-}" # replace non-alphanumeric with hyphens
+    clean_description="${clean_description//--/-}"        # replace double hyphens
+    clean_description="${clean_description#-}"            # remove leading hyphen
+    clean_description="${clean_description%-}"            # remove trailing hyphen
+
     echo "${type}/${component}-${clean_description}"
 }
 

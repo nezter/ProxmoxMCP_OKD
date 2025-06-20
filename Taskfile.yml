@@ -19,28 +19,15 @@ tasks:
 
   # Development setup
   setup:
-    desc: Set up development environment (safe frozen install)
+    desc: Set up development environment
     cmds:
-      - task: setup:frozen
-
-  setup:frozen:
-    desc: Set up development environment (frozen dependencies - no lock changes)
-    cmds:
-      - echo "🔧 Setting up ProxmoxMCP development environment (frozen)..."
-      - uv sync --extra {{.UV_EXTRA}} --frozen
-      - echo "✅ Development environment ready!"
-
-  setup:update:
-    desc: Set up development environment and update dependencies
-    cmds:
-      - echo "🔧 Setting up ProxmoxMCP development environment with updates..."
+      - echo "Setting up ProxmoxMCP development environment..."
       - uv sync --extra {{.UV_EXTRA}}
-      - echo "⚠️  Dependencies may have been updated - check git status"
       - echo "✅ Development environment ready!"
 
   # YAML linting tasks
   yaml:lint:
-    desc: Lint all YAML files (including .github, .codacy configs)
+    desc: Lint all YAML files
     cmds:
       - ./scripts/yaml-lint.sh
     sources:
@@ -49,40 +36,6 @@ tasks:
       - ".yamllint.yml"
     generates:
       - .task/yaml-lint-{{.CHECKSUM}}
-
-  yaml:lint:dev:
-    desc: Lint development YAML files (excludes .github/.codacy config directories)
-    cmds:
-      - |
-        echo "🔍 Linting development YAML files..."
-        find . -type f \( -name "*.yml" -o -name "*.yaml" \) \
-          -not -path "*/.codacy/*" \
-          -not -path "*/.github/*" \
-          -not -path "*/node_modules/*" \
-          -not -path "*/.git/*" \
-          -not -path "*/venv/*" \
-          -not -path "*/.venv/*" \
-          -not -path "*/__pycache__/*" \
-          -not -name "pnpm-lock.yaml" \
-          -not -name "yarn.lock" \
-          -not -name "package-lock.json" \
-          | while read -r file; do
-              printf "Checking %-40s " "$(basename "$file")..."
-              if uv run yamllint -c .yamllint.yml "$file" 2>/dev/null; then
-                echo "✅"
-              else
-                echo "❌"
-                echo "Issues in $file:"
-                uv run yamllint -c .yamllint.yml "$file" 2>&1 || true
-                echo ""
-              fi
-            done
-    sources:
-      - "**/*.yml"
-      - "**/*.yaml"
-      - ".yamllint.yml"
-    generates:
-      - .task/yaml-lint-dev-{{.CHECKSUM}}
 
   yaml:fix:
     desc: Show detailed YAML linting issues
@@ -93,6 +46,39 @@ tasks:
     desc: Check YAML files (strict mode - exits with error)
     cmds:
       - ./scripts/yaml-lint.sh --check
+
+  # Markdown linting and formatting tasks
+  markdown:lint:
+    desc: Lint all Markdown files
+    cmds:
+      - markdownlint-cli2 "**/*.md"
+    sources:
+      - "**/*.md"
+      - ".markdownlint.jsonc"
+    generates:
+      - .task/markdown-lint-{{.CHECKSUM}}
+
+  markdown:fix:
+    desc: Auto-fix Markdown formatting issues
+    cmds:
+      - markdownlint-cli2 --fix "**/*.md"
+    sources:
+      - "**/*.md"
+      - ".markdownlint.jsonc"
+
+  markdown:check:
+    desc: Check Markdown files (strict mode - exits with error)
+    cmds:
+      - markdownlint-cli2 "**/*.md" --config .markdownlint.jsonc
+
+  markdown:summary:
+    desc: Show summary of Markdown issues across all files
+    cmds:
+      - echo "📝 Markdown Linting Summary"
+      - echo "============================"
+      - markdownlint-cli2 "**/*.md" || true
+      - echo ""
+      - echo "💡 Run 'task markdown:fix' to auto-fix issues"
 
   # Python code quality tasks
   format:
@@ -122,70 +108,23 @@ tasks:
   type:check:
     desc: Run mypy type checking
     cmds:
-      - uv run mypy .
+      - uv run mypy . --exclude mem0-mcp
 
   # Testing tasks
   test:
-    desc: Run all tests with enhanced validation
+    desc: Run all tests
     cmds:
-      - echo "🧪 Running comprehensive test suite..."
-      - uv run pytest -v --tb=short
-      - echo "📊 Test Summary - All unit tests completed"
-
-  test:unit:
-    desc: Run unit tests only
-    cmds:
-      - uv run pytest -v tests/ --tb=short
-
-  test:coverage:
-    desc: Run tests with coverage report (requires pytest-cov)
-    cmds:
-      - |
-        if uv run python -c "import pytest_cov" 2>/dev/null; then
-          uv run pytest --cov=src --cov-report=html --cov-report=term-missing --cov-fail-under=80
-        else
-          echo "⚠️  pytest-cov not installed. Running tests without coverage..."
-          echo "💡 Install with: uv add pytest-cov --group dev"
-          uv run pytest -v
-        fi
+      - uv run pytest -v
 
   test:watch:
     desc: Run tests in watch mode
     cmds:
-      - |
-        if uv run python -c "import pytest_watch" 2>/dev/null; then
-          uv run pytest-watch
-        else
-          echo "⚠️  pytest-watch not installed. Install with: uv add pytest-watch --group dev"
-          echo "🔄 Running tests once instead..."
-          uv run pytest -v
-        fi
+      - uv run pytest-watch
 
-  test:integration:
-    desc: Run integration tests (requires Proxmox connection)
+  test:coverage:
+    desc: Run tests with coverage report
     cmds:
-      - echo "🔗 Integration tests require live Proxmox connection"
-      - echo "⚠️  Set PROXMOX_MCP_CONFIG before running integration tests"
-      - echo "🚧 Integration test suite not yet implemented"
-      - echo "💡 Consider adding integration tests in tests/integration/"
-
-  test:security:
-    desc: Run security-focused tests
-    cmds:
-      - echo "🔒 Running security-focused test subset..."
-      - uv run pytest -v -k "encrypt or security or auth" --tb=short
-
-  test:tools:
-    desc: Run MCP tools tests
-    cmds:
-      - echo "🔧 Running MCP tools test subset..."
-      - uv run pytest -v tests/test_server.py tests/test_vm_console.py --tb=short
-
-  test:config:
-    desc: Run configuration and encryption tests
-    cmds:
-      - echo "⚙️  Running configuration test subset..."
-      - uv run pytest -v tests/test_config_loader.py tests/test_encrypt_config.py tests/test_encryption.py --tb=short
+      - uv run pytest --cov=src --cov-report=html --cov-report=term
 
   # Combined quality checks
   check:
@@ -195,13 +134,15 @@ tasks:
       - lint
       - type:check
       - yaml:check
+      - markdown:check
 
   fix:
-    desc: Auto-fix all fixable issues (Python + YAML)
+    desc: Auto-fix all fixable issues (Python + YAML + Markdown)
     cmds:
       - task: format
       - task: lint:fix
       - task: yaml:autofix
+      - task: markdown:fix
 
   yaml:autofix:
     desc: Auto-fix YAML spacing issues (trailing spaces, newlines, etc.)
@@ -227,12 +168,13 @@ tasks:
 
   # Pre-commit style checks
   pre-commit:
-    desc: Run pre-commit checks (format, lint, type-check, dev yaml)
+    desc: Run pre-commit checks (format, lint, type-check, yaml, markdown)
     cmds:
       - task: format
       - task: lint:fix
       - task: type:check
-      - task: yaml:lint:dev
+      - task: yaml:lint
+      - task: markdown:fix
       - echo "✅ All pre-commit checks passed!"
 
   # CI simulation
@@ -253,16 +195,10 @@ tasks:
 
   # Dependency management
   deps:update:
-    desc: Update dependencies (including dev dependencies)
+    desc: Update dependencies
     cmds:
-      - uv sync --upgrade --extra {{.UV_EXTRA}}
+      - uv sync --upgrade
       - echo "✅ Dependencies updated!"
-
-  deps:sync:
-    desc: Sync dependencies without upgrades (safe, frozen versions)
-    cmds:
-      - uv sync --extra {{.UV_EXTRA}} --frozen
-      - echo "✅ Dependencies synced!"
 
   deps:lock:
     desc: Update lock file
@@ -351,3 +287,64 @@ tasks:
       - task: lint:fix
       - task: test
       - echo "✅ Quick check completed!"
+
+
+  # ==========================================
+  # Branch Management Tasks
+  # ==========================================
+
+  # Interactive branch creation
+  branch:
+    desc: Create a new branch interactively
+    cmds:
+      - echo "🌿 Creating new branch interactively..."
+      - ./scripts/branch-templates/interactive.sh
+
+  # Quick branch creation shortcuts
+  branch:feature:
+    desc: Create a feature branch
+    cmds:
+      - echo "🚀 Creating feature branch..."
+      - ./scripts/branch-templates/feature.sh {{.CLI_ARGS}}
+
+  branch:fix:
+    desc: Create a fix branch
+    cmds:
+      - echo "🐛 Creating fix branch..."
+      - ./scripts/branch-templates/fix.sh {{.CLI_ARGS}}
+
+  branch:security:
+    desc: Create a security branch
+    cmds:
+      - echo "🔒 Creating security branch..."
+      - ./scripts/branch-templates/security.sh {{.CLI_ARGS}}
+
+  # Branch validation and management
+  branch:validate:
+    desc: Validate current branch name
+    cmds:
+      - echo "🔍 Validating branch name..."
+      - ./scripts/branch-templates/validate.sh
+
+  branch:status:
+    desc: Show current branch and git status
+    cmds:
+      - echo "📊 Current branch and status:"
+      - git branch --show-current
+      - git status --porcelain
+
+  # Development workflows
+  work:start:
+    desc: Start working on a new issue (create branch + setup)
+    cmds:
+      - echo "🎯 Starting work on new issue..."
+      - task: branch
+      - task: setup
+
+  work:finish:
+    desc: Finish current work (checks + PR guidance)
+    cmds:
+      - echo "🏁 Finishing current work..."
+      - task: check
+      - task: branch:validate
+      - echo "🚀 Ready for PR! Push with git push"

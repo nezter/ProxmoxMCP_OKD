@@ -35,11 +35,14 @@ uv pip install -e ".[dev]"
 
 #### Standardized Quality Assurance Workflow
 
-The ProxmoxMCP project uses a comprehensive, standardized quality assurance workflow that must be followed for all code changes. This workflow includes automated checks, error recovery procedures, and ProxmoxMCP-specific validations.
+The ProxmoxMCP project uses a comprehensive, standardized quality assurance workflow that must be
+followed for all code changes. This workflow includes automated checks, error recovery procedures, and
+ProxmoxMCP-specific validations.
 
 #### Pre-Commit Quality Pipeline
 
 **Phase 1: Core Quality Checks (Parallel Execution)**
+
 ```bash
 # Run core quality checks in parallel for efficiency
 pytest & black . & mypy . & ruff . && wait
@@ -49,6 +52,7 @@ echo "Core quality checks completed"
 ```
 
 **Phase 2: ProxmoxMCP-Specific Validation**
+
 ```bash
 # Configuration validation
 export PROXMOX_MCP_CONFIG="proxmox-config/config.json"
@@ -71,6 +75,7 @@ uv pip check || {
 ```
 
 **Phase 3: Security and Integration Validation**
+
 ```bash
 # Run security validation checklist
 ./scripts/security-check.sh || {
@@ -92,6 +97,7 @@ fi
 When quality checks fail, follow these specific recovery procedures:
 
 #### pytest Failures
+
 ```bash
 # Step 1: Get detailed failure information
 pytest -v --tb=short
@@ -111,6 +117,7 @@ pytest --maxfail=1  # Stop on first failure for easier debugging
 ```
 
 #### black Formatting Failures
+
 ```bash
 # Step 1: Auto-format code (this usually resolves all issues)
 black .
@@ -132,6 +139,7 @@ Co-Authored-By: Claude <noreply@anthropic.com>"
 ```
 
 #### mypy Type Checking Failures
+
 ```bash
 # Step 1: Get detailed type error information
 mypy . --show-error-codes --show-error-context
@@ -160,6 +168,7 @@ mypy --ignore-missing-imports .  # Temporary workaround
 ```
 
 #### ruff Linting Failures
+
 ```bash
 # Step 1: Get detailed linting information
 ruff check . --show-fixes
@@ -194,6 +203,7 @@ def public_function() -> None:
 ```
 
 #### Configuration Validation Failures
+
 ```bash
 # Step 1: Check configuration file syntax
 python -c "import json; json.load(open('proxmox-config/config.json'))" || {
@@ -233,6 +243,7 @@ except Exception as e:
 ```
 
 #### MCP Server Validation Failures
+
 ```bash
 # Step 1: Check MCP tool registration
 python -c "
@@ -263,6 +274,7 @@ print('Tool validation would run here')
 ```
 
 #### Dependency Validation Failures
+
 ```bash
 # Step 1: Check for dependency conflicts
 uv pip check
@@ -282,6 +294,7 @@ pip index versions problematic-package
 ```
 
 #### Docker Build Validation Failures
+
 ```bash
 # Step 1: Clean Docker environment
 docker system prune -f
@@ -358,7 +371,8 @@ echo "🎉 Code is ready for commit"
 
 ### Dependency Management and Version Verification
 
-Before modifying dependencies in `pyproject.toml`, `requirements.in`, or `requirements-dev.in`, ALWAYS verify actual package versions to prevent uninstallable packages:
+Before modifying dependencies in `pyproject.toml`, `requirements.in`, or `requirements-dev.in`,
+ALWAYS verify actual package versions to prevent uninstallable packages:
 
 #### Version Research Commands
 
@@ -810,7 +824,9 @@ echo "✅ Security validation passed"
 
 ### Overview
 
-Repository hygiene involves proactive maintenance procedures to prevent accumulation of stale references, outdated analysis, and technical debt. These procedures should be integrated into regular development workflows to ensure repository health and accuracy.
+Repository hygiene involves proactive maintenance procedures to prevent accumulation of stale
+references, outdated analysis, and technical debt. These procedures should be integrated into regular
+development workflows to ensure repository health and accuracy.
 
 ### Pre-Work Hygiene Procedures
 
@@ -831,6 +847,7 @@ python -c "from proxmox_mcp.config.loader import load_config; load_config()" 2>/
 ### Regular Maintenance Schedule
 
 #### Daily (During Active Development)
+
 - **Memory Updates**: Capture new learnings and patterns immediately after completing tasks
 - **Branch Cleanup**: Remove merged feature branches and stale references
 - **Issue Synchronization**: Update issue status and remove stale labels
@@ -845,6 +862,7 @@ get_all_coding_preferences # Review for outdated patterns
 ```
 
 #### Weekly Maintenance
+
 - **Analysis Validation**: Review and update repository analysis against current state
 - **Documentation Accuracy**: Verify instruction files reflect current codebase structure
 - **Dependency Updates**: Check for security updates and compatibility issues
@@ -857,6 +875,7 @@ docker system prune -f
 ```
 
 #### Monthly Deep Cleaning
+
 - **Comprehensive Memory Audit**: Review all stored coding preferences for accuracy
 - **Architecture Documentation**: Update component descriptions and design patterns
 - **Security Review**: Validate security practices and credential management
@@ -864,7 +883,9 @@ docker system prune -f
 ### Memory Management Hygiene
 
 #### When to Capture New Learnings
+
 Immediately capture patterns in these scenarios:
+
 - **After resolving complex technical issues** - Document solution approach and decision rationale
 - **When implementing new architectural patterns** - Store complete implementation context
 - **Following security implementations** - Capture security best practices and validation methods
@@ -872,6 +893,7 @@ Immediately capture patterns in these scenarios:
 - **When discovering integration patterns** - Store MCP protocol and Proxmox API integration insights
 
 #### Memory Update Timing
+
 ```python
 # Capture immediately after significant implementations
 add_coding_preference(
@@ -890,14 +912,18 @@ add_coding_preference(
 ### Analysis Accuracy Validation
 
 #### Pre-Task Validation
+
 Before starting any analysis or implementation:
+
 1. **Current State Verification**: Use LS, Glob, and Grep tools to verify actual codebase structure
 2. **Reference Validation**: Check that all file references and paths are current and accurate
 3. **Component Status**: Verify component descriptions match actual implementation state
 4. **Integration Points**: Validate that described integration patterns still exist and function
 
 #### Post-Task Validation
+
 After completing implementation work:
+
 1. **Architecture Alignment**: Verify changes align with documented architectural patterns
 2. **Reference Updates**: Update any documentation that references modified components
 3. **Integration Consistency**: Ensure new implementations follow established integration patterns
@@ -905,6 +931,7 @@ After completing implementation work:
 ### Repository Health Metrics
 
 #### Key Health Indicators
+
 - **Test Coverage**: Maintain >90% coverage for core components
 - **Code Quality**: Zero mypy errors, consistent black formatting
 - **Documentation Currency**: No references to non-existent files or outdated patterns
@@ -918,6 +945,7 @@ After completing implementation work:
   1. Use simpler review text, or
   2. Escape special characters properly, or
   3. Submit reviews through the GitHub web interface for complex formatting
-- ALWAYS verify package versions exist before setting dependency constraints using `pip index versions <package>` or GitHub releases to prevent uninstallable packages
+- ALWAYS verify package versions exist before setting dependency constraints using
+  `pip index versions <package>` or GitHub releases to prevent uninstallable packages
 - ALWAYS treat GitHub API as authoritative source for repository state; verify branch existence before analysis
 - Perform stale branch cleanup before any repository analysis to ensure accuracy

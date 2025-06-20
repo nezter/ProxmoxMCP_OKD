@@ -9,7 +9,10 @@
 
 ![ProxmoxMCP](https://github.com/user-attachments/assets/e32ab79f-be8a-420c-ab2d-475612150534)
 
-> **Note**: This is a maintained fork of the original [canvrno/ProxmoxMCP](https://github.com/canvrno/ProxmoxMCP) repository, adding Docker support and ongoing maintenance. The original repository appears to be inactive since February 2025.
+> **Note**: This is a maintained fork of the original
+> [canvrno/ProxmoxMCP](https://github.com/canvrno/ProxmoxMCP) repository, adding Docker
+> support and ongoing maintenance. The original repository appears to be inactive since
+> February 2025.
 
 #### What's Different in this Fork?
 
@@ -27,7 +30,7 @@ A Python-based Model Context Protocol (MCP) server for interacting with Proxmox 
 
 📖 **[Complete Documentation](https://the-mothership.gitbook.io/proxmox-mcp/)** - Comprehensive guides, API reference, and tutorials on GitBook
 
-### 🏗️ Built With
+## 🏗️ Built With
 
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code/overview) - An agentic coding tool made by Anthropic
 - [Proxmoxer](https://github.com/proxmoxer/proxmoxer) - Python wrapper for Proxmox API
@@ -89,7 +92,7 @@ The `example.gitconfig` file contains optimized settings for this project includ
 
 #### Option 1: Quick Install (Recommended)
 
-1.  Clone and set up environment:
+1. Clone and set up environment:
 
     ```bash
     # Clone repository
@@ -107,14 +110,14 @@ The `example.gitconfig` file contains optimized settings for this project includ
     .\.venv\Scripts\Activate.ps1  # Windows
     ```
 
-2.  Install dependencies:
+2. Install dependencies:
 
     ```bash
     # Install with development dependencies
     uv pip install -e ".[dev]"
     ```
 
-3.  Create configuration:
+3. Create configuration:
 
     ```bash
     # Create config directory and copy template
@@ -122,7 +125,7 @@ The `example.gitconfig` file contains optimized settings for this project includ
     cp config/config.example.json proxmox-config/config.json
     ```
 
-4.  Edit `proxmox-config/config.json`:
+4. Edit `proxmox-config/config.json`:
 
     ```json
     {
@@ -147,19 +150,19 @@ The `example.gitconfig` file contains optimized settings for this project includ
 
 #### Verifying Installation
 
-1.  Check Python environment:
+1. Check Python environment:
 
     ```bash
     python -c "import proxmox_mcp; print('Installation OK')"
     ```
 
-2.  Run the tests:
+2. Run the tests:
 
     ```bash
     pytest
     ```
 
-3.  Verify configuration:
+3. Verify configuration:
 
     ```bash
     # Linux/macOS

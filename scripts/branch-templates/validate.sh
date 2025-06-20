@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 # Branch Management System Validator
 # Validates branch names according to ProxmoxMCP conventions
 
@@ -8,6 +8,15 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=scripts/branch-templates/config.sh
 source "${SCRIPT_DIR}/config.sh"
+
+# Legacy branch name patterns for backward compatibility
+FEATURE_PATTERN="^feature/([0-9]+-)?[a-z0-9-]+$"
+FIX_PATTERN="^fix/([0-9]+-)?[a-z0-9-]+$"
+SECURITY_PATTERN="^security/[a-z0-9-]+$"
+CHORE_PATTERN="^chore/[a-z0-9-]+$"
+RELEASE_PATTERN="^release/v?[0-9]+\.[0-9]+\.[0-9]+(-.*)?$"
+HOTFIX_PATTERN="^hotfix/[a-z0-9-]+$"
+CLAUDE_PATTERN="^claude/issue-[0-9]+-[a-z0-9-]+$"
 
 # Function to print colored output
 print_status() {
@@ -24,6 +33,23 @@ print_warning() {
 
 print_error() {
     echo -e "${COLOR_RED}[ERROR]${COLOR_NC} $1"
+}
+
+# Legacy pattern-based validation (for backward compatibility)
+validate_legacy_patterns() {
+    local branch_name="$1"
+
+    # Check against legacy patterns
+    if [[ $branch_name =~ $FEATURE_PATTERN ]] ||
+        [[ $branch_name =~ $FIX_PATTERN ]] ||
+        [[ $branch_name =~ $SECURITY_PATTERN ]] ||
+        [[ $branch_name =~ $CHORE_PATTERN ]] ||
+        [[ $branch_name =~ $RELEASE_PATTERN ]] ||
+        [[ $branch_name =~ $HOTFIX_PATTERN ]] ||
+        [[ $branch_name =~ $CLAUDE_PATTERN ]]; then
+        return 0
+    fi
+    return 1
 }
 
 # Function to validate branch name length
@@ -50,7 +76,10 @@ validate_prefix() {
 
     if ! is_valid_branch_prefix "$branch_name"; then
         print_error "Invalid branch prefix. Valid prefixes are:"
-        local valid_prefixes=("$BRANCH_PREFIX_FEATURE" "$BRANCH_PREFIX_FIX" "$BRANCH_PREFIX_SECURITY" "$BRANCH_PREFIX_DOCKER" "$BRANCH_PREFIX_CONFIG" "$BRANCH_PREFIX_DOCS" "$BRANCH_PREFIX_CI" "$BRANCH_PREFIX_PERF")
+        local valid_prefixes=("$BRANCH_PREFIX_FEATURE" "$BRANCH_PREFIX_FIX" \
+            "$BRANCH_PREFIX_SECURITY" "$BRANCH_PREFIX_DOCKER" \
+            "$BRANCH_PREFIX_CONFIG" "$BRANCH_PREFIX_DOCS" \
+            "$BRANCH_PREFIX_CI" "$BRANCH_PREFIX_PERF")
         for prefix in "${valid_prefixes[@]}"; do
             echo "  - ${prefix}/"
         done
@@ -70,7 +99,10 @@ validate_component() {
 
     # Extract the part after the prefix
     local prefix_pattern=""
-    local valid_prefixes=("$BRANCH_PREFIX_FEATURE" "$BRANCH_PREFIX_FIX" "$BRANCH_PREFIX_SECURITY" "$BRANCH_PREFIX_DOCKER" "$BRANCH_PREFIX_CONFIG" "$BRANCH_PREFIX_DOCS" "$BRANCH_PREFIX_CI" "$BRANCH_PREFIX_PERF")
+    local valid_prefixes=("$BRANCH_PREFIX_FEATURE" "$BRANCH_PREFIX_FIX" \
+        "$BRANCH_PREFIX_SECURITY" "$BRANCH_PREFIX_DOCKER" \
+        "$BRANCH_PREFIX_CONFIG" "$BRANCH_PREFIX_DOCS" \
+        "$BRANCH_PREFIX_CI" "$BRANCH_PREFIX_PERF")
 
     for prefix in "${valid_prefixes[@]}"; do
         if [[ "$branch_name" == "${prefix}/"* ]]; then
@@ -112,7 +144,6 @@ validate_description() {
     fi
 
     # Check if branch name has meaningful description after component
-    # Use parameter expansion instead of sed (addresses SC2001)
     local name_without_prefix="${branch_name#*/}"            # Remove type prefix
     local name_without_component="${name_without_prefix#*-}" # Remove first component
 
@@ -136,7 +167,6 @@ validate_description() {
 validate_characters() {
     local branch_name="$1"
 
-    # Use parameter expansion for character validation (addresses SC2001)
     # Check for invalid characters - anything not alphanumeric, hyphen, or slash
     local cleaned_name="${branch_name//[a-zA-Z0-9\/-]/}"
 
@@ -159,6 +189,14 @@ validate_characters() {
 is_protected_branch() {
     local branch_name="$1"
 
+    # Remove origin/ prefix if present
+    branch_name=${branch_name#origin/}
+
+    # Check main/development branches
+    if [[ "$branch_name" == "main" || "$branch_name" == "master" || "$branch_name" == "develop" ]]; then
+        return 0
+    fi
+
     for protected in "${PROTECTED_BRANCHES[@]}"; do
         if [[ "$branch_name" == "$protected" ]]; then
             return 0
@@ -178,7 +216,7 @@ validate_current_branch() {
     fi
 
     if is_protected_branch "$current_branch"; then
-        print_warning "You are on protected branch: $current_branch"
+        print_success "✅ ${current_branch} - Main/development branch"
         return 0
     fi
 
@@ -191,10 +229,25 @@ validate_branch_name() {
     local branch_name="$1"
     local validation_passed=true
 
+    # Remove origin/ prefix if present
+    branch_name=${branch_name#origin/}
+
+    # Skip protected branches
+    if is_protected_branch "$branch_name"; then
+        print_success "✅ ${branch_name} - Protected branch"
+        return 0
+    fi
+
     print_status "Validating branch name: $branch_name"
     echo ""
 
-    # Run all validations
+    # First try legacy pattern validation for backward compatibility
+    if validate_legacy_patterns "$branch_name"; then
+        print_success "✅ ${branch_name} - Valid (legacy pattern)"
+        return 0
+    fi
+
+    # Run comprehensive validations
     if ! validate_length "$branch_name"; then
         validation_passed=false
     fi
@@ -217,12 +270,10 @@ validate_branch_name() {
 
     echo ""
     if [[ "$validation_passed" == "true" ]]; then
-        print_success "Branch name is valid! ✨"
+        print_success "✅ ${branch_name} - Valid branch name ✨"
         return 0
     else
-        print_error "Branch name validation failed"
-
-        # Suggest a corrected name
+        print_error "❌ ${branch_name} - Branch name validation failed"
         suggest_corrections "$branch_name"
         return 1
     fi
@@ -239,7 +290,7 @@ suggest_corrections() {
     local suggested_component="core"
     local suggested_description="update"
 
-    # Use parameter expansion to clean the name (addresses SC2001)
+    # Clean the name
     local clean_name="${branch_name,,}"     # lowercase
     clean_name="${clean_name//[^a-z0-9]/-}" # replace non-alphanumeric with hyphens
     clean_name="${clean_name//--/-}"        # replace double hyphens
@@ -260,6 +311,43 @@ suggest_corrections() {
     echo "  Example: $suggestion"
     echo "  Format: <type>/<component>-<description>"
     echo ""
+    echo "  Legacy patterns also supported:"
+    echo "    feature/[issue-]description  (e.g., feature/123-add-monitoring)"
+    echo "    fix/[issue-]description      (e.g., fix/58-memory-leak)"
+    echo "    security/description         (e.g., security/fix-injection)"
+    echo ""
+}
+
+get_current_branch() {
+    git rev-parse --abbrev-ref HEAD 2>/dev/null || {
+        print_error "Not in a git repository"
+        exit 1
+    }
+}
+
+check_all_branches() {
+    print_status "Validating all local branches..."
+    echo
+
+    local all_valid=true
+    local branches
+    branches=$(git branch --format='%(refname:short)' | grep -v '^remotes/')
+
+    while IFS= read -r branch; do
+        if ! validate_branch_name "$branch"; then
+            all_valid=false
+        fi
+    done <<<"$branches"
+
+    echo
+    if $all_valid; then
+        print_success "🎉 All branches follow naming conventions!"
+        return 0
+    else
+        print_error "⚠️  Some branches don't follow naming conventions"
+        print_warning "Use the branch creation scripts to ensure proper naming"
+        return 1
+    fi
 }
 
 # Function to show help
@@ -272,81 +360,52 @@ Usage: $0 [OPTIONS] [BRANCH_NAME]
 OPTIONS:
     --current, -c       Validate current branch
     --name, -n NAME     Validate specific branch name
+    --check-all         Validate all local branches
     --help, -h          Show this help message
 
 EXAMPLES:
+    $0                              # Validate current branch
     $0 --current                    # Validate current branch
     $0 --name feature/vm-console    # Validate specific branch name
     $0 feature/api-enhancement      # Validate branch name (positional)
+    $0 --check-all                  # Validate all local branches
 
 BRANCH NAMING CONVENTIONS:
-    Format: <type>/<component>-<description>
-    
+    Modern format: <type>/<component>-<description>
+    Legacy format: <type>/[issue-]<description>
+
     Types: ${BRANCH_PREFIX_FEATURE}, ${BRANCH_PREFIX_FIX}, ${BRANCH_PREFIX_SECURITY}, ${BRANCH_PREFIX_DOCKER}, etc.
     Components: vm, api, config, docker, proxmox, etc.
-    
+
     Examples:
     - ${BRANCH_PREFIX_FEATURE}/vm-console-management
     - ${BRANCH_PREFIX_FIX}/api-timeout-handling
     - ${BRANCH_PREFIX_SECURITY}/encryption-key-rotation
-
+    - feature/123-add-monitoring (legacy)
 EOF
 }
 
-# Main function
 main() {
-    local action="help"
-    local branch_name=""
-
-    # Parse command line arguments
-    while [[ $# -gt 0 ]]; do
-        case $1 in
-        --current | -c)
-            action="current"
-            shift
-            ;;
-        --name | -n)
-            action="validate"
-            branch_name="$2"
-            shift 2
-            ;;
-        --help | -h)
-            show_help
-            exit 0
-            ;;
-        -*)
-            print_error "Unknown option: $1"
-            show_help
-            exit 1
-            ;;
-        *)
-            # Positional argument - treat as branch name
-            action="validate"
-            branch_name="$1"
-            shift
-            ;;
-        esac
-    done
-
-    # Execute the requested action
-    case $action in
-    current)
+    if [[ $# -eq 0 ]]; then
         validate_current_branch
-        ;;
-    validate)
-        if [[ -z "$branch_name" ]]; then
-            print_error "Branch name is required"
-            show_help
+    elif [[ "$1" == "--check-all" ]]; then
+        check_all_branches
+    elif [[ "$1" == "--current" || "$1" == "-c" ]]; then
+        validate_current_branch
+    elif [[ "$1" == "--name" || "$1" == "-n" ]]; then
+        if [[ $# -lt 2 ]]; then
+            print_error "Branch name required with --name option"
             exit 1
         fi
-        validate_branch_name "$branch_name"
-        ;;
-    *)
+        validate_branch_name "$2"
+    elif [[ "$1" == "-h" || "$1" == "--help" ]]; then
         show_help
-        exit 0
-        ;;
-    esac
+    else
+        # Validate specific branch (positional argument)
+        validate_branch_name "$1"
+    fi
 }
 
-# Run main function
-main "$@"
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi

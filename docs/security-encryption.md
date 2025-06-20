@@ -23,7 +23,8 @@ python -m proxmox_mcp.utils.encrypt_config --generate-key
 export PROXMOX_MCP_MASTER_KEY="your-generated-key"
 ```
 
-> **Security Note**: The key generation process now includes enhanced security measures that prevent the key from being exposed in terminal history or log files during automatic generation.
+> **Security Note**: The key generation process now includes enhanced security measures that
+> prevent the key from being exposed in terminal history or log files during automatic generation.
 
 ### 2. Encrypt Your Configuration
 
@@ -116,6 +117,7 @@ python -m proxmox_mcp.utils.encrypt_config --rotate-key-all proxmox-config/
 ## Configuration Format
 
 ### Before Encryption
+
 ```json
 {
   "auth": {
@@ -127,11 +129,12 @@ python -m proxmox_mcp.utils.encrypt_config --rotate-key-all proxmox-config/
 ```
 
 ### After Encryption
+
 ```json
 {
   "auth": {
     "user": "root@pam",
-    "token_name": "my-token", 
+    "token_name": "my-token",
     "token_value": "enc:Z0FBQUFBQm9QYjUz..."
   }
 }
@@ -173,14 +176,17 @@ Existing configurations work without changes. To migrate:
 ### Common Issues
 
 **"Token decryption failed"**
+
 - Verify `PROXMOX_MCP_MASTER_KEY` environment variable is set correctly
 - Ensure the master key matches the one used for encryption
 
 **"Config file not found"**
+
 - Check `PROXMOX_MCP_CONFIG` environment variable points to correct file
 - Verify file permissions and path accessibility
 
 **"Invalid encrypted token format"**
+
 - Encrypted tokens must start with `enc:` prefix
 - Verify file wasn't corrupted during transfer or storage
 
@@ -199,7 +205,8 @@ Enable debug logging to troubleshoot encryption issues:
 
 ## Key Rotation Procedures
 
-Key rotation is essential for maintaining long-term security. ProxmoxMCP provides comprehensive tools and procedures for safely rotating encryption keys.
+Key rotation is essential for maintaining long-term security. ProxmoxMCP provides comprehensive
+tools and procedures for safely rotating encryption keys.
 
 ### When to Rotate Keys
 
@@ -430,11 +437,13 @@ If key compromise is suspected:
 **Symptoms**: Rotation fails during verification phase
 
 **Causes**:
+
 - Wrong `PROXMOX_MCP_MASTER_KEY` environment variable
 - Configuration file corrupted
 - Key truncated or modified
 
 **Solutions**:
+
 ```bash
 # Verify environment variable is set correctly
 echo $PROXMOX_MCP_MASTER_KEY | wc -c  # Should be 45 characters
@@ -456,11 +465,13 @@ python -m proxmox_mcp.utils.encrypt_config config.encrypted.json --status
 **Symptoms**: Backup creation fails during rotation
 
 **Causes**:
+
 - Insufficient disk space
 - Permission issues
 - File system errors
 
 **Solutions**:
+
 ```bash
 # Check disk space
 df -h
@@ -477,11 +488,13 @@ cp config.encrypted.json config.encrypted.json.manual.backup
 **Symptoms**: Server won't start after key rotation
 
 **Causes**:
+
 - Environment variable not updated
 - Configuration cache issues
 - Service configuration problems
 
 **Solutions**:
+
 ```bash
 # Verify new environment variable
 echo $PROXMOX_MCP_MASTER_KEY
@@ -555,28 +568,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-      
+
       - name: Install dependencies
         run: |
           pip install -e .
-          
+
       - name: Rotate staging keys
         env:
           PROXMOX_MCP_MASTER_KEY: ${{ secrets.STAGING_MASTER_KEY }}
         run: |
           python -m proxmox_mcp.utils.encrypt_config --rotate-key staging-config/config.encrypted.json
-          
+
       - name: Test rotated configuration
         env:
           PROXMOX_MCP_MASTER_KEY: ${{ secrets.NEW_STAGING_KEY }}
         run: |
           python -m proxmox_mcp.server --test
-          
+
       - name: Update secrets
         run: |
           # Update GitHub secrets with new key
@@ -636,7 +649,7 @@ if [ -f "$KEY_FILE" ]; then
     LAST_ROTATION=$(jq -r '.last_rotation' "$KEY_FILE")
     CURRENT_DATE=$(date +%s)
     DAYS_SINCE_ROTATION=$(( (CURRENT_DATE - LAST_ROTATION) / 86400 ))
-    
+
     if [ $DAYS_SINCE_ROTATION -gt $MAX_AGE_DAYS ]; then
         echo "Key rotation required: $DAYS_SINCE_ROTATION days since last rotation"
         # Trigger automated rotation
@@ -776,6 +789,7 @@ WantedBy=multi-user.target
 ```
 
 Environment file (`/etc/proxmox-mcp/environment`):
+
 ```bash
 PROXMOX_MCP_MASTER_KEY=your-master-key
 ```

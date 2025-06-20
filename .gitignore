@@ -76,3 +76,6 @@ proxmox-config/config.json
 
 # Ignore local codacy
 .codacy/
+
+#Ignore cursor AI rules
+.cursor/rules/codacy.mdc
