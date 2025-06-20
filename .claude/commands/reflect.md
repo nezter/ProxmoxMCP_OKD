@@ -93,9 +93,10 @@ C. **Specificity Evaluation**
 **Memory Utilization Patterns:**
 
 ```bash
-# Review memory system usage (if available)
-# get_all_coding_preferences
-# search_coding_preferences "ProxmoxMCP"
+# Review memory system usage with Serena MCP server
+mcp__serena__list_memories
+mcp__serena__read_memory "proxmox-patterns"
+mcp__serena__read_memory "architecture-decisions"
 ```
 
 **Memory-Instruction Alignment Analysis:**
@@ -485,10 +486,10 @@ For each validated improvement:
 - **Domain Specificity**: Note ProxmoxMCP-specific instruction optimizations
 
 #### Implementation in Memory System
-1. **add_coding_preference**: Store successful instruction patterns with full context
+1. **mcp__serena__write_memory**: Store successful instruction patterns with full context
 2. **Pattern Classification**: Categorize improvements by type (error handling, task execution, etc.)
 3. **Reusability Assessment**: Determine which patterns apply to other AI instruction contexts
-4. **Evolution Tracking**: Monitor how instruction patterns evolve over time
+4. **Evolution Tracking**: Monitor how instruction patterns evolve over time using memory updates
 ```
 
 #### Pattern Library Development
@@ -880,7 +881,7 @@ The reflection analysis system will be considered successful when:
 
 This reflection analysis system integrates with:
 
-- **Memory System**: For pattern storage and retrieval (`add_coding_preference`, `search_coding_preferences`)
+- **Memory System**: For pattern storage and retrieval (`mcp__serena__write_memory`, `mcp__serena__read_memory`, `mcp__serena__list_memories`)
 - **Git Workflow**: Pre-commit hooks, PR validation, and automated scheduling
 - **Issue Management**: Automatic issue creation for critical instruction problems
 - **Documentation System**: Bidirectional linking with CLAUDE.md and AI instruction files

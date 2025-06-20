@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 # Additional Instructions
 
-- memory workflow @/workspaces/ProxmoxMCP/docs/ai-instructions/memory-instructions.md (not supported in Codex)
+- memory workflow @/workspaces/ProxmoxMCP/docs/ai-instructions/memory-instructions.md
 - context workflow @/workspaces/ProxmoxMCP/docs/ai-instructions/context-instructions.md
 - github workflow @/workspaces/ProxmoxMCP/docs/ai-instructions/github-instructions.md
 - issue creation workflow @/workspaces/ProxmoxMCP/docs/ai-instructions/issue-creation-instructions.md
@@ -33,24 +33,327 @@ uv pip install -e ".[dev]"
 
 ### Testing and Quality Assurance
 
-```bash
-# Run tests
-pytest
+#### Standardized Quality Assurance Workflow
 
-# Format code
+The ProxmoxMCP project uses a comprehensive, standardized quality assurance workflow that must be followed for all code changes. This workflow includes automated checks, error recovery procedures, and ProxmoxMCP-specific validations.
+
+#### Pre-Commit Quality Pipeline
+
+**Phase 1: Core Quality Checks (Parallel Execution)**
+```bash
+# Run core quality checks in parallel for efficiency
+pytest & black . & mypy . & ruff . && wait
+
+# If any check fails, stop and address issues before proceeding
+echo "Core quality checks completed"
+```
+
+**Phase 2: ProxmoxMCP-Specific Validation**
+```bash
+# Configuration validation
+export PROXMOX_MCP_CONFIG="proxmox-config/config.json"
+python -c "from proxmox_mcp.config.loader import load_config; load_config()" || {
+    echo "❌ Configuration validation failed"
+    exit 1
+}
+
+# MCP server startup validation
+python -m proxmox_mcp.server --validate-only || {
+    echo "❌ MCP server validation failed"
+    exit 1
+}
+
+# Dependency consistency check
+uv pip check || {
+    echo "❌ Dependency validation failed"
+    exit 1
+}
+```
+
+**Phase 3: Security and Integration Validation**
+```bash
+# Run security validation checklist
+./scripts/security-check.sh || {
+    echo "❌ Security validation failed"
+    exit 1
+}
+
+# Docker build validation (if Docker changes made)
+if git diff --name-only HEAD~1 | grep -E "(Dockerfile|compose\.yaml|\.dockerignore)"; then
+    docker compose build || {
+        echo "❌ Docker build validation failed"
+        exit 1
+    }
+fi
+```
+
+#### Error Recovery Procedures
+
+When quality checks fail, follow these specific recovery procedures:
+
+#### pytest Failures
+```bash
+# Step 1: Get detailed failure information
+pytest -v --tb=short
+
+# Step 2: Run specific failed tests for faster iteration
+pytest path/to/failed_test.py::test_function_name -v
+
+# Step 3: Common pytest failure patterns and solutions
+# - Import errors: Check PYTHONPATH and virtual environment activation
+# - Configuration errors: Verify test configuration files exist
+# - Dependency errors: Run `uv pip install -e ".[dev]"` to reinstall dependencies
+# - Proxmox API errors: Ensure mock fixtures are properly configured
+
+# Step 4: If tests pass individually but fail in suite
+pytest --lf  # Run only last failed tests
+pytest --maxfail=1  # Stop on first failure for easier debugging
+```
+
+#### black Formatting Failures
+```bash
+# Step 1: Auto-format code (this usually resolves all issues)
 black .
 
-# Type checking
-mypy .
+# Step 2: Verify formatting was applied
+git diff --name-only
 
-# Lint code
-ruff .
+# Step 3: Review changes and commit formatting fixes
+git add .
+git commit -m "format: apply black code formatting
 
-# Run all quality checks sequentially
-pytest && black . && mypy . && ruff .
+Automated formatting applied by black code formatter.
 
-# Full quality checks including dependency validation
-pytest && black . && mypy . && ruff . && uv pip check
+🤖 Generated with [Claude Code](https://claude.ai/code)
+
+Co-Authored-By: Claude <noreply@anthropic.com>"
+
+# Note: black failures are rare and usually indicate file permissions or encoding issues
+```
+
+#### mypy Type Checking Failures
+```bash
+# Step 1: Get detailed type error information
+mypy . --show-error-codes --show-error-context
+
+# Step 2: Common mypy error patterns and solutions
+
+# Missing type annotations
+# Error: Function is missing a return type annotation
+# Solution: Add return type hints
+def function_name() -> ReturnType:
+
+# Import type errors
+# Error: Cannot find implementation or library stub
+# Solution: Add type ignore comment or install type stubs
+import proxmoxer  # type: ignore[import]
+# OR
+pip install types-requests types-urllib3
+
+# Configuration type errors
+# Error: Incompatible types in assignment
+# Solution: Update Pydantic models or add proper type annotations
+
+# Step 3: Gradual typing approach for large errors
+mypy --ignore-missing-imports .  # Temporary workaround
+# Then gradually fix import issues one by one
+```
+
+#### ruff Linting Failures
+```bash
+# Step 1: Get detailed linting information
+ruff check . --show-fixes
+
+# Step 2: Auto-fix issues where possible
+ruff check . --fix
+
+# Step 3: Review remaining issues
+ruff check . --diff  # Show what would be changed
+
+# Step 4: Common ruff error patterns and solutions
+
+# Unused imports (F401)
+# Solution: Remove unused imports or add noqa comment if needed
+import unused_module  # noqa: F401  # Used by dynamic import
+
+# Line too long (E501)
+# Solution: Break long lines or use parentheses
+very_long_string = (
+    "This is a very long string that needs to be "
+    "broken across multiple lines for readability"
+)
+
+# Missing docstrings (D100)
+# Solution: Add docstrings to public functions and classes
+def public_function() -> None:
+    """Brief description of what this function does."""
+    pass
+
+# Step 5: Configuration-specific ignores
+# Add to pyproject.toml if needed, but prefer fixing the code
+```
+
+#### Configuration Validation Failures
+```bash
+# Step 1: Check configuration file syntax
+python -c "import json; json.load(open('proxmox-config/config.json'))" || {
+    echo "Invalid JSON in config file"
+    exit 1
+}
+
+# Step 2: Validate required environment variables
+python -c "
+import os
+required_vars = ['PROXMOX_MCP_CONFIG']
+missing = [var for var in required_vars if not os.getenv(var)]
+if missing:
+    print(f'Missing environment variables: {missing}')
+    exit(1)
+print('Environment variables validated')
+"
+
+# Step 3: Test configuration loading
+python -c "
+from proxmox_mcp.config.loader import load_config
+try:
+    config = load_config()
+    print('✅ Configuration loaded successfully')
+    print(f'Host: {config.host}')
+    print(f'User: {config.user}')
+except Exception as e:
+    print(f'❌ Configuration error: {e}')
+    exit(1)
+"
+
+# Step 4: Common configuration issues and solutions
+# - Missing config file: Copy from example and customize
+# - Invalid credentials: Check Proxmox API token validity
+# - Network issues: Verify Proxmox host accessibility
+# - SSL issues: Check certificate configuration
+```
+
+#### MCP Server Validation Failures
+```bash
+# Step 1: Check MCP tool registration
+python -c "
+from proxmox_mcp.tools.definitions import get_tool_definitions
+tools = get_tool_definitions()
+print(f'Registered tools: {len(tools)}')
+for tool in tools:
+    print(f'  - {tool.name}')
+"
+
+# Step 2: Validate tool implementations
+python -c "
+from proxmox_mcp.server import create_server
+try:
+    server = create_server()
+    print('✅ MCP server created successfully')
+except Exception as e:
+    print(f'❌ MCP server error: {e}')
+    exit(1)
+"
+
+# Step 3: Test individual tool functionality
+python -c "
+from proxmox_mcp.tools.node import get_nodes
+# Test with mock or development configuration
+print('Tool validation would run here')
+"
+```
+
+#### Dependency Validation Failures
+```bash
+# Step 1: Check for dependency conflicts
+uv pip check
+
+# Step 2: Rebuild environment if conflicts found
+rm -rf .venv
+uv venv
+source .venv/bin/activate  # Linux/macOS
+uv pip install -e ".[dev]"
+
+# Step 3: Verify specific dependency issues
+pip show problematic-package
+pip index versions problematic-package
+
+# Step 4: Update constraints if needed (following version verification process)
+# See "Dependency Management and Version Verification" section above
+```
+
+#### Docker Build Validation Failures
+```bash
+# Step 1: Clean Docker environment
+docker system prune -f
+docker compose down --volumes
+
+# Step 2: Build with verbose output
+docker compose build --no-cache --progress=plain
+
+# Step 3: Test container functionality
+docker compose up -d
+docker compose logs
+
+# Step 4: Validate container security
+docker compose exec proxmox-mcp id  # Should not be root
+docker compose exec proxmox-mcp ls -la /app  # Check file permissions
+```
+
+#### Complete Quality Assurance Command
+
+For development workflow efficiency, use this comprehensive command that includes error recovery:
+
+```bash
+#!/bin/bash
+# comprehensive-qa.sh - Complete quality assurance with error recovery
+
+set -e  # Exit on any error
+
+echo "🚀 Starting ProxmoxMCP Quality Assurance Pipeline"
+
+# Phase 1: Core Quality Checks
+echo "📋 Phase 1: Core Quality Checks"
+echo "Running pytest..."
+pytest || { echo "❌ Tests failed - run 'pytest -v' for details"; exit 1; }
+
+echo "Running black formatter..."
+black . || { echo "❌ Formatting failed"; exit 1; }
+
+echo "Running mypy type checker..."
+mypy . || { echo "❌ Type checking failed - run 'mypy . --show-error-codes' for details"; exit 1; }
+
+echo "Running ruff linter..."
+ruff check . || { echo "❌ Linting failed - run 'ruff check . --show-fixes' for details"; exit 1; }
+
+# Phase 2: ProxmoxMCP Validation
+echo "📋 Phase 2: ProxmoxMCP-Specific Validation"
+export PROXMOX_MCP_CONFIG="proxmox-config/config.json"
+
+echo "Validating configuration..."
+python -c "from proxmox_mcp.config.loader import load_config; load_config()" || {
+    echo "❌ Configuration validation failed"
+    exit 1
+}
+
+echo "Validating MCP server..."
+python -m proxmox_mcp.server --validate-only || {
+    echo "❌ MCP server validation failed"
+    exit 1
+}
+
+echo "Checking dependencies..."
+uv pip check || {
+    echo "❌ Dependency validation failed"
+    exit 1
+}
+
+# Phase 3: Security Validation
+echo "📋 Phase 3: Security Validation"
+echo "Running security checks..."
+# Security validation would be implemented here
+
+echo "✅ All quality assurance checks passed!"
+echo "🎉 Code is ready for commit"
 ```
 
 ### Dependency Management and Version Verification
@@ -316,6 +619,192 @@ All dependency versions MUST be verified before setting constraints:
 5. **Document breaking changes** when updating major versions
 
 See the "Dependency Management and Version Verification" section above for detailed procedures.
+
+## Security Validation and Best Practices
+
+### Comprehensive Security Checklist
+
+Before committing any code changes, validate security implementations using this checklist:
+
+#### Credential Management Validation
+
+- [ ] **No credentials in code**: Verify no hardcoded passwords, tokens, or API keys in source code
+- [ ] **No credentials in logs**: Ensure credentials are not logged in error messages or debug output
+- [ ] **Environment variables used**: All sensitive configuration uses environment variables
+- [ ] **Credential encryption**: API tokens and sensitive data encrypted at rest when stored
+- [ ] **No credentials in error outputs**: Error messages don't expose credential information
+
+#### ProxmoxMCP-Specific Security Validation
+
+- [ ] **Proxmox API authentication**: Token-based authentication properly implemented
+- [ ] **API token rotation**: Token rotation procedures documented and tested
+- [ ] **SSL/TLS validation**: Certificate validation properly configured for Proxmox connections
+- [ ] **Connection timeouts**: Appropriate timeouts set for API connections
+- [ ] **Rate limiting**: API rate limiting and quota management implemented
+
+#### Input Validation and Sanitization
+
+- [ ] **VM command sanitization**: All VM commands sanitized against injection attacks
+- [ ] **File path validation**: File paths validated against directory traversal attacks
+- [ ] **API parameter validation**: All API parameters validated using Pydantic models
+- [ ] **Configuration validation**: Configuration inputs validated with schema enforcement
+- [ ] **Command execution security**: VM command execution uses safe parameter passing
+
+#### Network and Communication Security
+
+- [ ] **TLS configuration**: All external communications use TLS/SSL
+- [ ] **Certificate verification**: SSL certificates properly verified (not disabled)
+- [ ] **Secure headers**: Appropriate security headers implemented where applicable
+- [ ] **Connection pooling security**: Connection pooling doesn't leak credentials
+- [ ] **API endpoint security**: All API endpoints require proper authentication
+
+#### Container and Deployment Security
+
+- [ ] **Non-root containers**: Docker containers run as non-root user
+- [ ] **File permissions**: Proper file permissions set for configuration and data files
+- [ ] **Environment variable security**: Sensitive environment variables properly scoped
+- [ ] **Health check security**: Health check endpoints don't expose sensitive information
+- [ ] **Image security**: Base images are from trusted sources and regularly updated
+
+#### Audit and Monitoring
+
+- [ ] **Security event logging**: Security-relevant events properly logged
+- [ ] **No sensitive data in logs**: Logs don't contain passwords, tokens, or personal data
+- [ ] **Audit trail**: Changes to security-critical configuration create audit trails
+- [ ] **Monitoring integration**: Security events integrated with monitoring systems
+- [ ] **Incident response**: Clear procedures for security incident response
+
+### Security Implementation Patterns
+
+#### Secure Configuration Loading
+
+```python
+# Correct: Use environment variables with validation
+from pydantic import BaseModel, Field
+import os
+
+class SecureConfig(BaseModel):
+    proxmox_host: str = Field(..., env="PROXMOX_HOST")
+    api_token: str = Field(..., env="PROXMOX_API_TOKEN")
+    
+    class Config:
+        # Never log sensitive fields
+        json_encoders = {
+            str: lambda v: "***" if "token" in str(v).lower() else v
+        }
+```
+
+#### Secure API Communication
+
+```python
+# Correct: Proper SSL verification and error handling
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
+
+def create_secure_session():
+    session = requests.Session()
+    
+    # Configure retries and timeouts
+    retry_strategy = Retry(
+        total=3,
+        backoff_factor=1,
+        status_forcelist=[429, 500, 502, 503, 504],
+    )
+    
+    adapter = HTTPAdapter(max_retries=retry_strategy)
+    session.mount("https://", adapter)
+    
+    # Always verify SSL certificates
+    session.verify = True
+    
+    return session
+```
+
+#### Secure Command Execution
+
+```python
+# Correct: Safe parameter passing for VM commands
+import shlex
+from typing import List
+
+def execute_vm_command(vm_id: int, command: List[str]) -> dict:
+    # Validate VM ID
+    if not isinstance(vm_id, int) or vm_id < 1:
+        raise ValueError("Invalid VM ID")
+    
+    # Use list form to prevent injection
+    safe_command = [str(arg) for arg in command]
+    
+    # Log command execution (without sensitive data)
+    logger.info(f"Executing command on VM {vm_id}: {safe_command[0]}")
+    
+    # Execute with proxmox API
+    return proxmox_api.execute_command(vm_id, safe_command)
+```
+
+### Security Testing Requirements
+
+#### Pre-Commit Security Validation
+
+```bash
+# Security validation script to run before commits
+#!/bin/bash
+
+echo "Running security validation..."
+
+# Check for hardcoded secrets
+if grep -r -E "(password|token|key|secret).*=.*['\"][^'\"]*['\"]" src/ --exclude-dir=tests; then
+    echo "❌ Potential hardcoded secrets found"
+    exit 1
+fi
+
+# Validate SSL configuration
+python -c "
+import ssl
+from proxmox_mcp.config.loader import load_config
+config = load_config()
+if hasattr(config, 'verify_ssl') and not config.verify_ssl:
+    print('❌ SSL verification disabled')
+    exit(1)
+print('✅ SSL verification enabled')
+"
+
+# Check environment variable usage
+if ! grep -q "os.environ\|getenv\|Field.*env=" src/proxmox_mcp/config/; then
+    echo "❌ No environment variable usage found in config"
+    exit 1
+fi
+
+echo "✅ Security validation passed"
+```
+
+#### Security Integration Testing
+
+- **Authentication testing**: Verify all authentication flows work correctly
+- **Authorization testing**: Test proper permission enforcement
+- **Input validation testing**: Test all input validation and sanitization
+- **Error handling testing**: Ensure errors don't leak sensitive information
+- **SSL/TLS testing**: Verify secure communication channels
+
+### Security Incident Response
+
+#### Immediate Actions for Security Issues
+
+1. **Assess severity**: Determine if issue affects production systems
+2. **Contain impact**: Isolate affected systems if necessary
+3. **Document incident**: Record timeline and actions taken
+4. **Notify stakeholders**: Inform relevant team members
+5. **Implement fix**: Deploy security patch following change management
+6. **Verify resolution**: Confirm vulnerability is properly addressed
+7. **Post-incident review**: Document lessons learned and improve processes
+
+#### Security Issue Escalation
+
+- **Critical**: Immediate response required (credential exposure, RCE)
+- **High**: Response within 24 hours (privilege escalation, data exposure)
+- **Medium**: Response within 72 hours (DoS, information disclosure)
+- **Low**: Address in next release cycle (security hardening opportunities)
 
 ## Repository Hygiene and Maintenance
 
