@@ -4,13 +4,7 @@ This document provides comprehensive guidelines for Claude Code when working on 
 
 ## Pre-Work Phase
 
-### 1. Memory and Context Research
-- **ALWAYS start** by using `get_all_coding_preferences` to retrieve stored coding patterns
-- Use `search_coding_preferences` to find specific implementations related to the issue
-- Use `resolve-library-id` and `get-library-docs` for external library research when needed
-- Review existing architectural patterns and implementation styles
-
-### 2. Issue Analysis
+### 1. Issue Analysis
 - **Read the complete issue description** carefully, including all comments and updates
 - Identify the **issue type** from labels (bug, enhancement, security, etc.)
 - Determine **affected components** (server, config, tools, formatting, docker, etc.)
@@ -18,7 +12,7 @@ This document provides comprehensive guidelines for Claude Code when working on 
 - Review any **acceptance criteria** provided
 - Assess the **effort level** and complexity
 
-### 3. Codebase Exploration
+### 2. Codebase Exploration
 - Use `Glob` and `Grep` tools to understand relevant code structure
 - Read existing implementations of similar functionality
 - Identify integration points and dependencies
@@ -27,7 +21,7 @@ This document provides comprehensive guidelines for Claude Code when working on 
 
 ## Implementation Phase
 
-### 4. Planning and Architecture
+### 3. Planning and Architecture
 - Create a **TodoWrite** task list breaking down the implementation
 - Follow **existing architectural patterns** from the codebase
 - Ensure **consistency** with ProxmoxMCP design principles:
@@ -37,7 +31,7 @@ This document provides comprehensive guidelines for Claude Code when working on 
   - Rich formatting with themes
   - Comprehensive error handling
 
-### 5. Code Implementation Guidelines
+### 4. Code Implementation Guidelines
 
 #### Security Considerations
 - **Never expose secrets** in code, logs, or outputs
@@ -60,14 +54,14 @@ This document provides comprehensive guidelines for Claude Code when working on 
 - **Consistent naming conventions** with the codebase
 - **No hardcoded values** - use configuration or constants
 
-### 6. Testing Requirements
+### 5. Testing Requirements
 - **Add comprehensive tests** for new functionality
 - **Use existing test patterns** from the test suite
 - **Mock Proxmox API calls** in tests
 - **Test error conditions** and edge cases
 - **Ensure backward compatibility** when modifying existing code
 
-### 7. Documentation Updates
+### 6. Documentation Updates
 - **Update relevant documentation** in `docs/` directory
 - **Add tool descriptions** to `tools/definitions.py` for new MCP tools
 - **Update README.md** if adding new features or changing installation
@@ -75,7 +69,7 @@ This document provides comprehensive guidelines for Claude Code when working on 
 
 ## Quality Assurance Phase
 
-### 8. Pre-Commit Validation
+### 7. Pre-Commit Validation
 Run all quality checks before committing:
 ```bash
 # Required quality checks
@@ -89,14 +83,14 @@ python -m proxmox_mcp.server  # Test server startup
 docker compose build
 ```
 
-### 9. Security Validation
+### 8. Security Validation
 - **Review for secret exposure** in code and logs
 - **Test authentication flows** if authentication is involved
 - **Validate input sanitization** for command execution
 - **Check SSL/TLS configurations** if network communication is involved
 - **Review file permissions** for any created files
 
-### 10. Integration Testing
+### 9. Integration Testing
 - **Test MCP tool functionality** individually
 - **Verify Proxmox API integration** if applicable
 - **Test error handling paths** and fallback mechanisms
@@ -105,18 +99,13 @@ docker compose build
 
 ## Commit and Documentation Phase
 
-### 11. Commit Guidelines
+### 10. Commit Guidelines
 - **Follow commit message template** from `.gitmessage`
 - **Use appropriate commit type**: feat, fix, security, config, docker, refactor, test, docs, ci, perf
 - **Include detailed commit body** explaining what and why (not how)
 - **Reference the issue number** with "Fixes #issue-number"
 - **Mention affected components** and breaking changes
 
-### 12. Memory Updates
-- **Add new coding patterns** to memory using `add_coding_preference`
-- **Include complete implementation context**: dependencies, setup, examples
-- **Document architectural decisions** and design patterns used
-- **Store security best practices** and configuration patterns
 
 ## Component-Specific Guidelines
 
@@ -208,17 +197,15 @@ An issue is successfully resolved when:
 6. **Backward compatibility** is maintained (unless breaking change is intended)
 7. **Integration tests pass** with Proxmox API (when applicable)
 8. **Commit follows standards** with proper message and references
-9. **Memory is updated** with new coding patterns and learnings
 
 ## Post-Implementation
 
-### 13. Knowledge Capture
+### 11. Knowledge Capture
 - **Document lessons learned** for future similar issues
 - **Update architectural patterns** if new patterns emerge
-- **Share implementation insights** via memory system
 - **Consider roadmap implications** for future development
 
-### 14. Monitoring and Validation
+### 12. Monitoring and Validation
 - **Monitor for related issues** after implementation
 - **Validate real-world usage** when possible
 - **Be available for follow-up questions** and clarifications
@@ -231,7 +218,6 @@ An issue is successfully resolved when:
 Before marking an issue as complete, verify:
 
 - [ ] Issue requirements fully understood and addressed
-- [ ] Memory and context research completed
 - [ ] Implementation follows ProxmoxMCP architectural patterns
 - [ ] Comprehensive tests added and passing
 - [ ] Security considerations addressed
@@ -239,7 +225,6 @@ Before marking an issue as complete, verify:
 - [ ] Code quality checks passing (pytest, black, mypy)
 - [ ] Integration testing completed
 - [ ] Commit message follows template and references issue
-- [ ] New coding patterns added to memory
 - [ ] Backward compatibility maintained
 - [ ] Performance implications considered
 
