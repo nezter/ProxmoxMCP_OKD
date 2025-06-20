@@ -122,7 +122,7 @@ tasks:
   type:check:
     desc: Run mypy type checking
     cmds:
-      - uv run mypy . --exclude mem0-mcp
+      - uv run mypy .
 
   # Testing tasks
   test:

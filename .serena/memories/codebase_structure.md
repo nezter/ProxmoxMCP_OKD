@@ -8,7 +8,6 @@ ProxmoxMCP/
 ├── proxmox-config/         # Configuration templates and files
 ├── docs/                   # Documentation
 ├── scripts/                # Utility scripts
-├── mem0-mcp/              # MCP integration components
 ├── .github/               # GitHub workflows and templates
 ├── pyproject.toml         # Project configuration and dependencies
 ├── Dockerfile             # Docker container definition
