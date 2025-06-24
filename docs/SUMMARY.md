@@ -6,14 +6,47 @@
 * [🚀 Project Roadmap](ROADMAP.md)
 * [💁 Contributing](../CONTRIBUTING.md)
 
-## Architecture & Development
+## Development Guide
 
-* [📋 Repository Review](repository-review.md)
-* [🤖 Claude Code Automation](claude-code-automation.md)
+* [🔄 Development Workflows](development/development-workflow.md)
+* [🧪 Testing Guide](development/testing-workflow.md)
+* [🐍 Python Code Standards](development/python-coding-standard.md)
+* [⚡ Pre-commit Setup](development/pre-commit-improvements.md)
+
+## Project Management
+
+* [🎯 Milestone Planning](milestone-planning.md)
+* [🌿 Branch Management](branch-management.md)
+
+## Automation & Tools
+
+* [🤖 Claude Code Automation](automation/claude-code-automation.md)
+* [🔗 Claude SDK Integration](automation/claude-code-sdk-integration.md)
+* [📝 Markdown Automation](automation/markdown-automation-guide.md)
+* [⚡ Taskfile Integration](automation/TASKFILE_INTEGRATION.md)
+* [📋 YAML Linting](automation/yaml-linting.md)
 
 ## Security
 
 * [🔒 Security & Encryption](security-encryption.md)
+* [🛡️ Security Fix Verification](security/SECURITY_FIX_VERIFICATION.md)
+* [🔍 Dependency Scanning](security/dependency-scanning.md)
+
+## Analysis & Reports
+
+* [📋 Repository Review](repository-review.md)
+* [⚡ Efficiency Analysis](EFFICIENCY_ANALYSIS_REPORT.md)
+
+## Internal Documentation
+
+* [🤖 AI Instructions](internal/ai-instructions/)
+  * [💾 Memory Management](internal/ai-instructions/memory-instructions.md)
+  * [🔍 Context Research](internal/ai-instructions/context-instructions.md)
+  * [🐙 GitHub Workflows](internal/ai-instructions/github-instructions.md)
+  * [📝 Issue Creation](internal/ai-instructions/issue-creation-instructions.md)
+  * [🔧 Issue Resolution](internal/ai-instructions/issue-resolution-instructions.md)
+  * [🔄 PR Management](internal/ai-instructions/pr-instructions.md)
+  * [🎯 Milestone Management](internal/ai-instructions/milestone-instructions.md)
 
 ## Project Files
 
