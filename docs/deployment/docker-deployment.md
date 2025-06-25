@@ -60,6 +60,7 @@ docker inspect proxmox-mcp | grep Health
 ### Available Images
 
 #### GitHub Container Registry (Primary)
+
 ```bash
 # Latest stable release
 ghcr.io/basher83/proxmox-mcp:latest
@@ -75,6 +76,7 @@ ghcr.io/basher83/proxmox-mcp:v1.0.0-rc1
 ```
 
 #### Multi-Architecture Support
+
 ```bash
 # Multi-architecture manifest (automatic selection)
 ghcr.io/basher83/proxmox-mcp:latest
@@ -88,6 +90,7 @@ docker pull --platform linux/arm64 ghcr.io/basher83/proxmox-mcp:latest
 ### Image Information
 
 #### Security and Verification
+
 ```bash
 # Verify image signature (if available)
 cosign verify ghcr.io/basher83/proxmox-mcp:latest
@@ -100,6 +103,7 @@ syft ghcr.io/basher83/proxmox-mcp:latest
 ```
 
 #### Image Details
+
 - **Base Image:** python:3.10-slim
 - **User:** Non-root (appuser:appgroup)
 - **Port:** None (stdio MCP server)
@@ -113,6 +117,7 @@ syft ghcr.io/basher83/proxmox-mcp:latest
 ### Proxmox API Token Setup
 
 #### 1. Create API Token in Proxmox
+
 ```bash
 # In Proxmox web interface:
 # 1. Go to Datacenter → Permissions → API Tokens
@@ -121,6 +126,7 @@ syft ghcr.io/basher83/proxmox-mcp:latest
 ```
 
 #### 2. Configuration File
+
 ```json
 {
   "host": "your-proxmox-host.example.com",
@@ -136,6 +142,7 @@ syft ghcr.io/basher83/proxmox-mcp:latest
 ### Container Configuration Methods
 
 #### Method 1: Configuration File (Recommended)
+
 ```bash
 # Create configuration directory
 mkdir -p ./proxmox-config
@@ -160,6 +167,7 @@ docker run -d \
 ```
 
 #### Method 2: Environment Variables
+
 ```bash
 # Run with environment variables
 docker run -d \
@@ -174,6 +182,7 @@ docker run -d \
 ```
 
 #### Method 3: Docker Secrets (Production)
+
 ```bash
 # Create secrets
 echo "your-secret-token" | docker secret create proxmox_token -
@@ -189,6 +198,7 @@ docker service create \
 ### Encrypted Configuration
 
 #### Using Built-in Encryption
+
 ```bash
 # Generate encryption key
 docker run --rm ghcr.io/basher83/proxmox-mcp:latest \
@@ -217,6 +227,7 @@ docker run -d \
 ### Docker Compose (Recommended)
 
 #### Basic Deployment
+
 ```yaml
 # docker-compose.yml
 version: '3.8'
@@ -260,6 +271,7 @@ services:
 ```
 
 #### Production Deployment with Monitoring
+
 ```yaml
 # docker-compose.prod.yml
 version: '3.8'
@@ -325,6 +337,7 @@ volumes:
 ### Docker Swarm
 
 #### Swarm Service Deployment
+
 ```bash
 # Initialize swarm (if not already done)
 docker swarm init
@@ -346,6 +359,7 @@ docker service create \
 ```
 
 #### Stack Deployment
+
 ```yaml
 # proxmox-mcp-stack.yml
 version: '3.8'
@@ -389,6 +403,7 @@ volumes:
 ### Kubernetes
 
 #### Basic Deployment
+
 ```yaml
 # proxmox-mcp-deployment.yaml
 apiVersion: apps/v1
@@ -484,6 +499,7 @@ stringData:
 ```
 
 #### Production Kubernetes with Helm
+
 ```yaml
 # values.yaml for Helm chart
 replicaCount: 1
@@ -538,6 +554,7 @@ monitoring:
 ### Container Security
 
 #### Security Hardening
+
 ```yaml
 # Secure Docker Compose configuration
 services:
@@ -566,6 +583,7 @@ services:
 ```
 
 #### Network Security
+
 ```yaml
 services:
   proxmox-mcp:
@@ -589,6 +607,7 @@ networks:
 ### Secrets Management
 
 #### Docker Compose Secrets
+
 ```yaml
 version: '3.8'
 
@@ -613,6 +632,7 @@ secrets:
 ```
 
 #### External Secret Management
+
 ```bash
 # Using HashiCorp Vault
 vault kv put secret/proxmox-mcp \
@@ -632,6 +652,7 @@ docker compose --env-file .env.secrets up -d
 ### SSL/TLS Configuration
 
 #### Custom CA Certificates
+
 ```dockerfile
 # Custom Dockerfile for custom CA
 FROM ghcr.io/basher83/proxmox-mcp:latest
@@ -645,6 +666,7 @@ RUN update-ca-certificates
 ```
 
 #### SSL Configuration Options
+
 ```json
 {
   "host": "proxmox.example.com",
@@ -663,6 +685,7 @@ RUN update-ca-certificates
 ### Health Monitoring
 
 #### Container Health Checks
+
 ```bash
 # Manual health check
 docker exec proxmox-mcp /app/health_check.sh
@@ -675,6 +698,7 @@ docker logs proxmox-mcp --details | grep health
 ```
 
 #### Advanced Health Monitoring
+
 ```yaml
 # Docker Compose with monitoring
 version: '3.8'
@@ -699,6 +723,7 @@ services:
 ### Logging Configuration
 
 #### Log Aggregation
+
 ```yaml
 # ELK Stack integration
 version: '3.8'
@@ -742,6 +767,7 @@ services:
 ```
 
 #### Structured Logging
+
 ```yaml
 services:
   proxmox-mcp:
@@ -770,6 +796,7 @@ services:
 ### Metrics and Monitoring
 
 #### Prometheus Integration (Future)
+
 ```yaml
 # Prometheus monitoring setup
 version: '3.8'
@@ -816,6 +843,7 @@ volumes:
 ### Common Issues
 
 #### 1. Container Won't Start
+
 ```bash
 # Check container logs
 docker logs proxmox-mcp
@@ -834,6 +862,7 @@ docker run --rm -it \
 ```
 
 #### 2. Health Check Failures
+
 ```bash
 # Manual health check
 docker exec proxmox-mcp /app/health_check.sh
@@ -860,6 +889,7 @@ except Exception as e:
 ```
 
 #### 3. Permission Issues
+
 ```bash
 # Fix volume permissions
 sudo chown -R 10001:10001 ./proxmox-config ./logs
@@ -872,6 +902,7 @@ docker exec proxmox-mcp id
 ```
 
 #### 4. SSL/TLS Issues
+
 ```bash
 # Test SSL connectivity
 docker exec proxmox-mcp openssl s_client -connect your-proxmox-host:8006
@@ -888,6 +919,7 @@ docker run -v ./ca-cert.pem:/usr/local/share/ca-certificates/proxmox-ca.crt:ro \
 ### Debugging Tools
 
 #### Interactive Debugging
+
 ```bash
 # Run interactive shell
 docker run --rm -it \
@@ -903,6 +935,7 @@ docker exec -it proxmox-mcp python
 ```
 
 #### Development Mode
+
 ```bash
 # Run in development mode with debugging
 docker run --rm -it \
@@ -916,6 +949,7 @@ docker run --rm -it \
 ### Performance Troubleshooting
 
 #### Resource Monitoring
+
 ```bash
 # Monitor container resources
 docker stats proxmox-mcp
@@ -929,6 +963,7 @@ docker run --rm -it --pid container:proxmox-mcp \
 ```
 
 #### Memory Issues
+
 ```bash
 # Check memory usage
 docker exec proxmox-mcp cat /proc/meminfo
@@ -948,6 +983,7 @@ deploy:
 ### Production Deployment
 
 #### Version Management
+
 ```bash
 # Always pin specific versions in production
 image: ghcr.io/basher83/proxmox-mcp:v1.0.0  # ✅ Good
@@ -959,6 +995,7 @@ docker-compose -f docker-compose.staging.yml up -d
 ```
 
 #### Resource Planning
+
 ```yaml
 # Production resource allocation
 deploy:
@@ -972,6 +1009,7 @@ deploy:
 ```
 
 #### Backup and Recovery
+
 ```bash
 # Backup configuration and logs
 tar -czf proxmox-mcp-backup-$(date +%Y%m%d).tar.gz \
@@ -987,6 +1025,7 @@ docker exec proxmox-mcp backup-command > backup.sql
 ### Security Best Practices
 
 #### Principle of Least Privilege
+
 ```yaml
 # Minimal permissions
 security_opt:
@@ -998,6 +1037,7 @@ user: "10001:10001"
 ```
 
 #### Secret Management
+
 ```bash
 # Use external secret management
 # - HashiCorp Vault
@@ -1011,6 +1051,7 @@ user: "10001:10001"
 ```
 
 #### Network Security
+
 ```yaml
 # Network isolation
 networks:
@@ -1025,6 +1066,7 @@ networks:
 ### Monitoring Best Practices
 
 #### Health Checks
+
 ```yaml
 # Comprehensive health checks
 healthcheck:
@@ -1036,6 +1078,7 @@ healthcheck:
 ```
 
 #### Log Management
+
 ```yaml
 # Structured logging
 environment:
@@ -1055,6 +1098,7 @@ logging:
 ### Performance Optimization
 
 #### Container Optimization
+
 ```bash
 # Use specific base image tags
 FROM python:3.10.12-slim  # Specific version
@@ -1066,6 +1110,7 @@ COPY . .  # Copy source last
 ```
 
 #### Resource Tuning
+
 ```yaml
 # Production tuning
 environment:
@@ -1083,6 +1128,7 @@ ulimits:
 ### Maintenance
 
 #### Regular Updates
+
 ```bash
 # Automated update checking
 docker images --format "table {{.Repository}}\t{{.Tag}}\t{{.CreatedAt}}"
@@ -1094,6 +1140,7 @@ docker image prune -f  # Clean old images
 ```
 
 #### Monitoring and Alerting
+
 ```yaml
 # Set up alerts for:
 # - Container health failures

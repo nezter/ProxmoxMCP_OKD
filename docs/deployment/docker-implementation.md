@@ -24,24 +24,28 @@
 ### What Exists ✅
 
 **Well-structured Dockerfile:**
+
 - Multi-stage build with builder and final stages
 - Security best practices with non-root user implementation
 - Proper Python environment setup with virtual environment
 - Build arguments for customization (Python version, build environment)
 
 **Docker Compose Setup:**
+
 - Health checks with custom health script
 - Proper volume mounting for configuration and logs
 - Signal handling (SIGINT) for graceful shutdown
 - Environment variable configuration
 
 **Security-focused Implementation:**
+
 - Non-root user (`appuser`) with proper group setup
 - Minimal base image (Python slim)
 - Proper file permissions and ownership
 - Build dependency isolation
 
 **Good .dockerignore:**
+
 - Comprehensive exclusion of unnecessary files
 - Security-conscious (excludes secrets, development files)
 - Size optimization (excludes docs, tests, build artifacts)
@@ -49,24 +53,28 @@
 ### What's Missing ❌
 
 **CI/CD Integration:**
+
 - No automated Docker builds in GitHub Actions
 - No container registry publishing workflows
 - No automated security scanning integration
 - No build caching optimization
 
 **Distribution Strategy:**
+
 - No container registry publishing
 - No versioning strategy for container images
 - No automated releases with container artifacts
 - No multi-platform distribution
 
 **Advanced Features:**
+
 - No multi-architecture support (ARM64, AMD64)
 - No container security scanning in CI/CD
 - No Software Bill of Materials (SBOM) generation
 - No container attestation and signing
 
 **Enterprise Readiness:**
+
 - No Kubernetes deployment manifests
 - No Helm charts for enterprise deployment
 - No monitoring and observability integration
@@ -81,6 +89,7 @@
 #### Recommended: GitHub Container Registry (GHCR)
 
 **Advantages:**
+
 - ✅ **Free for public repositories** with generous limits
 - ✅ **Integrated authentication** with GitHub tokens
 - ✅ **Multi-architecture support** with buildx
@@ -89,6 +98,7 @@
 - ✅ **High performance** and global CDN distribution
 
 **Registry Structure:**
+
 ```
 ghcr.io/basher83/proxmox-mcp:latest          # Latest stable release
 ghcr.io/basher83/proxmox-mcp:v0.1.0         # Specific version tags
@@ -100,6 +110,7 @@ ghcr.io/basher83/proxmox-mcp:dev            # Development builds
 #### Alternative: Docker Hub
 
 **Considerations:**
+
 - ✅ **Widely adopted** and familiar to users
 - ✅ **Good documentation** and discovery features
 - ❌ **Rate limiting** for anonymous pulls (100 pulls/6 hours)
@@ -109,6 +120,7 @@ ghcr.io/basher83/proxmox-mcp:dev            # Development builds
 ### Container Tagging Strategy
 
 #### Semantic Versioning Tags
+
 ```bash
 # Release versions
 ghcr.io/basher83/proxmox-mcp:v1.0.0         # Exact version
@@ -123,6 +135,7 @@ ghcr.io/basher83/proxmox-mcp:pr-123         # Pull request testing
 ```
 
 #### Multi-Architecture Tags
+
 ```bash
 # Architecture-specific
 ghcr.io/basher83/proxmox-mcp:v1.0.0-amd64   # Intel/AMD 64-bit
@@ -141,6 +154,7 @@ ghcr.io/basher83/proxmox-mcp:v1.0.0         # Multi-arch manifest
 **File:** `.github/workflows/docker-build.yml`
 
 #### Triggers
+
 - **Pull Requests:** Build and test containers (no publishing)
 - **Main Branch:** Build, test, and publish to `:main` tag
 - **Release Tags:** Build, test, and publish to `:latest` and version tags
@@ -149,6 +163,7 @@ ghcr.io/basher83/proxmox-mcp:v1.0.0         # Multi-arch manifest
 #### Workflow Features
 
 **Multi-Architecture Builds:**
+
 ```yaml
 strategy:
   matrix:
@@ -158,18 +173,21 @@ strategy:
 ```
 
 **Build Optimization:**
+
 - **Layer caching** with GitHub Actions cache
 - **Dependency caching** for pip and UV
 - **Multi-stage build** optimization
 - **Parallel builds** across architectures
 
 **Security Integration:**
+
 - **Trivy vulnerability scanning** for OS and dependencies
 - **SARIF upload** to GitHub Security tab
 - **Container image signing** with cosign
 - **SBOM generation** for supply chain security
 
 #### Sample Workflow Structure
+
 ```yaml
 name: Docker Build and Publish
 
@@ -233,16 +251,19 @@ jobs:
 #### Security Scanning Components
 
 **Vulnerability Scanning:**
+
 - **Trivy:** Comprehensive vulnerability detection
 - **Grype:** Alternative vulnerability scanner
 - **Docker Scout:** Docker's native security scanning
 
 **Supply Chain Security:**
+
 - **SBOM generation** with Syft
 - **Container signing** with cosign
 - **Attestation creation** for build provenance
 
 **Compliance Scanning:**
+
 - **CIS Docker Benchmarks**
 - **OpenSCAP security compliance**
 - **Custom security policies**
@@ -254,16 +275,19 @@ jobs:
 #### Release Process Features
 
 **Automated Versioning:**
+
 - **Semantic versioning** with conventional commits
 - **Changelog generation** from commit history
 - **Version bumping** in package files
 
 **Multi-Platform Release:**
+
 - **Container publishing** to multiple registries
 - **Binary releases** for different architectures
 - **Documentation deployment** to GitBook
 
 **Quality Gates:**
+
 - **Full test suite** execution
 - **Security scanning** completion
 - **Integration testing** with real Proxmox instances
@@ -275,6 +299,7 @@ jobs:
 ### Current Dockerfile Analysis
 
 #### Strengths
+
 - Multi-stage build for size optimization
 - Non-root user implementation
 - Python virtual environment usage
@@ -283,6 +308,7 @@ jobs:
 #### Areas for Improvement
 
 **1. Hardcoded Dependencies:**
+
 ```dockerfile
 # Current: Hardcoded MCP SDK version
 RUN .venv/bin/pip install git+https://github.com/modelcontextprotocol/python-sdk.git@v1.8.0#egg=mcp
@@ -293,6 +319,7 @@ RUN .venv/bin/pip install git+https://github.com/modelcontextprotocol/python-sdk
 ```
 
 **2. Missing Metadata:**
+
 ```dockerfile
 # Add comprehensive OCI labels
 ARG VERSION=dev
@@ -314,6 +341,7 @@ LABEL maintainer="basher83"
 ```
 
 **3. Enhanced Security:**
+
 ```dockerfile
 # Additional security hardening
 RUN addgroup --system --gid 10001 appgroup && \
@@ -333,6 +361,7 @@ RUN chown -R appuser:appgroup /app && \
 ### Alternative Dockerfile Variants
 
 #### Development Dockerfile
+
 ```dockerfile
 FROM base AS development
 
@@ -353,6 +382,7 @@ ENTRYPOINT ["python", "-m", "debugpy", "--listen", "0.0.0.0:5678", "--wait-for-c
 ```
 
 #### Distroless Production Dockerfile
+
 ```dockerfile
 # Ultra-minimal production image
 FROM gcr.io/distroless/python3:latest AS distroless
@@ -375,6 +405,7 @@ ENTRYPOINT ["python", "-m", "proxmox_mcp.server"]
 ### Size Optimization Strategies
 
 #### 1. Alpine Linux Base
+
 ```dockerfile
 # Alternative: Alpine-based build for smaller size
 FROM python:3.10-alpine AS alpine-base
@@ -391,6 +422,7 @@ RUN apk add --no-cache --virtual .build-deps \
 ```
 
 #### 2. Dependency Layer Optimization
+
 ```dockerfile
 # Optimize layer caching by separating dependency types
 COPY requirements-core.in ./
@@ -403,6 +435,7 @@ RUN --mount=type=cache,target=$PIP_CACHE_DIR \
 ```
 
 #### 3. Multi-Stage Cleanup
+
 ```dockerfile
 # Clean up build artifacts in final stage
 FROM base AS final
@@ -420,6 +453,7 @@ RUN find /app -name "*.pyc" -delete && \
 ### Performance Optimization
 
 #### 1. Python Optimization
+
 ```dockerfile
 # Python performance environment variables
 ENV PYTHONOPTIMIZE=2
@@ -429,6 +463,7 @@ ENV PYTHONHASHSEED=random
 ```
 
 #### 2. Startup Optimization
+
 ```dockerfile
 # Pre-compile Python modules
 RUN python -m compileall /app/src
@@ -444,16 +479,19 @@ RUN find /app/src -name "*.py" -exec python -m py_compile {} \;
 ### Target Architectures
 
 #### Primary Platforms
+
 - **linux/amd64** - Intel/AMD 64-bit (servers, desktops)
 - **linux/arm64** - ARM 64-bit (Apple Silicon, ARM servers, Raspberry Pi 4+)
 
 #### Secondary Platforms (Future)
+
 - **linux/arm/v7** - ARM 32-bit (Raspberry Pi 3, older ARM devices)
 - **linux/386** - Intel 32-bit (legacy systems)
 
 ### Implementation Strategy
 
 #### Docker Buildx Configuration
+
 ```yaml
 # GitHub Actions setup
 - name: Set up Docker Buildx
@@ -466,6 +504,7 @@ RUN find /app/src -name "*.py" -exec python -m py_compile {} \;
 ```
 
 #### Architecture-Specific Optimizations
+
 ```dockerfile
 # Architecture-specific optimizations
 ARG TARGETPLATFORM
@@ -487,6 +526,7 @@ RUN if [ "$TARGETARCH" = "arm64" ]; then \
 ### Testing Multi-Architecture Builds
 
 #### Local Testing
+
 ```bash
 # Test multi-arch builds locally
 docker buildx create --name multiarch --use
@@ -497,6 +537,7 @@ docker run --platform linux/arm64 proxmox-mcp:test
 ```
 
 #### CI/CD Testing Matrix
+
 ```yaml
 strategy:
   matrix:
@@ -517,6 +558,7 @@ strategy:
 ### Vulnerability Scanning
 
 #### Trivy Integration
+
 ```yaml
 - name: Run Trivy vulnerability scanner
   uses: aquasecurity/trivy-action@master
@@ -535,6 +577,7 @@ strategy:
 ```
 
 #### Custom Security Policies
+
 ```yaml
 # .trivyignore - Ignore specific vulnerabilities
 CVE-2023-12345  # False positive in development dependencies
@@ -543,6 +586,7 @@ CVE-2023-12345  # False positive in development dependencies
 ### Runtime Security
 
 #### Security Hardening
+
 ```dockerfile
 # Enhanced security configuration
 USER appuser
@@ -560,6 +604,7 @@ ENV TMPDIR=/tmp/app-tmp
 ```
 
 #### Secrets Management
+
 ```dockerfile
 # Support for Docker secrets
 RUN mkdir -p /run/secrets && \
@@ -573,6 +618,7 @@ RUN chmod +x /app/load-secrets.sh
 ### Supply Chain Security
 
 #### SBOM Generation
+
 ```yaml
 - name: Generate SBOM
   uses: anchore/sbom-action@v0
@@ -589,6 +635,7 @@ RUN chmod +x /app/load-secrets.sh
 ```
 
 #### Container Signing
+
 ```yaml
 - name: Install cosign
   uses: sigstore/cosign-installer@v3
@@ -607,6 +654,7 @@ RUN chmod +x /app/load-secrets.sh
 ### Development Container Features
 
 #### Hot Reload Development
+
 ```dockerfile
 FROM base AS development
 
@@ -633,6 +681,7 @@ ENTRYPOINT ["python", "-m", "debugpy", "--listen", "0.0.0.0:5678", "-m", "proxmo
 ```
 
 #### Testing Container
+
 ```dockerfile
 FROM development AS testing
 
@@ -659,6 +708,7 @@ CMD ["/app/tests", "-v", "--cov=/app/src"]
 ### Development Workflow Support
 
 #### Docker Compose for Development
+
 ```yaml
 # compose.dev.yaml
 services:
@@ -680,6 +730,7 @@ services:
 ```
 
 #### IDE Integration
+
 ```json
 // .vscode/launch.json
 {
@@ -711,6 +762,7 @@ services:
 ### Release Channels
 
 #### Stable Release Channel
+
 ```bash
 # Semantic versioning for stable releases
 ghcr.io/basher83/proxmox-mcp:latest         # Latest stable
@@ -720,6 +772,7 @@ ghcr.io/basher83/proxmox-mcp:v1             # Major version
 ```
 
 #### Development Channel
+
 ```bash
 # Development and testing builds
 ghcr.io/basher83/proxmox-mcp:main           # Main branch
@@ -729,6 +782,7 @@ ghcr.io/basher83/proxmox-mcp:nightly        # Nightly builds
 ```
 
 #### Pre-release Channel
+
 ```bash
 # Release candidates and betas
 ghcr.io/basher83/proxmox-mcp:v1.0.0-rc1     # Release candidate
@@ -739,6 +793,7 @@ ghcr.io/basher83/proxmox-mcp:v1.0.0-alpha1  # Alpha releases
 ### Version Matrix
 
 #### Container-Application Version Mapping
+
 ```
 ProxmoxMCP v0.1.0    →  Container v0.1.0
 ProxmoxMCP v1.0.0    →  Container v1.0.0 + latest tag
@@ -747,6 +802,7 @@ ProxmoxMCP PR #123   →  Container pr-123 tag
 ```
 
 #### Compatibility Matrix
+
 ```
 Container Version  | MCP SDK Version | Proxmox VE Support | Python Version
 v1.0.0            | v1.8.0          | 7.4+, 8.x         | 3.10+
@@ -757,6 +813,7 @@ main              | latest          | 7.4+, 8.x         | 3.10+
 ### Container Registry Management
 
 #### Retention Policies
+
 ```yaml
 # Container cleanup policies
 retention:
@@ -774,6 +831,7 @@ retention:
 ```
 
 #### Access Control
+
 ```yaml
 # Registry access permissions
 permissions:
@@ -793,6 +851,7 @@ permissions:
 #### Registry Documentation
 
 **GitHub Container Registry (GHCR) README:**
+
 ```markdown
 # ProxmoxMCP Container
 
@@ -802,18 +861,23 @@ docker run -v ./config.json:/app/config.json ghcr.io/basher83/proxmox-mcp:latest
 ```
 
 ## Available Tags
+
 - `latest` - Latest stable release
 - `v1.0.0` - Specific version
 - `main` - Latest development build
 
 ## Configuration
+
 Mount your Proxmox configuration:
+
 ```bash
 docker run -v ./proxmox-config:/app/proxmox-config:ro ghcr.io/basher83/proxmox-mcp:latest
 ```
 
 ## Documentation
+
 📖 [Full Documentation](https://the-mothership.gitbook.io/proxmox-mcp/)
+
 ```
 
 #### Docker Hub Description
@@ -834,9 +898,11 @@ docker compose up
 ```
 
 ## Links
+
 - [GitHub Repository](https://github.com/basher83/ProxmoxMCP)
 - [Documentation](https://the-mothership.gitbook.io/proxmox-mcp/)
 - [Security](https://github.com/basher83/ProxmoxMCP/security)
+
 ```
 
 ### Usage Examples Documentation
@@ -861,6 +927,7 @@ docker run -d \
 ```
 
 #### Docker Compose Usage
+
 ```yaml
 # docker-compose.yml
 version: '3.8'
@@ -883,6 +950,7 @@ services:
 ```
 
 #### Kubernetes Deployment
+
 ```yaml
 # kubernetes-deployment.yaml
 apiVersion: apps/v1
@@ -935,6 +1003,7 @@ spec:
 ### Container Health Monitoring
 
 #### Enhanced Health Checks
+
 ```dockerfile
 # Comprehensive health check script
 RUN cat > /app/health_check.sh << 'EOF'
@@ -989,6 +1058,7 @@ RUN chmod +x /app/health_check.sh
 ```
 
 #### Prometheus Metrics (Future)
+
 ```dockerfile
 # Optional: Prometheus metrics endpoint
 EXPOSE 9090
@@ -1010,6 +1080,7 @@ EOF
 ### Logging Configuration
 
 #### Structured Logging
+
 ```dockerfile
 # Configure logging for containers
 ENV PYTHONUNBUFFERED=1
@@ -1043,6 +1114,7 @@ EOF
 ```
 
 #### Log Aggregation Support
+
 ```yaml
 # Docker Compose with log aggregation
 version: '3.8'
@@ -1084,11 +1156,13 @@ services:
 ### Phase 1: Basic CI/CD Implementation (Week 1)
 
 #### Goals
+
 - Set up automated container builds
 - Implement basic security scanning
 - Configure GitHub Container Registry publishing
 
 #### Deliverables
+
 - [ ] **Create `.github/workflows/docker-build.yml`** with basic build and publish
 - [ ] **Configure GHCR authentication** using GitHub tokens
 - [ ] **Implement Trivy security scanning** with SARIF upload
@@ -1096,6 +1170,7 @@ services:
 - [ ] **Create basic container usage documentation**
 
 #### Success Criteria
+
 - ✅ Automated builds trigger on PR and main branch pushes
 - ✅ Containers are published to GHCR with proper tags
 - ✅ Security scan results appear in GitHub Security tab
@@ -1104,11 +1179,13 @@ services:
 ### Phase 2: Multi-Architecture Support (Week 2)
 
 #### Goals
+
 - Enable ARM64 and AMD64 builds
 - Optimize build performance with caching
 - Implement comprehensive testing
 
 #### Deliverables
+
 - [ ] **Configure Docker Buildx** for multi-platform builds
 - [ ] **Implement build caching** with GitHub Actions cache
 - [ ] **Add architecture-specific testing** matrix
@@ -1116,6 +1193,7 @@ services:
 - [ ] **Create platform-specific documentation**
 
 #### Success Criteria
+
 - ✅ Containers build successfully for both AMD64 and ARM64
 - ✅ Build times are optimized with proper caching
 - ✅ All tests pass on both architectures
@@ -1124,11 +1202,13 @@ services:
 ### Phase 3: Release Automation (Week 3)
 
 #### Goals
+
 - Automate semantic versioning and releases
 - Implement advanced security features
 - Create comprehensive documentation
 
 #### Deliverables
+
 - [ ] **Create release automation workflow** with semantic versioning
 - [ ] **Implement container signing** with cosign
 - [ ] **Generate SBOM** for supply chain security
@@ -1136,6 +1216,7 @@ services:
 - [ ] **Write comprehensive deployment guides**
 
 #### Success Criteria
+
 - ✅ Releases are automatically created with proper versioning
 - ✅ Containers are signed and have SBOM attached
 - ✅ Kubernetes deployment works out of the box
@@ -1144,11 +1225,13 @@ services:
 ### Phase 4: Production Hardening (Week 4)
 
 #### Goals
+
 - Implement enterprise-grade security
 - Add monitoring and observability
 - Optimize for production workloads
 
 #### Deliverables
+
 - [ ] **Implement distroless production images**
 - [ ] **Add Prometheus metrics support**
 - [ ] **Create Helm charts** for Kubernetes deployment
@@ -1156,6 +1239,7 @@ services:
 - [ ] **Add performance benchmarking** and optimization
 
 #### Success Criteria
+
 - ✅ Production images pass enterprise security scans
 - ✅ Monitoring and metrics are properly exposed
 - ✅ Helm deployment is documented and tested
@@ -1164,11 +1248,13 @@ services:
 ### Phase 5: Community and Ecosystem (Ongoing)
 
 #### Goals
+
 - Build community around containerized deployment
 - Integrate with ecosystem tools
 - Maintain and improve based on feedback
 
 #### Deliverables
+
 - [ ] **Create community deployment examples**
 - [ ] **Integrate with MCP ecosystem tools**
 - [ ] **Implement feedback collection** mechanisms
@@ -1182,12 +1268,14 @@ services:
 ### For End Users
 
 #### Simplified Deployment
+
 - **One-command deployment** with Docker Compose
 - **No dependency management** or Python environment setup
 - **Consistent behavior** across different platforms
 - **Easy updates** with container tag changes
 
 #### Production Readiness
+
 - **Security-hardened containers** with regular vulnerability scanning
 - **Multi-architecture support** for diverse infrastructure
 - **Health checks** and monitoring integration
@@ -1196,12 +1284,14 @@ services:
 ### For Developers
 
 #### Streamlined Development
+
 - **Consistent development environment** across team members
 - **Hot reload support** for rapid iteration
 - **Integrated debugging** with IDE support
 - **Automated testing** with containerized test suites
 
 #### Quality Assurance
+
 - **Automated security scanning** in CI/CD pipeline
 - **Multi-platform testing** ensures broad compatibility
 - **Reproducible builds** with locked dependencies
@@ -1210,12 +1300,14 @@ services:
 ### For Operations Teams
 
 #### Enterprise Integration
+
 - **Kubernetes-ready deployment** with Helm charts
 - **Monitoring integration** with Prometheus and Grafana
 - **Log aggregation** support for centralized logging
 - **Security compliance** with industry standards
 
 #### Maintenance Efficiency
+
 - **Automated updates** through CI/CD pipeline
 - **Rollback capabilities** with versioned containers
 - **Security patches** distributed automatically

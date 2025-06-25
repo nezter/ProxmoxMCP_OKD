@@ -38,12 +38,14 @@ graph TD
 ### Workflow Triggers
 
 #### Automated Triggers
+
 - **Pull Requests:** Build and test containers (no publishing)
 - **Main Branch:** Build, test, and publish to `:main` tag
 - **Release Tags:** Build, test, and publish to `:latest` and version tags
 - **Scheduled:** Nightly security scans and dependency updates
 
 #### Manual Triggers
+
 - **Workflow Dispatch:** On-demand builds with custom parameters
 - **Emergency Releases:** Hotfix deployments with expedited process
 
@@ -175,6 +177,7 @@ jobs:
 ### Build Optimization Features
 
 #### Layer Caching Strategy
+
 ```yaml
 # Multi-level caching for optimal build performance
 - name: Build with advanced caching
@@ -190,6 +193,7 @@ jobs:
 ```
 
 #### Dependency Caching
+
 ```yaml
 # Cache Python dependencies separately
 - name: Cache Python dependencies
@@ -204,6 +208,7 @@ jobs:
 ```
 
 #### Build Arguments Optimization
+
 ```dockerfile
 # Dockerfile optimization for CI/CD
 ARG BUILDKIT_INLINE_CACHE=1
@@ -309,6 +314,7 @@ jobs:
 ### Security Policies
 
 #### Trivy Configuration
+
 ```yaml
 # .trivyignore - Vulnerability exceptions
 # Format: CVE-ID [EXPIRY DATE] [REASON]
@@ -322,6 +328,7 @@ CVE-2023-12347  permanent   # False positive in base image
 ```
 
 #### Security Thresholds
+
 ```yaml
 # Security quality gates
 - name: Check security thresholds
@@ -346,6 +353,7 @@ CVE-2023-12347  permanent   # False positive in base image
 ### Supply Chain Security
 
 #### Container Signing
+
 ```yaml
 - name: Install cosign
   uses: sigstore/cosign-installer@v3
@@ -360,6 +368,7 @@ CVE-2023-12347  permanent   # False positive in base image
 ```
 
 #### Attestation Generation
+
 ```yaml
 - name: Generate provenance attestation
   uses: actions/attest-build-provenance@v1
@@ -376,6 +385,7 @@ CVE-2023-12347  permanent   # False positive in base image
 ### Cross-Platform Configuration
 
 #### Build Matrix Strategy
+
 ```yaml
 strategy:
   matrix:
@@ -393,6 +403,7 @@ strategy:
 ```
 
 #### QEMU Emulation Setup
+
 ```yaml
 - name: Set up QEMU
   uses: docker/setup-qemu-action@v3
@@ -412,6 +423,7 @@ strategy:
 ### Architecture-Specific Optimizations
 
 #### Conditional Dockerfile Instructions
+
 ```dockerfile
 # Architecture-specific optimizations
 ARG TARGETPLATFORM
@@ -435,6 +447,7 @@ RUN case "$TARGETARCH" in \
 ```
 
 #### Performance Testing Per Architecture
+
 ```yaml
 - name: Test container performance
   run: |
@@ -546,6 +559,7 @@ jobs:
 ### Release Validation
 
 #### Pre-Release Testing
+
 ```yaml
 - name: Run release validation tests
   run: |
@@ -573,6 +587,7 @@ jobs:
 ### Version Management
 
 #### Semantic Versioning
+
 ```yaml
 - name: Validate semantic version
   run: |
@@ -586,6 +601,7 @@ jobs:
 ```
 
 #### Tag Management
+
 ```yaml
 - name: Update container tags
   run: |
@@ -613,6 +629,7 @@ jobs:
 ### Integration Testing
 
 #### Container Functionality Tests
+
 ```yaml
 name: Container Integration Tests
 
@@ -676,6 +693,7 @@ jobs:
 ### End-to-End Testing
 
 #### Container Deployment Tests
+
 ```yaml
 - name: Test Docker Compose deployment
   run: |
@@ -701,6 +719,7 @@ jobs:
 ```
 
 #### Kubernetes Testing
+
 ```yaml
 - name: Test Kubernetes deployment
   run: |
@@ -730,6 +749,7 @@ jobs:
 ### Container Registry Operations
 
 #### Registry Cleanup Workflow
+
 ```yaml
 name: Registry Cleanup
 
@@ -764,6 +784,7 @@ jobs:
 ```
 
 #### Multi-Registry Publishing
+
 ```yaml
 - name: Publish to multiple registries
   strategy:
@@ -794,6 +815,7 @@ jobs:
 ### Registry Security
 
 #### Access Control
+
 ```yaml
 # Repository settings for GitHub Container Registry
 permissions:
@@ -814,6 +836,7 @@ permissions:
 ```
 
 #### Container Scanning in Registry
+
 ```yaml
 - name: Scan published container
   run: |
@@ -836,6 +859,7 @@ permissions:
 ### Build Performance
 
 #### Parallel Building
+
 ```yaml
 - name: Build with parallel jobs
   uses: docker/build-push-action@v5
@@ -852,6 +876,7 @@ permissions:
 ```
 
 #### Cache Optimization
+
 ```yaml
 - name: Optimize build cache
   run: |
@@ -875,6 +900,7 @@ permissions:
 ### Runtime Performance
 
 #### Container Optimization
+
 ```dockerfile
 # Performance optimizations in Dockerfile
 ENV PYTHONOPTIMIZE=2
@@ -889,6 +915,7 @@ RUN find /app/src -name "*.py" -exec python -m py_compile {} \;
 ```
 
 #### Resource Monitoring
+
 ```yaml
 - name: Monitor build resources
   run: |
@@ -907,6 +934,7 @@ RUN find /app/src -name "*.py" -exec python -m py_compile {} \;
 ### CI/CD Performance
 
 #### Workflow Optimization
+
 ```yaml
 # Parallel job execution
 jobs:
@@ -925,6 +953,7 @@ jobs:
 ```
 
 #### Resource Management
+
 ```yaml
 - name: Optimize CI resources
   run: |
