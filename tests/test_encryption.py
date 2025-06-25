@@ -97,7 +97,7 @@ class TestTokenEncryption:
         master_key = TokenEncryption.generate_master_key()
         encryptor = TokenEncryption(master_key=master_key)
 
-        original_token = "test-api-token-12345"
+        original_token = "test-api-token-12345"  # nosec: test credential
         encrypted_token = encryptor.encrypt_token(original_token)
         decrypted_token = encryptor.decrypt_token(encrypted_token)
 
@@ -111,7 +111,7 @@ class TestTokenEncryption:
         master_key = TokenEncryption.generate_master_key()
         encryptor = TokenEncryption(master_key=master_key)
 
-        token = "test-token"
+        token = "test-token"  # nosec: test credential
         encrypted1 = encryptor.encrypt_token(token)
         encrypted2 = encryptor.encrypt_token(token)
 
@@ -148,7 +148,7 @@ class TestTokenEncryption:
     def test_decrypt_plain_text_token(self):
         """Test that plain text tokens (without enc: prefix) are returned as-is."""
         encryptor = TokenEncryption()
-        plain_token = "plain-text-token"
+        plain_token = "plain-text-token"  # nosec: test credential
         result = encryptor.decrypt_token(plain_token)
         assert result == plain_token
 
@@ -157,17 +157,17 @@ class TestTokenEncryption:
         encryptor = TokenEncryption()
 
         # Test plain text token
-        assert not encryptor.is_encrypted("plain-token")
+        assert not encryptor.is_encrypted("plain-token")  # nosec: test credential
 
         # Test encrypted token
-        encrypted = encryptor.encrypt_token("test-token")
+        encrypted = encryptor.encrypt_token("test-token")  # nosec: test credential
         assert encryptor.is_encrypted(encrypted)
 
     def test_migrate_plain_token(self):
         """Test migrating plain text token to encrypted format."""
         encryptor = TokenEncryption()
 
-        plain_token = "plain-token"
+        plain_token = "plain-token"  # nosec: test credential
         migrated_token = encryptor.migrate_plain_token(plain_token)
 
         # Should be encrypted
@@ -219,7 +219,7 @@ class TestTokenEncryption:
         encryptor1 = TokenEncryption(master_key=master_key)
         encryptor2 = TokenEncryption(master_key=master_key)
 
-        token = "shared-token"
+        token = "shared-token"  # nosec: test credential
         encrypted_by_1 = encryptor1.encrypt_token(token)
         decrypted_by_2 = encryptor2.decrypt_token(encrypted_by_1)
 

@@ -19,8 +19,8 @@ def mock_env_vars():
     env_vars = {
         "PROXMOX_HOST": "test.proxmox.com",
         "PROXMOX_USER": "test@pve",
-        "PROXMOX_TOKEN_NAME": "test_token",
-        "PROXMOX_TOKEN_VALUE": "test_value",
+        "PROXMOX_TOKEN_NAME": "test_token",  # nosec: test credential
+        "PROXMOX_TOKEN_VALUE": "test_value",  # nosec: test credential
         "LOG_LEVEL": "DEBUG",
     }
     with patch.dict(os.environ, env_vars):
@@ -34,8 +34,8 @@ def temp_config_file(mock_env_vars):
         "proxmox": {"host": "test.proxmox.com", "port": 8006, "verify_ssl": False},
         "auth": {
             "user": "test@pve",
-            "token_name": "test_token",
-            "token_value": "test_value",
+            "token_name": "test_token",  # nosec: test credential
+            "token_value": "test_value",  # nosec: test credential
         },
         "logging": {"level": "DEBUG"},
     }

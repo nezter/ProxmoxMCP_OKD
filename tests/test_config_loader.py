@@ -152,7 +152,7 @@ class TestEnhancedDecryptionErrors:
 
     def test_no_sensitive_data_in_error_messages(self):
         """Test that error messages don't expose sensitive token data."""
-        sensitive_token = "enc:very_sensitive_secret_token_data"
+        sensitive_token = "enc:very_sensitive_secret_token_data"  # nosec: test credential
 
         with pytest.raises(ValueError) as exc_info:
             _handle_decryption_error(
@@ -190,7 +190,7 @@ class TestConfigLoaderIntegration:
             "proxmox": {"host": "test-host"},
             "auth": {
                 "user": "test@pam",
-                "token_name": "test-token",
+                "token_name": "test-token",  # nosec: test credential
                 "token_value": "enc:encrypted_token_that_will_fail",  # Valid format, will fail
             },
             "logging": {"level": "INFO"},
@@ -222,7 +222,7 @@ class TestConfigLoaderIntegration:
             "proxmox": {"host": "test-host"},
             "auth": {
                 "user": "test@pam",
-                "token_name": "test-token",
+                "token_name": "test-token",  # nosec: test credential
                 "token_value": "enc:fake_token",
             },
             "logging": {"level": "INFO"},
