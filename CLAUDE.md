@@ -7,8 +7,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - memory workflow @/workspaces/ProxmoxMCP/docs/ai-instructions/memory-instructions.md
 - context workflow @/workspaces/ProxmoxMCP/docs/ai-instructions/context-instructions.md
 - github workflow @/workspaces/ProxmoxMCP/docs/ai-instructions/github-instructions.md
-- issue creation workflow @/workspaces/ProxmoxMCP/docs/ai-instructions/issue-creation-instructions.md
-- issue resolution workflow @/workspaces/ProxmoxMCP/docs/ai-instructions/issue-resolution-instructions.md
+- issue creation workflow 
+  @/workspaces/ProxmoxMCP/docs/ai-instructions/issue-creation-instructions.md
+- issue resolution workflow 
+  @/workspaces/ProxmoxMCP/docs/ai-instructions/issue-resolution-instructions.md
 - pr workflow @/workspaces/ProxmoxMCP/docs/ai-instructions/pr-instructions.md
 - milestone workflow @/workspaces/ProxmoxMCP/docs/ai-instructions/milestone-instructions.md
 
@@ -35,8 +37,10 @@ uv pip install -e ".[dev]"
 
 #### Standardized Quality Assurance Workflow
 
-The ProxmoxMCP project uses a comprehensive, standardized quality assurance workflow that must be
-followed for all code changes. This workflow includes automated checks, error recovery procedures, and
+The ProxmoxMCP project uses a comprehensive, standardized quality assurance workflow that 
+must be
+followed for all code changes. This workflow includes automated checks, error recovery 
+procedures, and
 ProxmoxMCP-specific validations.
 
 #### Pre-Commit Quality Pipeline
@@ -56,7 +60,8 @@ echo "Core quality checks completed"
 ```bash
 # Configuration validation
 export PROXMOX_MCP_CONFIG="proxmox-config/config.json"
-python -c "from proxmox_mcp.config.loader import load_config; load_config()" || {
+python -c "from proxmox_mcp.config.loader import load_config; \
+    load_config()" || {
     echo "❌ Configuration validation failed"
     exit 1
 }
@@ -327,23 +332,32 @@ echo "🚀 Starting ProxmoxMCP Quality Assurance Pipeline"
 # Phase 1: Core Quality Checks
 echo "📋 Phase 1: Core Quality Checks"
 echo "Running pytest..."
-pytest || { echo "❌ Tests failed - run 'pytest -v' for details"; exit 1; }
+pytest || { 
+    echo "❌ Tests failed - run 'pytest -v' for details"; exit 1; 
+}
 
 echo "Running black formatter..."
 black . || { echo "❌ Formatting failed"; exit 1; }
 
 echo "Running mypy type checker..."
-mypy . || { echo "❌ Type checking failed - run 'mypy . --show-error-codes' for details"; exit 1; }
+mypy . || { 
+    echo "❌ Type checking failed - run 'mypy . --show-error-codes' for details"; 
+    exit 1; 
+}
 
 echo "Running ruff linter..."
-ruff check . || { echo "❌ Linting failed - run 'ruff check . --show-fixes' for details"; exit 1; }
+ruff check . || { 
+    echo "❌ Linting failed - run 'ruff check . --show-fixes' for details"; 
+    exit 1; 
+}
 
 # Phase 2: ProxmoxMCP Validation
 echo "📋 Phase 2: ProxmoxMCP-Specific Validation"
 export PROXMOX_MCP_CONFIG="proxmox-config/config.json"
 
 echo "Validating configuration..."
-python -c "from proxmox_mcp.config.loader import load_config; load_config()" || {
+python -c "from proxmox_mcp.config.loader import load_config; \
+    load_config()" || {
     echo "❌ Configuration validation failed"
     exit 1
 }
@@ -581,7 +595,8 @@ cp proxmox-config/config.example.json proxmox-config/config.json
 ### Configuration Requirements
 
 - Requires `PROXMOX_MCP_CONFIG` environment variable pointing to config JSON file
-- Config must include Proxmox connection details (host, port, SSL settings) and authentication (user, token_name, token_value)
+- Config must include Proxmox connection details (host, port, SSL settings) and 
+  authentication (user, token_name, token_value)
 - Supports both file-based and environment variable configuration
 
 ### Authentication
