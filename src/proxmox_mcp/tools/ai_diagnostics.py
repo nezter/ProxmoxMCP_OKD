@@ -145,6 +145,52 @@ suggested optimizations during maintenance windows.
                 )
             ]
 
+    async def _prepare_vm_diagnosis_prompt(self, vmid: str, node: str, vm_data: Dict[str, Any]) -> str:
+        """Prepare the AI diagnosis prompt for VM analysis."""
+        return f"""
+        Diagnose issues with this Proxmox VM and provide specific solutions:
+        
+        VM ID: {vmid}
+        Node: {node}
+        Diagnostic Data: {json.dumps(vm_data, indent=2)}
+        
+        Analyze and provide solutions for:
+        1. Performance issues and resource constraints
+        2. Configuration problems and optimization opportunities
+        3. Network connectivity issues
+        4. Storage performance problems
+        5. Guest OS issues (if data available)
+        6. Hardware compatibility concerns
+        
+        For each issue found, provide:
+        - Problem description and root cause
+        - Specific solution steps with commands
+        - Expected resolution time
+        - Prevention measures for the future
+        """
+
+    def _format_vm_diagnosis_response(self, vmid: str, node: str, vm_data: Dict[str, Any], ai_response: str) -> str:
+        """Format the VM diagnosis response with overview and AI analysis."""
+        vm_status = vm_data.get("status", {})
+        return f"""🔧 **AI VM Diagnostic Report - VM {vmid}**
+
+**VM Overview**
+- Node: {node}
+- Status: {vm_status.get("status", "unknown")}
+- CPU Cores: {vm_status.get("cpus", "N/A")}
+- Memory: {vm_status.get("maxmem", "N/A")} bytes
+- Uptime: {vm_status.get("uptime", "N/A")} seconds
+
+**AI Analysis & Recommendations**
+
+{ai_response}
+
+---
+💡 **Diagnostic powered by Claude Code SDK with Proxmox expertise**
+🔍 **VM Configuration**: Review VM configuration file for additional optimization opportunities
+⚠️  **Safety**: Test configuration changes in a non-production environment first
+        """
+
     async def diagnose_vm_issues(self, node: str, vmid: str) -> List[Content]:
         """Diagnose specific VM issues using AI analysis.
 
@@ -168,49 +214,14 @@ suggested optimizations during maintenance windows.
             if not self.claude_available:
                 return await self._basic_vm_analysis(vm_data, node, vmid)
 
-            diagnosis_prompt = f"""
-            Diagnose issues with this Proxmox VM and provide specific solutions:
+            # Prepare AI diagnosis prompt
+            diagnosis_prompt = await self._prepare_vm_diagnosis_prompt(vmid, node, vm_data)
             
-            VM ID: {vmid}
-            Node: {node}
-            Diagnostic Data: {json.dumps(vm_data, indent=2)}
-            
-            Analyze and provide solutions for:
-            1. Performance issues and resource constraints
-            2. Configuration problems and optimization opportunities
-            3. Network connectivity issues
-            4. Storage performance problems
-            5. Guest OS issues (if data available)
-            6. Hardware compatibility concerns
-            
-            For each issue found, provide:
-            - Problem description and root cause
-            - Specific solution steps with commands
-            - Expected resolution time
-            - Prevention measures for the future
-            """
-
+            # Get AI analysis
             ai_response = await self._query_claude(diagnosis_prompt)
 
-            vm_status = vm_data.get("status", {})
-            formatted_response = f"""🔧 **AI VM Diagnostic Report - VM {vmid}**
-
-**VM Overview**
-- Node: {node}
-- Status: {vm_status.get("status", "unknown")}
-- CPU Cores: {vm_status.get("cpus", "N/A")}
-- Memory: {vm_status.get("maxmem", "N/A")} bytes
-- Uptime: {vm_status.get("uptime", "N/A")} seconds
-
-**AI Analysis & Recommendations**
-
-{ai_response}
-
----
-💡 **Diagnostic powered by Claude Code SDK with Proxmox expertise**
-🔍 **VM Configuration**: Review VM configuration file for additional optimization opportunities
-⚠️  **Safety**: Test configuration changes in a non-production environment first
-            """
+            # Format the response
+            formatted_response = self._format_vm_diagnosis_response(vmid, node, vm_data, ai_response)
 
             return [Content(type="text", text=formatted_response)]
 
@@ -222,6 +233,52 @@ suggested optimizations during maintenance windows.
                     text=f"❌ AI VM diagnosis failed for VM {vmid}. Please check logs for details.",
                 )
             ]
+
+    def _prepare_resource_optimization_prompt(self, resource_data: Dict[str, Any]) -> str:
+        """Prepare the AI optimization prompt for resource analysis."""
+        return f"""
+        Analyze this Proxmox resource utilization data and suggest optimizations:
+        
+        {json.dumps(resource_data, indent=2)}
+        
+        Provide optimization recommendations for:
+        1. Overprovisioned VMs that can be downsized (with specific recommendations)
+        2. Underutilized nodes that could host more VMs
+        3. Storage optimization opportunities (thin provisioning, compression, etc.)
+        4. Network optimization suggestions
+        5. Cost-saving recommendations and ROI calculations
+        6. Performance improvement strategies
+        7. Resource allocation best practices
+        
+        For each recommendation, include:
+        - Specific configuration changes needed
+        - Expected resource savings or performance improvements
+        - Implementation complexity (Easy/Medium/Hard)
+        - Risk level and mitigation strategies
+        - Monitoring metrics to track success
+        """
+
+    def _format_resource_optimization_response(self, resource_data: Dict[str, Any], ai_response: str) -> str:
+        """Format the resource optimization response with overview and AI analysis."""
+        resource_summary = resource_data.get("resource_summary", {})
+        return f"""⚡ **AI Resource Optimization Report**
+
+**Current Resource Overview**
+- Total CPU Cores: {resource_summary.get("total_cpu_cores", "N/A")}
+- Total Memory: {self._format_bytes(resource_summary.get("total_memory", 0))}
+- Memory Utilization: {resource_summary.get("memory_utilization_percent", 0):.1f}%
+- Active VMs: {len(resource_data.get("vms", []))}
+
+**AI Optimization Recommendations**
+
+{ai_response}
+
+---
+📈 **Optimization Analysis powered by Claude Code SDK**
+📊 **Implementation**: Start with "Easy" recommendations for quick wins
+⚠️  **Testing**: Validate changes in staging environment before production
+🔄 **Monitoring**: Set up alerts to track optimization success metrics
+        """
 
     async def suggest_resource_optimization(self) -> List[Content]:
         """Provide AI-powered resource optimization recommendations.
@@ -241,49 +298,14 @@ suggested optimizations during maintenance windows.
             if not self.claude_available:
                 return await self._basic_resource_analysis(resource_data)
 
-            optimization_prompt = f"""
-            Analyze this Proxmox resource utilization data and suggest optimizations:
-            
-            {json.dumps(resource_data, indent=2)}
-            
-            Provide optimization recommendations for:
-            1. Overprovisioned VMs that can be downsized (with specific recommendations)
-            2. Underutilized nodes that could host more VMs
-            3. Storage optimization opportunities (thin provisioning, compression, etc.)
-            4. Network optimization suggestions
-            5. Cost-saving recommendations and ROI calculations
-            6. Performance improvement strategies
-            7. Resource allocation best practices
-            
-            For each recommendation, include:
-            - Specific configuration changes needed
-            - Expected resource savings or performance improvements
-            - Implementation complexity (Easy/Medium/Hard)
-            - Risk level and mitigation strategies
-            - Monitoring metrics to track success
-            """
+            # Prepare optimization prompt
+            optimization_prompt = self._prepare_resource_optimization_prompt(resource_data)
 
+            # Get AI analysis
             ai_response = await self._query_claude(optimization_prompt)
 
-            resource_summary = resource_data.get("resource_summary", {})
-            formatted_response = f"""⚡ **AI Resource Optimization Report**
-
-**Current Resource Overview**
-- Total CPU Cores: {resource_summary.get("total_cpu_cores", "N/A")}
-- Total Memory: {self._format_bytes(resource_summary.get("total_memory", 0))}
-- Memory Utilization: {resource_summary.get("memory_utilization_percent", 0):.1f}%
-- Active VMs: {len(resource_data.get("vms", []))}
-
-**AI Optimization Recommendations**
-
-{ai_response}
-
----
-📈 **Optimization Analysis powered by Claude Code SDK**
-📊 **Implementation**: Start with "Easy" recommendations for quick wins
-⚠️  **Testing**: Validate changes in staging environment before production
-🔄 **Monitoring**: Set up alerts to track optimization success metrics
-            """
+            # Format the response
+            formatted_response = self._format_resource_optimization_response(resource_data, ai_response)
 
             return [Content(type="text", text=formatted_response)]
 
@@ -296,6 +318,52 @@ suggested optimizations during maintenance windows.
                     "Please check logs for details.",
                 )
             ]
+
+    def _prepare_security_analysis_prompt(self, security_data: Dict[str, Any]) -> str:
+        """Prepare the AI security analysis prompt."""
+        return f"""
+        Perform a comprehensive security analysis of this Proxmox environment:
+        
+        {json.dumps(security_data, indent=2)}
+        
+        Analyze and provide recommendations for:
+        1. Authentication and access control weaknesses
+        2. Network security configuration issues
+        3. VM isolation and security groups
+        4. Backup and disaster recovery security
+        5. Compliance with security frameworks (SOC2, ISO27001, etc.)
+        6. Potential attack vectors and mitigations
+        7. Encryption and data protection measures
+        8. Audit logging and monitoring gaps
+        
+        For each security finding, provide:
+        - Risk level (Critical/High/Medium/Low)
+        - Potential impact if exploited
+        - Specific remediation steps with commands
+        - Prevention and detection strategies
+        - Compliance implications
+        """
+
+    def _format_security_analysis_response(self, security_data: Dict[str, Any], ai_response: str) -> str:
+        """Format the security analysis response with overview and AI assessment."""
+        user_count = len(security_data.get("users", []))
+        return f"""🔒 **AI Security Posture Analysis**
+
+**Security Overview**
+- User Accounts: {user_count}
+- Firewall Status: {security_data.get("firewall_options", {}).get("enable", "Unknown")}
+- Datacenter Config: {"Available" if security_data.get("datacenter_config") else "Limited"}
+
+**AI Security Assessment**
+
+{ai_response}
+
+---
+🛡️  **Security Analysis powered by Claude Code SDK with cybersecurity expertise**
+🔐 **Priority**: Address Critical and High-risk items immediately
+📋 **Compliance**: Review recommendations against your organization's security policies
+🔍 **Audit**: Implement continuous security monitoring for ongoing protection
+        """
 
     async def analyze_security_posture(self) -> List[Content]:
         """Analyze cluster security posture using AI.
@@ -315,49 +383,14 @@ suggested optimizations during maintenance windows.
             if not self.claude_available:
                 return await self._basic_security_analysis(security_data)
 
-            security_prompt = f"""
-            Perform a comprehensive security analysis of this Proxmox environment:
-            
-            {json.dumps(security_data, indent=2)}
-            
-            Analyze and provide recommendations for:
-            1. Authentication and access control weaknesses
-            2. Network security configuration issues
-            3. VM isolation and security groups
-            4. Backup and disaster recovery security
-            5. Compliance with security frameworks (SOC2, ISO27001, etc.)
-            6. Potential attack vectors and mitigations
-            7. Encryption and data protection measures
-            8. Audit logging and monitoring gaps
-            
-            For each security finding, provide:
-            - Risk level (Critical/High/Medium/Low)
-            - Potential impact if exploited
-            - Specific remediation steps with commands
-            - Prevention and detection strategies
-            - Compliance implications
-            """
+            # Prepare security analysis prompt
+            security_prompt = self._prepare_security_analysis_prompt(security_data)
 
+            # Get AI analysis
             ai_response = await self._query_claude(security_prompt)
 
-            user_count = len(security_data.get("users", []))
-            formatted_response = f"""🔒 **AI Security Posture Analysis**
-
-**Security Overview**
-- User Accounts: {user_count}
-- Firewall Status: {security_data.get("firewall_options", {}).get("enable", "Unknown")}
-- Datacenter Config: {"Available" if security_data.get("datacenter_config") else "Limited"}
-
-**AI Security Assessment**
-
-{ai_response}
-
----
-🛡️  **Security Analysis powered by Claude Code SDK with cybersecurity expertise**
-🔐 **Priority**: Address Critical and High-risk items immediately
-📋 **Compliance**: Review recommendations against your organization's security policies
-🔍 **Audit**: Implement continuous security monitoring for ongoing protection
-            """
+            # Format the response
+            formatted_response = self._format_security_analysis_response(security_data, ai_response)
 
             return [Content(type="text", text=formatted_response)]
 
@@ -396,91 +429,95 @@ suggested optimizations during maintenance windows.
             self.logger.error(f"Claude Code SDK query failed: {e}")
             raise RuntimeError(f"AI analysis failed: {e}") from e
 
+    def _collect_node_metrics(self, nodes: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Collect metrics for all nodes."""
+        node_data = []
+        for node in nodes:
+            try:
+                node_status = self.proxmox.nodes(node["node"]).status.get()
+                node_data.append({
+                    "name": node["node"],
+                    "status": node["status"],
+                    "cpu_usage": node_status.get("cpu", 0),
+                    "memory_usage": node_status.get("memory", {}),
+                    "uptime": node_status.get("uptime", 0),
+                    "load_average": node_status.get("loadavg", []),
+                    "cpu_info": node_status.get("cpuinfo", {}),
+                    "kernel_version": node_status.get("kversion", "unknown"),
+                })
+            except Exception as e:
+                self.logger.warning(f"Failed to get status for node {node['node']}: {e}")
+                node_data.append({
+                    "name": node["node"],
+                    "status": node.get("status", "unknown"),
+                    "error": str(e),
+                })
+        return node_data
+
+    def _collect_vm_metrics(self, nodes: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """Collect VM metrics from all nodes."""
+        vm_data = []
+        for node in nodes:
+            try:
+                vms = self.proxmox.nodes(node["node"]).qemu.get()
+                for vm in vms:
+                    vm_info = {
+                        "vmid": vm["vmid"],
+                        "name": vm.get("name", "unnamed"),
+                        "node": node["node"],
+                        "status": vm["status"],
+                        "cpu_usage": vm.get("cpu", 0),
+                        "memory_usage": vm.get("mem", 0),
+                        "max_memory": vm.get("maxmem", 0),
+                        "disk_read": vm.get("diskread", 0),
+                        "disk_write": vm.get("diskwrite", 0),
+                        "network_in": vm.get("netin", 0),
+                        "network_out": vm.get("netout", 0),
+                    }
+                    vm_data.append(vm_info)
+            except Exception as e:
+                self.logger.warning(f"Failed to get VMs for node {node['node']}: {e}")
+        return vm_data
+
+    def _collect_storage_metrics(self) -> List[Dict[str, Any]]:
+        """Collect storage pool information."""
+        try:
+            return self.proxmox.storage.get()
+        except Exception as e:
+            self.logger.warning(f"Failed to get storage information: {e}")
+            return []
+
+    def _collect_cluster_status(self) -> List[Dict[str, Any]]:
+        """Collect cluster status information."""
+        try:
+            return self.proxmox.cluster.status.get()
+        except Exception as e:
+            self.logger.warning(f"Failed to get cluster status: {e}")
+            return []
+
     async def _collect_cluster_metrics(self) -> Dict[str, Any]:
         """Collect comprehensive cluster metrics for AI analysis.
 
         Returns:
             Dict[str, Any]: Complete cluster state including nodes, VMs, storage
         """
-        data: Dict[str, Any] = {}
-
         try:
-            # Collect node information
+            # Get base node list
             nodes = self.proxmox.nodes.get()
-            data["nodes"] = []
-            for node in nodes:
-                try:
-                    node_status = self.proxmox.nodes(node["node"]).status.get()
-                    data["nodes"].append(
-                        {
-                            "name": node["node"],
-                            "status": node["status"],
-                            "cpu_usage": node_status.get("cpu", 0),
-                            "memory_usage": node_status.get("memory", {}),
-                            "uptime": node_status.get("uptime", 0),
-                            "load_average": node_status.get("loadavg", []),
-                            "cpu_info": node_status.get("cpuinfo", {}),
-                            "kernel_version": node_status.get("kversion", "unknown"),
-                        }
-                    )
-                except Exception as e:
-                    self.logger.warning(
-                        f"Failed to get status for node {node['node']}: {e}"
-                    )
-                    data["nodes"].append(
-                        {
-                            "name": node["node"],
-                            "status": node.get("status", "unknown"),
-                            "error": str(e),
-                        }
-                    )
-
-            # Collect VM information
-            data["vms"] = []
-            for node in nodes:
-                try:
-                    vms = self.proxmox.nodes(node["node"]).qemu.get()
-                    for vm in vms:
-                        vm_info = {
-                            "vmid": vm["vmid"],
-                            "name": vm.get("name", "unnamed"),
-                            "node": node["node"],
-                            "status": vm["status"],
-                            "cpu_usage": vm.get("cpu", 0),
-                            "memory_usage": vm.get("mem", 0),
-                            "max_memory": vm.get("maxmem", 0),
-                            "disk_read": vm.get("diskread", 0),
-                            "disk_write": vm.get("diskwrite", 0),
-                            "network_in": vm.get("netin", 0),
-                            "network_out": vm.get("netout", 0),
-                        }
-                        data["vms"].append(vm_info)
-                except Exception as e:
-                    self.logger.warning(
-                        f"Failed to get VMs for node {node['node']}: {e}"
-                    )
-
-            # Collect storage information
-            try:
-                storage = self.proxmox.storage.get()
-                data["storage"] = storage
-            except Exception as e:
-                self.logger.warning(f"Failed to get storage information: {e}")
-                data["storage"] = []
-
-            # Collect cluster status
-            try:
-                cluster_status = self.proxmox.cluster.status.get()
-                data["cluster_status"] = cluster_status
-            except Exception as e:
-                self.logger.warning(f"Failed to get cluster status: {e}")
-                data["cluster_status"] = []
+            
+            # Collect all metrics using helper methods
+            data = {
+                "nodes": self._collect_node_metrics(nodes),
+                "vms": self._collect_vm_metrics(nodes), 
+                "storage": self._collect_storage_metrics(),
+                "cluster_status": self._collect_cluster_status(),
+            }
+            
+            return data
 
         except Exception as e:
             self.logger.error(f"Failed to collect cluster metrics: {e}")
             raise
-
-        return data
 
     async def _collect_vm_diagnostics(self, node: str, vmid: str) -> Dict[str, Any]:
         """Collect detailed VM diagnostic data.

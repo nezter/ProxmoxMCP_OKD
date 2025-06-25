@@ -43,6 +43,85 @@ class VMConsoleManager:
         self.proxmox = proxmox_api
         self.logger = logging.getLogger("proxmox-mcp.vm-console")
 
+    def _validate_vm_for_execution(self, node: str, vmid: str) -> None:
+        """Validate that VM exists and is running for command execution."""
+        vm_status = self.proxmox.nodes(node).qemu(vmid).status.current.get()
+        if vm_status["status"] != "running":
+            self.logger.error(f"Failed to execute command on VM {vmid}: VM is not running")
+            raise ValueError(f"VM {vmid} on node {node} is not running")
+
+    async def _execute_command_via_agent(self, node: str, vmid: str, command: str) -> int:
+        """Start command execution via QEMU guest agent and return PID."""
+        endpoint = self.proxmox.nodes(node).qemu(vmid).agent
+        self.logger.debug(f"Using API endpoint: {endpoint}")
+        
+        try:
+            self.logger.debug(f"Executing command via agent: {command}")
+            exec_result = endpoint("exec").post(command=command)
+            self.logger.debug(f"Raw exec response: {exec_result}")
+            self.logger.info(f"Command started with result: {exec_result}")
+        except Exception as e:
+            self.logger.error(f"Failed to start command: {str(e)}")
+            raise RuntimeError(f"Failed to start command: {str(e)}") from e
+
+        if "pid" not in exec_result:
+            raise RuntimeError("No PID returned from command execution")
+
+        return exec_result["pid"]
+
+    async def _get_command_results(self, node: str, vmid: str, pid: int) -> Dict[str, Any]:
+        """Wait for command completion and get results."""
+        import asyncio
+        
+        self.logger.info(f"Waiting for command completion (PID: {pid})...")
+        await asyncio.sleep(1)  # Allow command to complete
+        
+        endpoint = self.proxmox.nodes(node).qemu(vmid).agent
+        try:
+            self.logger.debug(f"Getting status for PID {pid}...")
+            console = endpoint("exec-status").get(pid=pid)
+            self.logger.debug(f"Raw exec-status response: {console}")
+            if not console:
+                raise RuntimeError("No response from exec-status")
+        except Exception as e:
+            self.logger.error(f"Failed to get command status: {str(e)}")
+            raise RuntimeError(f"Failed to get command status: {str(e)}") from e
+            
+        self.logger.info(f"Command completed with status: {console}")
+        return console
+
+    def _process_command_response(self, console: Any) -> Dict[str, Any]:
+        """Process and format command execution response."""
+        self.logger.debug(f"Raw API response type: {type(console)}")
+        self.logger.debug(f"Raw API response: {console}")
+
+        if isinstance(console, dict):
+            # Handle exec-status response format
+            output = console.get("out-data", "")
+            error = console.get("err-data", "")
+            exit_code = console.get("exitcode", 0)
+            exited = console.get("exited", 0)
+
+            if not exited:
+                self.logger.warning("Command may not have completed")
+        else:
+            # Some versions might return data differently
+            self.logger.debug(f"Unexpected response type: {type(console)}")
+            output = str(console)
+            error = ""
+            exit_code = 0
+
+        self.logger.debug(f"Processed output: {output}")
+        self.logger.debug(f"Processed error: {error}")
+        self.logger.debug(f"Processed exit code: {exit_code}")
+
+        return {
+            "success": True,
+            "output": output,
+            "error": error,
+            "exit_code": exit_code,
+        }
+
     async def execute_command(
         self, node: str, vmid: str, command: str
     ) -> Dict[str, Any]:
@@ -89,96 +168,22 @@ class VMConsoleManager:
                        - API communication errors occur
         """
         try:
-            # Verify VM exists and is running
-            vm_status = self.proxmox.nodes(node).qemu(vmid).status.current.get()
-            if vm_status["status"] != "running":
-                self.logger.error(
-                    f"Failed to execute command on VM {vmid}: VM is not running"
-                )
-                raise ValueError(f"VM {vmid} on node {node} is not running")
+            self.logger.info(f"Executing command on VM {vmid} (node: {node}): {command}")
 
-            # Get VM's console
-            self.logger.info(
-                f"Executing command on VM {vmid} (node: {node}): {command}"
-            )
+            # Validate VM state
+            self._validate_vm_for_execution(node, vmid)
 
-            # Get the API endpoint
-            # Use the guest agent exec endpoint
-            endpoint = self.proxmox.nodes(node).qemu(vmid).agent
-            self.logger.debug(f"Using API endpoint: {endpoint}")
+            # Execute command via QEMU guest agent
+            pid = await self._execute_command_via_agent(node, vmid, command)
 
-            # Execute the command using two-step process
-            try:
-                # Start command execution
-                self.logger.info("Starting command execution...")
-                try:
-                    self.logger.debug(f"Executing command via agent: {command}")
-                    exec_result = endpoint("exec").post(command=command)
-                    self.logger.debug(f"Raw exec response: {exec_result}")
-                    self.logger.info(f"Command started with result: {exec_result}")
-                except Exception as e:
-                    self.logger.error(f"Failed to start command: {str(e)}")
-                    raise RuntimeError(f"Failed to start command: {str(e)}") from e
+            # Get command results
+            console = await self._get_command_results(node, vmid, pid)
 
-                if "pid" not in exec_result:
-                    raise RuntimeError("No PID returned from command execution")
+            # Process and format response
+            result = self._process_command_response(console)
 
-                pid = exec_result["pid"]
-                self.logger.info(f"Waiting for command completion (PID: {pid})...")
-
-                # Add a small delay to allow command to complete
-                import asyncio
-
-                await asyncio.sleep(1)
-
-                # Get command output using exec-status
-                try:
-                    self.logger.debug(f"Getting status for PID {pid}...")
-                    console = endpoint("exec-status").get(pid=pid)
-                    self.logger.debug(f"Raw exec-status response: {console}")
-                    if not console:
-                        raise RuntimeError("No response from exec-status")
-                except Exception as e:
-                    self.logger.error(f"Failed to get command status: {str(e)}")
-                    raise RuntimeError(f"Failed to get command status: {str(e)}") from e
-                self.logger.info(f"Command completed with status: {console}")
-            except Exception as e:
-                self.logger.error(f"API call failed: {str(e)}")
-                raise RuntimeError(f"API call failed: {str(e)}") from e
-            self.logger.debug(f"Raw API response type: {type(console)}")
-            self.logger.debug(f"Raw API response: {console}")
-
-            # Handle different response structures
-            if isinstance(console, dict):
-                # Handle exec-status response format
-                output = console.get("out-data", "")
-                error = console.get("err-data", "")
-                exit_code = console.get("exitcode", 0)
-                exited = console.get("exited", 0)
-
-                if not exited:
-                    self.logger.warning("Command may not have completed")
-            else:
-                # Some versions might return data differently
-                self.logger.debug(f"Unexpected response type: {type(console)}")
-                output = str(console)
-                error = ""
-                exit_code = 0
-
-            self.logger.debug(f"Processed output: {output}")
-            self.logger.debug(f"Processed error: {error}")
-            self.logger.debug(f"Processed exit code: {exit_code}")
-
-            self.logger.debug(
-                f"Executed command '{command}' on VM {vmid} (node: {node})"
-            )
-
-            return {
-                "success": True,
-                "output": output,
-                "error": error,
-                "exit_code": exit_code,
-            }
+            self.logger.debug(f"Executed command '{command}' on VM {vmid} (node: {node})")
+            return result
 
         except ValueError:
             # Re-raise ValueError for VM not running
