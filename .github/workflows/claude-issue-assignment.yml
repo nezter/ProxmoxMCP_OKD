@@ -69,10 +69,10 @@ jobs:
           direct_prompt: |
             I've been assigned to work on GitHub Issue #${{ github.event.issue.number }}.
 
-            **Issue Title:** ${{ github.event.issue.title }}
+            **Issue Title:** ${{ toJSON(github.event.issue.title) }}
 
             **Issue Description:**
-            ${{ github.event.issue.body }}
+            ${{ toJSON(github.event.issue.body) }}
 
             **Instructions:**
             1. Analyze the issue requirements carefully
@@ -140,7 +140,7 @@ jobs:
               const pr = await github.rest.pulls.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                title: `Fix #${{ github.event.issue.number }}: ${{ github.event.issue.title }}`,
+                title: `Fix #${{ github.event.issue.number }}: ${{ toJSON(github.event.issue.title) }}`,
                 head: branchName,
                 base: 'main',
                 body: `Closes #${{ github.event.issue.number }}
