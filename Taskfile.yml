@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
 # Taskfile for ProxmoxMCP
 # Documentation: https://taskfile.dev/
 version: "3"
