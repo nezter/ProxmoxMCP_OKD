@@ -312,24 +312,46 @@ tasks:
       - echo "Running yamllint to show remaining issues..."
       - ./scripts/yaml-lint.sh --fix || true
 
+  # Safe YAML and Markdown validation (non-failing)
+  docs:check:
+    desc: Check documentation formatting (non-failing)
+    cmds:
+      - echo "📄 Checking documentation formatting..."
+      - echo "YAML files:"
+      - ./scripts/yaml-lint.sh || echo "ℹ️  YAML issues found - run 'task yaml:autofix' to fix"
+      - echo "Markdown files:"
+      - markdownlint-cli2 "**/*.md" || echo "ℹ️  Markdown issues found - run 'task markdown:fix' to attempt fixes"
+      - echo "ℹ️  Documentation checks completed (issues are informational only)"
+
   # Legacy alias - keeping for backward compatibility
   autofix:
     desc: Auto-fix YAML files (alias for yaml:autofix)
     cmds:
       - task: yaml:autofix
 
-  # Pre-commit style checks
+  # Pre-commit style checks (focused on code quality)
   pre-commit:
-    desc: Run pre-commit checks with comprehensive QA pipeline
+    desc: Run essential pre-commit checks (code quality focused)
     cmds:
-      - echo "🔄 Running pre-commit with auto-fixes..."
+      - echo "🔄 Running essential pre-commit checks..."
+      - echo "📝 Auto-fixing Python code..."
       - task: format
       - task: lint:fix
-      - task: yaml:fix
-      - task: markdown:fix
-      - echo "🔍 Running validation checks..."
+      - echo "🔍 Running core validation..."
+      - task: qa:phase1
+      - echo "✅ Essential pre-commit checks passed!"
+      - echo "ℹ️  For full validation, run task qa comprehensive"
+
+  # Comprehensive pre-commit (includes docs)
+  pre-commit:full:
+    desc: Run comprehensive pre-commit with all validations
+    cmds:
+      - echo "🔄 Running comprehensive pre-commit with auto-fixes..."
+      - task: format
+      - task: lint:fix
+      - echo "🔍 Running full validation pipeline..."
       - task: qa:comprehensive
-      - echo "✅ All pre-commit checks passed!"
+      - echo "✅ Comprehensive pre-commit checks passed!"
 
   # CI simulation
   ci:
