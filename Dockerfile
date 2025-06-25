@@ -21,6 +21,7 @@ WORKDIR /app
 FROM base AS builder
 
 # Install build dependencies (for pip, venv, and system packages needed for build)
+# Note: System packages not pinned to avoid dependency conflicts (Hadolint DL3008)
 RUN --mount=type=cache,target=/root/.cache/apt \
     apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -39,7 +40,7 @@ RUN python -m venv .venv && \
 ENV PIP_CACHE_DIR=/root/.cache/pip
 
 # Create a temporary requirements file with only public dependencies
-RUN echo "proxmoxer>=2.0.1,<3.0.0\nrequests>=2.31.0,<3.0.0\npydantic>=2.0.0,<3.0.0" > public-requirements.in
+RUN printf "proxmoxer>=2.0.1,<3.0.0\nrequests>=2.31.0,<3.0.0\npydantic>=2.0.0,<3.0.0" > public-requirements.in
 
 # First install base tools and public dependencies
 RUN --mount=type=cache,target=$PIP_CACHE_DIR \
@@ -95,7 +96,7 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 USER root
 
 # Create a simple health script that tests basic functionality
-RUN echo '#!/bin/sh\n\
+RUN printf '#!/bin/sh\n\
 if [ -z "$PROXMOX_MCP_CONFIG" ]; then\n\
   echo "PROXMOX_MCP_CONFIG not set, skipping deep health check"\n\
   exit 0\n\
