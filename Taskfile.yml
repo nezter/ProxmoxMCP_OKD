@@ -17,13 +17,14 @@ tasks:
       - task --list-all
     silent: true
 
-  # Development setup
+  # Development environment setup
   setup:
-    desc: Set up development environment
+    desc: Install dependencies and sync development environment
     cmds:
-      - echo "Setting up ProxmoxMCP development environment..."
+      - echo "📦 Installing ProxmoxMCP dependencies..."
       - uv sync --extra {{.UV_EXTRA}}
-      - echo "✅ Development environment ready!"
+      - echo "✅ Dependencies installed and synced!"
+      - echo "ℹ️  To prepare for development server, run task dev setup"
 
   # YAML linting tasks
   yaml:lint:
@@ -361,12 +362,45 @@ tasks:
       - task: qa:comprehensive
       - echo "✅ All CI checks passed!"
 
-  # Development server tasks (if applicable)
+  # Development server tasks
   dev:
-    desc: Start development environment
+    desc: Start ProxmoxMCP development server
     cmds:
-      - echo "Starting ProxmoxMCP development server..."
-      - uv run python -m proxmox_mcp.server
+      - echo "🚀 Starting ProxmoxMCP development server..."
+      - |
+        if [ -f "proxmox-config/config.json" ]; then
+          echo "Using config file: proxmox-config/config.json"
+          export PROXMOX_MCP_CONFIG="proxmox-config/config.json"
+          uv run python -m proxmox_mcp.server
+        else
+          echo "❌ No config file found at proxmox-config/config.json"
+          echo "📝 To set up the development server:"
+          echo "   1. Create config directory: mkdir -p proxmox-config"
+          echo "   2. Copy example config: cp proxmox-config/config.example.json proxmox-config/config.json"
+          echo "   3. Edit config.json with your Proxmox credentials"
+          echo "   4. Run: task dev"
+          exit 1
+        fi
+
+  # Environment setup with server preparation
+  dev:setup:
+    desc: Set up development environment and prepare for server
+    deps: [setup]
+    cmds:
+      - echo "🔧 Preparing development server environment..."
+      - mkdir -p proxmox-config
+      - |
+        if [ ! -f "proxmox-config/config.json" ] && [ -f "proxmox-config/config.example.json" ]; then
+          echo "📝 Creating config template..."
+          cp proxmox-config/config.example.json proxmox-config/config.json
+          echo "✅ Config template created at proxmox-config/config.json"
+          echo "⚠️  Please edit config.json with your Proxmox credentials before running 'task dev'"
+        elif [ -f "proxmox-config/config.json" ]; then
+          echo "✅ Development environment ready - config file exists"
+          echo "🚀 Run 'task dev' to start the server"
+        else
+          echo "ℹ️  No example config found - you'll need to create proxmox-config/config.json manually"
+        fi
 
   # Dependency management
   deps:update:
