@@ -194,22 +194,7 @@ tasks:
             print(f'ℹ️  SSL validation skipped: {e}')
         " || echo "ℹ️  SSL validation skipped (config not available)"
 
-  docker:validate:
-    desc: Validate Docker build and security
-    cmds:
-      - echo "🐳 Validating Docker configuration..."
-      - |
-        if [ -f "Dockerfile" ]; then
-          echo "Building Docker image for validation..."
-          docker build -t proxmox-mcp:test . || {
-            echo "❌ Docker build failed"
-            exit 1
-          }
-          echo "✅ Docker build successful"
-          docker rmi proxmox-mcp:test || true
-        else
-          echo "ℹ️  No Dockerfile found, skipping Docker validation"
-        fi
+  
 
   # 3-Phase QA Pipeline (following CLAUDE.md)
   qa:phase1:
@@ -231,7 +216,6 @@ tasks:
     desc: "Phase 3: Security and Integration Validation"
     deps:
       - security:validate
-      - docker:validate
 
   qa:comprehensive:
     desc: Complete CLAUDE.md quality assurance workflow
@@ -416,16 +400,7 @@ tasks:
       - uv lock
       - echo "✅ Lock file updated!"
 
-  # Docker tasks
-  docker:build:
-    desc: Build Docker image
-    cmds:
-      - docker build -t proxmox-mcp:latest .
-
-  docker:run:
-    desc: Run Docker container
-    cmds:
-      - docker run --rm -it proxmox-mcp:latest
+  
 
   # Cleanup tasks
   clean:
