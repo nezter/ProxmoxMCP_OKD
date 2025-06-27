@@ -10,19 +10,8 @@
 ![ProxmoxMCP](https://github.com/user-attachments/assets/e32ab79f-be8a-420c-ab2d-475612150534)
 
 > **Note**: This is a maintained fork of the original
-> [canvrno/ProxmoxMCP](https://github.com/canvrno/ProxmoxMCP) repository, adding Docker
-> support and ongoing maintenance. The original repository appears to be inactive since
+> [canvrno/ProxmoxMCP](https://github.com/canvrno/ProxmoxMCP) repository, with ongoing maintenance. The original repository appears to be inactive since
 > February 2025.
-
-#### What's Different in this Fork?
-
-- ✨ **Full Docker Support**: Added complete Docker and Docker Compose configurations
-- 🔒 **Security Focused**: Containerized with security best practices
-- 📦 **Easy Deployment**: Simple `docker compose up` deployment
-- 🛠️ **Maintained**: Active maintenance and updates
-- 💡 **Community Driven**: Open to contributions and improvements
-
-The main addition is comprehensive Docker support, making it easy to deploy and run the Proxmox MCP server in a containerized environment. See the [Docker section](./#🐳-running-with-docker) for details.
 
 A Python-based Model Context Protocol (MCP) server for interacting with Proxmox hypervisors, providing a clean interface for managing nodes, VMs, and containers.
 
@@ -425,74 +414,74 @@ Execute a command in a VM's console using QEMU Guest Agent.
   - Returns error if command execution fails
   - Includes command output even if command returns non-zero exit code
 
-### 🐳 Running with Docker
+### 🚀 Running the Server
 
-You can run the Proxmox MCP Server in a containerized environment using Docker and Docker Compose. This is useful for consistent deployments and isolating dependencies.
+#### Development Mode
 
-#### Requirements
+For testing and development:
 
-- **Docker** and **Docker Compose** installed
-- **Python 3.10** (as specified in the Dockerfile base image)
-- Access to your Proxmox server and API token credentials
-- A valid configuration file (see [Configuration](./#⚙️-configuration))
+```bash
+# Activate virtual environment first
+source .venv/bin/activate  # Linux/macOS
+# OR
+.\.venv\Scripts\Activate.ps1  # Windows
 
-#### Environment Variables
+# Run the server
+python -m proxmox_mcp.server
+```
 
-The following environment variable **must** be set for the server to start:
+#### Cline Desktop Integration
 
-- `PROXMOX_MCP_CONFIG`: Path to your configuration file inside the container (e.g., `/app/proxmox-config/config.json`)
+For Cline users, add this configuration to your MCP settings file (typically at `~/.config/Code/User/globalStorage/saoudrizwan.claude-dev/settings/cline_mcp_settings.json`):
 
-You may also set other environment variables as needed (see the [Cline Desktop Integration](./#cline-desktop-integration) section for examples):
+```json
+{
+  "mcpServers": {
+    "github.com/basher83/ProxmoxMCP": {
+      "command": "/absolute/path/to/ProxmoxMCP/.venv/bin/python",
+      "args": ["-m", "proxmox_mcp.server"],
+      "cwd": "/absolute/path/to/ProxmoxMCP",
+      "env": {
+        "PYTHONPATH": "/absolute/path/to/ProxmoxMCP/src",
+        "PROXMOX_MCP_CONFIG": "/absolute/path/to/ProxmoxMCP/proxmox-config/config.json",
+        "PROXMOX_HOST": "your-proxmox-host",
+        "PROXMOX_USER": "username@pve",
+        "PROXMOX_TOKEN_NAME": "token-name",
+        "PROXMOX_TOKEN_VALUE": "token-value",
+        "PROXMOX_PORT": "8006",
+        "PROXMOX_VERIFY_SSL": "false",
+        "PROXMOX_SERVICE": "PVE",
+        "LOG_LEVEL": "DEBUG"
+      },
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}
+```
 
-- `PYTHONPATH`: Should be set to `/app/src` (already set in the compose file)
-- Additional Proxmox or logging variables as required by your setup
+To help generate the correct paths, you can use this command:
 
-#### Build and Run
+```bash
+# This will print the MCP settings with your absolute paths filled in
+python -c "import os; print(f'''{{\n    \"mcpServers\": {{\n        \"github.com/basher83/ProxmoxMCP\": {{\n            \"command\": \"{os.path.abspath('.venv/bin/python')}\",\n            \"args\": [\"-m\", \"proxmox_mcp.server\"],\n            \"cwd\": \"{os.getcwd()}\",\n            \"env\": {{\n                \"PYTHONPATH\": \"{os.path.abspath('src')}\",\n                \"PROXMOX_MCP_CONFIG\": \"{os.path.abspath('proxmox-config/config.json')}\",\n                ...\n            }}\n        }}\n    }}\n}}''')"
+```
 
-1. **Copy your configuration file** into the `proxmox-config` directory, or mount it as a volume.
-2. **Build and start the service:**
+Important:
 
-   ```bash
-   docker compose up --build
-   ```
+- All paths must be absolute
+- The Python interpreter must be from your virtual environment
+- The PYTHONPATH must point to the src directory
+- Restart VSCode after updating MCP settings
 
-   Or, if using legacy Compose:
+### ☁️ OKD on Proxmox Setup
 
-   ```bash
-   docker-compose up --build
-   ```
+This project now supports deploying an OKD 4.x cluster on Proxmox using Fedora CoreOS. The necessary scripts and instructions are located in the `okd-setup/` directory.
 
-3. **Set the required environment variable** at runtime. You can do this by editing the `docker-compose.yml` file:
-
-   ```yaml
-   environment:
-     PROXMOX_MCP_CONFIG: /app/proxmox-config/config.json
-   ```
-
-   Or by using an `.env` file and uncommenting the `env_file` line in the compose file.
-
-4. **(Optional) Mount volumes** if you want to persist configuration or logs:
-
-   ```yaml
-   volumes:
-     - ./proxmox-config:/app/proxmox-config
-     - ./logs:/app/logs
-   ```
-
-#### Ports
-
-- **No ports are exposed by default.**
-  - The server runs as a stdio service. If you need to expose a port, add a `ports` section to the `docker-compose.yml` file.
-
-#### Notes
-
-- The container runs as a non-root user for security.
-- All dependencies are installed in a virtual environment inside the container.
-- If you need to develop locally, you can mount the `src` directory as a volume for live code updates.
-
-For more advanced configuration, see the comments in the provided `docker-compose.yml` and [Configuration](./#⚙️-configuration) section above.
+Please refer to the `okd-setup/README.md` for detailed steps on setting up your OKD cluster.
 
 ### 👨‍💻 Development
+
 
 After activating your virtual environment:
 
