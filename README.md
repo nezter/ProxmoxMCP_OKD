@@ -35,6 +35,7 @@ A Python-based Model Context Protocol (MCP) server for interacting with Proxmox 
 - 📝 Configurable logging system
 - ✅ Type-safe implementation with Pydantic
 - 🎨 Rich output formatting with customizable themes
+- ☁️ **OKD on Proxmox Deployment**: Scripts and configurations for deploying OKD 4.x clusters on Proxmox using Fedora CoreOS.
 
 <https://github.com/user-attachments/assets/1b5f42f7-85d5-4918-aca4-d38413b0e82b>
 
